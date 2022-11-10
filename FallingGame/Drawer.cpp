@@ -31,9 +31,11 @@ Drawer::Drawer(Layer& layer)
 	// 3. then set our vertex attributes pointers
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	m_rectangle_u_color = glGetUniformLocation(rectangle_program, "u_color");
 }
 
-void Drawer::draw_rectangle(float x, float y, float w, float h, SDL_Color color)
+void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
 {
 	glUseProgram(rectangle_program);
 	glBindVertexArray(rectangle_VAO);
@@ -44,6 +46,7 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, SDL_Color color)
 		x + w, y
 	};
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	glUniform4f(m_rectangle_u_color, color.r, color.g, color.b, color.a);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

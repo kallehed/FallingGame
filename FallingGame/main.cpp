@@ -14,12 +14,12 @@ int main(int argc, char* argv[])
 
 	float x = 0.f;
 	
-	while (!layer.start_frame() && !quit) {
-
+	while (!layer.start_frame() && !quit)
+	{
 		if (layer.key_down(SDL_SCANCODE_D)) { x += 0.01f; }
 		if (layer.key_down(SDL_SCANCODE_A)) { x -= 0.01f; }
 
-		drawer.draw_rectangle(x + std::sin(SDL_GetTicks() / 300.f), 0.25f, 0.5f, 0.5f, {125,0,34,255});
+		drawer.draw_rectangle(x + std::sin(SDL_GetTicks() / 300.f), 0.25f, 0.5f, 0.5f, {0.5f,0.f,0.1f,1.f});
 		//stuff
 		layer.end_frame();
 	}
