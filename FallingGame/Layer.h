@@ -14,10 +14,14 @@ public:
 	bool start_frame(); // true -> end program
 	void end_frame();
 
-	bool key_down(SDL_Scancode key); // returns wheather key is currently down
+	bool key_down(SDL_Scancode key); // returns whether key is currently down
 	bool key_just_down(SDL_Scancode key);
 
+	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
+
 private:
+	unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
+
 	SDL_Window* m_window = NULL;
 	SDL_GLContext m_glcontext = NULL;
 	bool m_fullscreen = false;

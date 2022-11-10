@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 
 Layer::Layer()
 {
@@ -16,6 +17,7 @@ Layer::Layer()
 	//SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+
 
 	m_window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 500, 500, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	if (m_window == NULL) std::cout << "ERROR::WINDOW_COULD_NOT_BE_CREATED\n";
@@ -32,10 +34,16 @@ Layer::Layer()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		std::cin.get();
 	}
+	SDL_GL_SetSwapInterval(1);
+
 	{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " " << a << '\n'; }
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glViewport(0, 0, 100, 100);
+	{
+		int w, h;
+		SDL_GL_GetDrawableSize(m_window, &w, &h);
+		glViewport(0, 0, w, h);
+	}
 }
 
 Layer::~Layer()
@@ -48,6 +56,10 @@ Layer::~Layer()
 bool Layer::start_frame()
 {
 	m_start = SDL_GetPerformanceCounter();
+
+	glClearColor(0.0, 1.0, 1.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
+
 	m_keys_just_down = { false }; // reset before getting events
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
@@ -115,8 +127,6 @@ bool Layer::start_frame()
 
 void Layer::end_frame()
 {
-	glClearColor(0.0, 1.0, 1.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 	SDL_GL_SwapWindow(m_window);
 
 	Uint64 end = SDL_GetPerformanceCounter();
@@ -136,4 +146,64 @@ bool Layer::key_down(SDL_Scancode key)
 bool Layer::key_just_down(SDL_Scancode key)
 {
 	return m_keys_just_down[key];
+}
+
+unsigned int Layer::compile_shader_from_file(int type, const char* path, const char* error_msg)
+{
+	unsigned int shader = glCreateShader(type);
+
+	// load from file
+	char* shaderSource = new char[100000];
+	{
+		std::ifstream f(path);
+		if (f) {
+			f.getline(shaderSource, 100000, '\0');
+		}
+		else {
+			std::cout << "ERROR::FILE_NOT_FOUND: " << path << "\n";
+		}
+	}
+
+	glShaderSource(shader, 1, (&shaderSource), NULL);
+	glCompileShader(shader);
+
+	int success;
+	char infoLog[512];
+
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		std::cout << error_msg << infoLog << std::endl;
+	}
+	delete[] shaderSource;
+	return shader;
+}
+
+unsigned int Layer::compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error)
+{
+	unsigned int vertexShader = compile_shader_from_file(GL_VERTEX_SHADER, vertexShaderSource, "ERROR::SHADER::VERTEX::COMPILATION_FAILED ");
+
+	// fragment shader
+	unsigned int fragmentShader = compile_shader_from_file(GL_FRAGMENT_SHADER, fragmentShaderSource, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED ");
+
+	// shader program
+	unsigned int shaderProgram = glCreateProgram();
+
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	int  success;
+	char infoLog[512];
+
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "ERROR::PROGRAM::SHADERPROGRAM::COMPILATION_FAILED, NAME: " << name_for_error << "\n" << infoLog << std::endl;
+	}
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return shaderProgram;
 }
