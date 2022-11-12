@@ -34,7 +34,7 @@ Layer::Layer()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		std::cin.get();
 	}
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 
 	{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " " << a << '\n'; }
 	glEnable(GL_BLEND);
@@ -133,7 +133,7 @@ void Layer::end_frame()
 
 	float milliSecElapsed = ((end - m_start) / (float)SDL_GetPerformanceFrequency()) * 1000.f;
 
-	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / 60.f - milliSecElapsed));
+	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / FPS - milliSecElapsed));
 	SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
 	SDL_Delay(delay);
 }

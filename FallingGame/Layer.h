@@ -19,6 +19,9 @@ public:
 
 	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 
+	static constexpr float FPS = 60.f;
+	float dt = 1 / FPS;
+
 private:
 	unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
 
