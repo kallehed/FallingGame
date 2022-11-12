@@ -19,7 +19,7 @@ Layer::Layer()
 	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
 
-	m_window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 500, 500, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
+	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST), SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	if (m_window == NULL) std::cout << "ERROR::WINDOW_COULD_NOT_BE_CREATED\n";
 
 	m_glcontext = SDL_GL_CreateContext(m_window);
@@ -34,7 +34,7 @@ Layer::Layer()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		std::cin.get();
 	}
-	SDL_GL_SetSwapInterval(0);
+	SDL_GL_SetSwapInterval(1);
 
 	{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " " << a << '\n'; }
 	glEnable(GL_BLEND);
@@ -128,14 +128,16 @@ bool Layer::start_frame()
 void Layer::end_frame()
 {
 	SDL_GL_SwapWindow(m_window);
-
 	Uint64 end = SDL_GetPerformanceCounter();
 
 	float milliSecElapsed = ((end - m_start) / (float)SDL_GetPerformanceFrequency()) * 1000.f;
-
-	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / FPS - milliSecElapsed));
+	
+	Uint32 delay = 0*static_cast<Uint32>(std::max(0.f, 1000.f / 10.f - milliSecElapsed));
+	dt = (milliSecElapsed + delay) / 1000.f;
+	dt = std::min(1.f / MIN_FPS, dt);
 	SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
 	SDL_Delay(delay);
+	
 }
 
 bool Layer::key_down(SDL_Scancode key)

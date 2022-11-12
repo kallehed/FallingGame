@@ -19,11 +19,15 @@ public:
 
 	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 
-	static constexpr float FPS = 60.f;
-	float dt = 1 / FPS;
-
+	float dt = 0.f; // delta time for last frame
+	constexpr static float WIDTH = 1.6f;
+	constexpr static float HEIGHT = 1.f;
 private:
 	unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
+
+	constexpr static float START_LENGTH_CONST = 500.f; // used for setting inital width/height
+
+	constexpr static float MIN_FPS = 60.f;
 
 	SDL_Window* m_window = NULL;
 	SDL_GLContext m_glcontext = NULL;

@@ -1,0 +1,6 @@
+
+Add matrix to convert coordinates correctly
+Add player which will fall
+
+
+// bouncing seems to work with delta-time correctly as of now

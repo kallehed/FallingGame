@@ -1,7 +1,5 @@
-#version 330 core
+#version 430 core
 out vec4 FragColor;
-
-in vec2 f_pos;
 
 uniform vec4 u_color;
 

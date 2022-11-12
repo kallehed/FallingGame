@@ -1,6 +1,7 @@
 #include "Drawer.h"
 
 #include "Layer.h"
+#include "Game.h"
 
 Drawer::Drawer(Layer& layer)
 {
@@ -33,6 +34,7 @@ Drawer::Drawer(Layer& layer)
 	glEnableVertexAttribArray(0);
 
 	m_rectangle_u_color = glGetUniformLocation(rectangle_program, "u_color");
+	m_rectangle_u_offset = glGetUniformLocation(rectangle_program, "u_offset");
 }
 
 void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
@@ -49,4 +51,10 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glUniform4f(m_rectangle_u_color, color.r, color.g, color.b, color.a);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void Drawer::before_draw(Game& g)
+{
+	Pos off = g.c.offset();
+	glUniform2f(m_rectangle_u_offset, off.x, off.y);
 }

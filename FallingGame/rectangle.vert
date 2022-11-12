@@ -1,10 +1,10 @@
-#version 330 core
+#version 430 core
 layout (location = 0) in vec2 aPos;
 
-out vec2 f_pos;
+uniform vec2 u_offset;
 
 void main()
 {
-    f_pos = aPos;
-    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
+    vec2 pos = aPos + u_offset;
+    gl_Position = vec4(pos.x/1.6, pos.y, 0.0, 1.0);
 }
