@@ -9,7 +9,7 @@ public:
 	
 	void logic(Game& g);
 
-	Rect r;
+	HoLine h;
 private:
 };
 

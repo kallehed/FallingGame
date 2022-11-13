@@ -25,4 +25,12 @@ public:
 	bool intersect(Rect& e);
 };
 
+class HoLine // a horizontal line, containing x,y,w
+{
+public:
+	float x, y, w;
+	HoLine(float, float, float); // x, y, w
+	void draw(Drawer& d, const Color& color);
+};
+
 float rand_01();

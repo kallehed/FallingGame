@@ -13,9 +13,12 @@ public:
 
 	void collided(Game& g);
 
-	Rect r{ 0.0f, 0.6f, 0.1f, 0.2f };
+	HoLine r{ 0.0f, 0.0f, 0.1f};
+	float prev_y = 0.f;
 	float y_vel = 0.f;
+	float x_vel = 0.f;
 private:
 	constexpr static float MAX_Y_VEL = 7.f;
+	constexpr static float MAX_X_VEL = 3.f;
 };
 

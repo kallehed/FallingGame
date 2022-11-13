@@ -2,5 +2,10 @@
 Add matrix to convert coordinates correctly
 Add player which will fall
 
+Bounce inner-workings: 
+Player is a Y-Position and a width(bottom of bird). Bouncers are Y-Position and width.
+If ( P_y was higher than B_y PREVIOUS frame, but lower in CURERNT frame 
+AND P_x+w intersects B_x+w in CURRENT frame ) ====> BOUNCE!
+ALSO: possible y_vel must be low enough 
 
 // bouncing seems to work with delta-time correctly as of now

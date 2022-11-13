@@ -24,11 +24,9 @@ void Game::start()
 		// collision between bouncers and player
 		{
 			for (auto& e : bouncers) {
-				if (p.r.intersect(e.r)) {
-					if (p.y_vel < -0.9f) {
+				if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x+e.h.w && p.r.x + p.r.w > e.h.x) {
+					if (p.y_vel < 0.0f) {
 						std::cout << "bounce << " << p.y_vel << "\n";
-						//p.collided(*this);
-						//p.y_vel = std::max(0.5f, p.y_vel * 0.5f);
 						p.y_vel = std::clamp(-0.5f*p.y_vel, 1.1f, 3.f);
 						
 					}
@@ -46,8 +44,7 @@ void Game::start()
 		d.before_draw(*this);
 		p.draw(*this);
 		for (auto& e : bouncers) {
-			Rect new_r = e.r;
-			new_r.draw(d, {1.f,1.f,0.f,1.f});
+			e.h.draw(d, {1.f,1.f,0.f,1.f});
 		}
 
 		//stuff
