@@ -1,6 +1,8 @@
 #include "Player.h"
 
 #include "Game.h"
+#include <algorithm>
+#include <cmath>
 
 Player::Player() {}
 
@@ -10,7 +12,8 @@ void Player::logic(Game& g)
 	if (g.l.key_down(SDL_SCANCODE_D)) { r.x += change; }
 	if (g.l.key_down(SDL_SCANCODE_A)) { r.x -= change; }
 
-	y_vel -= 1.0f * g.l.dt;
+	float new_y_vel = y_vel - ((g.l.dt) / ( 1.f + std::pow(std::abs(y_vel), 1.5f)));
+	y_vel = std::clamp( new_y_vel, -MAX_Y_VEL, MAX_Y_VEL);
 	r.y += y_vel * g.l.dt;
 }
 

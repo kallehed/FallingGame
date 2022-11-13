@@ -16,6 +16,6 @@ public:
 	Rect r{ 0.0f, 0.6f, 0.1f, 0.2f };
 	float y_vel = 0.f;
 private:
-	
+	constexpr static float MAX_Y_VEL = 7.f;
 };
 

@@ -1,5 +1,8 @@
 #include "Game.h"
 
+#include <algorithm>
+#include <iostream>
+
 Game::Game() : l(), d(l), p()
 {
 }
@@ -8,8 +11,7 @@ void Game::start()
 {
 	bool quit = false;
 
-	float x = 0.f;
-	float timer = 0.f;
+	float next_bouncer_y = -1.f;
 
 	while (!l.start_frame() && !quit)
 	{
@@ -23,16 +25,21 @@ void Game::start()
 		{
 			for (auto& e : bouncers) {
 				if (p.r.intersect(e.r)) {
-					p.collided(*this);
+					if (p.y_vel < -0.9f) {
+						std::cout << "bounce << " << p.y_vel << "\n";
+						//p.collided(*this);
+						//p.y_vel = std::max(0.5f, p.y_vel * 0.5f);
+						p.y_vel = std::clamp(-0.5f*p.y_vel, 1.1f, 3.f);
+						
+					}
 				}
 			}
 		}
 
 		// game logic without place yet
-		timer += l.dt;
-		if (timer >= 0.7f) {
-			bouncers.emplace_back((rand_01()-0.5f )*2.f*l.WIDTH, -l.HEIGHT + p.r.y);
-			timer = (timer - 0.7f);
+		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
+			bouncers.emplace_back((rand_01()-0.5f )*2.f*(l.WIDTH - 0.4f), next_bouncer_y);
+			next_bouncer_y -= 2.f * l.HEIGHT * (0.3f + 1.f*rand_01());
 		}
 		c.last_in_logic(*this);
 

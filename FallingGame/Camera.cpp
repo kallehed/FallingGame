@@ -4,7 +4,7 @@
 
 void Camera::last_in_logic(Game& g)
 {
-	y = g.p.r.y + 0*g.l.HEIGHT;
+	y = g.p.r.y - g.l.HEIGHT*0.45f;
 }
 
 Pos Camera::offset()
