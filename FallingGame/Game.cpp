@@ -15,6 +15,7 @@ void Game::start()
 
 	while (!l.start_frame() && !quit)
 	{
+		// logic
 		p.logic(*this);
 		
 		for (auto& e : bouncers) {
@@ -36,11 +37,13 @@ void Game::start()
 
 		// game logic without place yet
 		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
-			bouncers.emplace_back((rand_01()-0.5f )*2.f*(l.WIDTH - 0.4f), next_bouncer_y);
-			next_bouncer_y -= 2.f * l.HEIGHT * (0.3f + 1.f*rand_01());
+			bouncers.emplace_back((rand_01()-0.5f )*2.f*(l.WIDTH), next_bouncer_y);
+			next_bouncer_y -= 2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()) ;
 		}
 		c.last_in_logic(*this);
 
+
+		// Drawing
 		d.before_draw(*this);
 		p.draw(*this);
 		for (auto& e : bouncers) {
