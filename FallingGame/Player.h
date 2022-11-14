@@ -13,7 +13,7 @@ public:
 
 	void collided(Game& g);
 
-	HoLine r{ 0.0f, 0.0f, 0.1f};
+	HoLine h{ 0.0f, 0.0f, 0.1f};
 	float prev_y = 0.f;
 	float y_vel = 0.f;
 	float x_vel = 0.f;

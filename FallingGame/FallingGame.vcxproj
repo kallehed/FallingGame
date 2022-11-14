@@ -143,11 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\GlfwGame\GlfwGame\glad.c" />
     <ClCompile Include="Bouncer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="glad.c" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="misc.cpp" />
@@ -161,13 +161,16 @@
     <ClInclude Include="Layer.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="Player.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="rectangle.frag" />
-    <None Include="rectangle.vert" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="f\shaders\image.frag" />
+    <None Include="f\shaders\image.vert" />
+    <None Include="f\shaders\rectangle.frag" />
+    <None Include="f\shaders\rectangle.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

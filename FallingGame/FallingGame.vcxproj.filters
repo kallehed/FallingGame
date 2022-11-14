@@ -24,9 +24,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\GlfwGame\GlfwGame\glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,6 +43,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,18 +71,27 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="rectangle.vert">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="rectangle.frag">
-      <Filter>Shader Files</Filter>
-    </None>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Todo.txt">
       <Filter>Misc</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="f\shaders\rectangle.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\rectangle.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\image.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\image.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

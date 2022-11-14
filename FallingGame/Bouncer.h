@@ -5,7 +5,7 @@
 class Bouncer
 {
 public:
-	Bouncer(float x, float y);
+	Bouncer(float WIDTH, float y);
 	
 	void logic(Game& g);
 
