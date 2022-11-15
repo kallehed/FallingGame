@@ -29,7 +29,6 @@ void Game::start()
 					if (p.y_vel < 0.0f) {
 						std::cout << "bounce << " << p.y_vel << "\n";
 						p.y_vel = std::clamp(-0.5f*p.y_vel, 1.1f, 3.f);
-						
 					}
 				}
 			}

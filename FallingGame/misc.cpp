@@ -31,4 +31,12 @@ float rand_01()
 	return (((float)rand()) / ((float)RAND_MAX));
 }
 
-
+float decr_abs_val(float val, float dec)
+{
+	if (std::abs(val) <= dec) {
+		return 0.f;
+	}
+	else {
+		return val + (dec * (val >= 0.f ? (-1.f) : 1.f));
+	}
+}

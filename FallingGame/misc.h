@@ -33,4 +33,12 @@ public:
 	void draw(Drawer& d, const Color& color);
 };
 
+// random float btw 0 and 1
 float rand_01();
+
+// decr val by dec in absolute terms. dec must be positive. 
+// val could be any number. if dec > abs(val): return 0 
+float decr_abs_val(float val, float dec);
+
+constexpr float pi = 3.14159265359f;
+constexpr float tau = 6.28318530718f;

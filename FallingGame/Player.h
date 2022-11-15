@@ -17,6 +17,7 @@ public:
 	float prev_y = 0.f;
 	float y_vel = 0.f;
 	float x_vel = 0.f;
+	float rotation = 0.f;
 private:
 	constexpr static float MAX_Y_VEL = 7.f;
 	constexpr static float MAX_X_VEL = 3.f;

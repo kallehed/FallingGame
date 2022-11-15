@@ -31,14 +31,31 @@ void Player::logic(Game& g)
 		h.y += y_vel * g.l.dt;
 	}
 
+	{
+		// x vel rotation
+		rotation -= g.l.dt * (x_vel / 1.f);
+
+		if (y_vel > 0.f) {
+			rotation += (y_vel / 0.1f) * g.l.dt;
+		}
+		else {
+			//rotation /= 1.05f;
+			rotation = decr_abs_val(rotation, std::abs(rotation) * 5.0f * g.l.dt);
+		}
+
+		while (rotation > pi) {
+			rotation -= tau;
+		}
+		/*while (rotation < pi) {rotation += tau;})*/
+	}
+
 	// limit x to borders of screen
 	h.x = std::clamp(h.x, -g.l.WIDTH, g.l.WIDTH - h.w);
 }
 
 void Player::draw(Game& g)
 {
-	float rot = (y_vel > 0) ? (3.14 - 3.14f / (1.f + 5.f*y_vel)) : 0;
-	g.d.draw_image(h.x - 0.14f, h.y, 0.4f, 0.4f, rot);
+	g.d.draw_image(h.x + 0.06f, h.y + 0.2f, 0.4f, 0.4f, rotation);
 	h.draw(g.d, { 1.f, 0.f, 0.1f, 0.5f });
 }
 
