@@ -74,8 +74,6 @@ Drawer::Drawer(Layer& layer)
 
 		m_image_u_offset = glGetUniformLocation(image_program, "u_offset");
 		m_image_u_rotation = glGetUniformLocation(image_program, "u_rotation");
-
-
 	}
 
 	// bird texture
@@ -128,16 +126,23 @@ void Drawer::draw_image(float x, float y, float w, float h, float rotation)
 	glBindVertexArray(image_VAO);
 	glBindTexture(GL_TEXTURE_2D, bird_texture);
 
+	float x_l = -w / 2.f;
+	float y_l = -h / 2.f;
+
 	float vertices[] = {
-		x, y,     0.f, 1.f,
-		x, y + h,     0.f, 0.f,
-		x + w, y + h,  1.f, 0.f,
-		x + w, y,     1.f, 1.f
+		x_l, y_l,     0.f, 1.f,
+		x_l, -y_l,     0.f, 0.f,
+		-x_l, -y_l,  1.f, 0.f,
+		-x_l, y_l,     1.f, 1.f
 	};
 	glBindBuffer(GL_ARRAY_BUFFER, image_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
 
+	glUseProgram(image_program);
+	glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
+
 	glUniform1f(m_image_u_rotation, rotation);
+	//glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -147,6 +152,6 @@ void Drawer::before_draw(Game& g)
 	Pos off = g.c.offset();
 	glUseProgram(rectangle_program);
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
-	glUseProgram(image_program);
-	glUniform2f(m_image_u_offset, off.x, off.y);
+	global_offset = off;
+	
 }

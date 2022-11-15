@@ -37,7 +37,8 @@ void Player::logic(Game& g)
 
 void Player::draw(Game& g)
 {
-	g.d.draw_image(h.x - 0.14f, h.y, 0.4f, 0.4f, ((y_vel < 0.f ? 0.f : 3.14f)));
+	float rot = (y_vel > 0) ? (3.14 - 3.14f / (1.f + 5.f*y_vel)) : 0;
+	g.d.draw_image(h.x - 0.14f, h.y, 0.4f, 0.4f, rot);
 	h.draw(g.d, { 1.f, 0.f, 0.1f, 0.5f });
 }
 

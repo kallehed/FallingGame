@@ -26,5 +26,7 @@ private:
 	int m_image_u_offset, m_image_u_rotation;
 
 	unsigned int bird_texture;
+
+	Pos global_offset = {0.f,0.f};
 };
 
