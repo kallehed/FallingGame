@@ -72,7 +72,8 @@ Drawer::Drawer(Layer& layer)
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		m_image_u_offset = glGetUniformLocation(image_program, "u_offset_and_rot");
+		m_image_u_offset = glGetUniformLocation(image_program, "u_offset");
+		m_image_u_rotation = glGetUniformLocation(image_program, "u_rotation");
 
 
 	}
@@ -121,7 +122,7 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_image(float x, float y, float w, float h)
+void Drawer::draw_image(float x, float y, float w, float h, float rotation)
 {
 	glUseProgram(image_program);
 	glBindVertexArray(image_VAO);
@@ -136,6 +137,8 @@ void Drawer::draw_image(float x, float y, float w, float h)
 	glBindBuffer(GL_ARRAY_BUFFER, image_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
 
+	glUniform1f(m_image_u_rotation, rotation);
+
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -145,5 +148,5 @@ void Drawer::before_draw(Game& g)
 	glUseProgram(rectangle_program);
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
 	glUseProgram(image_program);
-	glUniform3f(m_image_u_offset, off.x, off.y, SDL_GetTicks()/300.f);
+	glUniform2f(m_image_u_offset, off.x, off.y);
 }

@@ -11,7 +11,7 @@ public:
 
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
-	void draw_image(float x, float y, float w, float h);
+	void draw_image(float x, float y, float w, float h, float rotation);
 
 	void before_draw(Game& g);
 
@@ -23,7 +23,7 @@ private:
 
 	unsigned int image_program;
 	unsigned int image_VAO, image_VBO, image_EBO;
-	int m_image_u_offset;
+	int m_image_u_offset, m_image_u_rotation;
 
 	unsigned int bird_texture;
 };
