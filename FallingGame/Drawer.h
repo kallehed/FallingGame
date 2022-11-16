@@ -17,6 +17,9 @@ public:
 
 	void before_draw(Game& g);
 
+protected:
+	void load_texture(const char* path, unsigned int* image);
+
 private:
 	unsigned int rectangle_program;
 	unsigned int rectangle_VAO, rectangle_VBO, rectangle_EBO;
@@ -28,6 +31,6 @@ private:
 	int m_image_u_offset, m_image_u_rotation;
 
 public:
-	unsigned int bird_texture, mushroom_cap_texture;
+	unsigned int bird_texture, mushroom_cap_texture, mushroom_stem_texture;
 };
 

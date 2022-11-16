@@ -9,6 +9,8 @@ public:
 	
 	void logic(Game& g);
 
+	void draw(Game& g);
+
 	HoLine h;
 private:
 };

@@ -23,7 +23,7 @@ HoLine::HoLine(float _x, float _y, float _w) : x(_x), y(_y), w(_w)
 
 void HoLine::draw(Drawer& d, const Color& color)
 {
-	d.draw_rectangle(x, y, w, 0.05f, color);
+	d.draw_rectangle(x, y, w, 0.01f, color);
 }
 
 float rand_01()

@@ -76,56 +76,10 @@ Drawer::Drawer(Layer& layer)
 		m_image_u_rotation = glGetUniformLocation(image_program, "u_rotation");
 	}
 
-	// bird texture
-	{
-		glGenTextures(1, &bird_texture);
-		glBindTexture(GL_TEXTURE_2D, bird_texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		int width, height, nrChannels;
-		// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-		unsigned char* data = stbi_load("f/images/bird.png", &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			std::cout << "Failed to load texture: bird" << std::endl;
-		}
-		stbi_image_free(data);
-	}
-
-	// mushroom cap texture
-	{
-		glGenTextures(1, &mushroom_cap_texture);
-		glBindTexture(GL_TEXTURE_2D, mushroom_cap_texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		int width, height, nrChannels;
-		unsigned char* data = stbi_load("f/images/mushroom_cap.png", &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			std::cout << "Failed to load texture: mushroom cap" << std::endl;
-		}
-		stbi_image_free(data);
-	}
+	// load textures
+	load_texture("f/images/bird.png", &bird_texture);
+	load_texture("f/images/mushroom_cap.png", &mushroom_cap_texture);
+	load_texture("f/images/mushroom_stem.png", &mushroom_stem_texture);
 }
 
 void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
@@ -180,4 +134,29 @@ void Drawer::before_draw(Game& g)
 	glUseProgram(rectangle_program);
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
 	
+}
+
+void Drawer::load_texture(const char* path, unsigned int* image)
+{
+	glGenTextures(1, image);
+	glBindTexture(GL_TEXTURE_2D, *image); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture: \'" << path << '\'' << std::endl;
+	}
+	stbi_image_free(data);
 }
