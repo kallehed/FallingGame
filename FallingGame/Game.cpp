@@ -45,7 +45,8 @@ void Game::start()
 		d.before_draw(*this);
 		p.draw(*this);
 		for (auto& e : bouncers) {
-			e.h.draw(d, {1.f,1.f,0.f,1.f});
+			e.h.draw(d, {1.f,1.f,0.f,0.5f});
+			d.draw_image(c, d.mushroom_cap_texture, e.h.x + e.h.w/2.f, e.h.y, e.h.w, 0.2f, 0.f);
 		}
 		//d.draw_image(0, 0, 0, 0);
 		//stuff

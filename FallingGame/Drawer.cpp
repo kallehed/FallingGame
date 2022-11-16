@@ -97,7 +97,32 @@ Drawer::Drawer(Layer& layer)
 		}
 		else
 		{
-			std::cout << "Failed to load texture" << std::endl;
+			std::cout << "Failed to load texture: bird" << std::endl;
+		}
+		stbi_image_free(data);
+	}
+
+	// mushroom cap texture
+	{
+		glGenTextures(1, &mushroom_cap_texture);
+		glBindTexture(GL_TEXTURE_2D, mushroom_cap_texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load("f/images/mushroom_cap.png", &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: mushroom cap" << std::endl;
 		}
 		stbi_image_free(data);
 	}
@@ -120,11 +145,11 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_image(float x, float y, float w, float h, float rotation)
+void Drawer::draw_image(Camera& c, unsigned int texture, float x, float y, float w, float h, float rotation)
 {
 	glUseProgram(image_program);
 	glBindVertexArray(image_VAO);
-	glBindTexture(GL_TEXTURE_2D, bird_texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	float x_l = -w / 2.f;
 	float y_l = -h / 2.f;
@@ -139,8 +164,10 @@ void Drawer::draw_image(float x, float y, float w, float h, float rotation)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
 
 	glUseProgram(image_program);
-	glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
-
+	{
+		Pos global_offset = c.offset();
+		glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
+	}
 	glUniform1f(m_image_u_rotation, rotation);
 	//glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
 
@@ -152,6 +179,5 @@ void Drawer::before_draw(Game& g)
 	Pos off = g.c.offset();
 	glUseProgram(rectangle_program);
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
-	global_offset = off;
 	
 }

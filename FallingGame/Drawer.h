@@ -3,6 +3,7 @@
 #include "misc.h"
 
 class Layer;
+class Camera;
 
 class Drawer
 {
@@ -11,7 +12,8 @@ public:
 
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
-	void draw_image(float x, float y, float w, float h, float rotation);
+	// draw generalized image at position(with respect to offset) with certain rotation around middle
+	void draw_image(Camera& c, unsigned int texture, float x, float y, float w, float h, float rotation);
 
 	void before_draw(Game& g);
 
@@ -25,8 +27,7 @@ private:
 	unsigned int image_VAO, image_VBO, image_EBO;
 	int m_image_u_offset, m_image_u_rotation;
 
-	unsigned int bird_texture;
-
-	Pos global_offset = {0.f,0.f};
+public:
+	unsigned int bird_texture, mushroom_cap_texture;
 };
 
