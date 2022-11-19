@@ -59,7 +59,7 @@ void Player::draw(Game& g)
 	// width "3D" rotation at bounce
 	float w = 0.4f - std::max(0.0f, std::min(0.8f, 1.f * y_vel));
 	// smallification when falling down ONLY
-	w /=  std::max(1.f, - ((y_vel - 8.f) / 8.f));
+	w /=  std::max(1.f, - ((y_vel - 5.f) / 5.f));
 	g.d.draw_image(g.c, g.d.bird_texture, h.x + 0.06f, h.y + 0.2f, w, 0.4f, rotation);
-	h.draw(g.d, { 1.f, 0.f, 0.1f, 0.5f });
+	//h.draw(g.d, { 1.f, 0.f, 0.1f, 0.5f });
 }

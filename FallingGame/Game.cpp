@@ -28,7 +28,8 @@ void Game::start()
 				if (e.h.y < p.prev_y && e.h.y > p.h.y && p.h.x < e.h.x+e.h.w && p.h.x + p.h.w > e.h.x) {
 					if (p.y_vel < 0.0f) {
 						std::cout << "bounce << " << p.y_vel << "\n";
-						p.y_vel = std::clamp(-0.5f*p.y_vel, 1.1f, 3.f);
+						p.y_vel = std::clamp(-0.5f*p.y_vel, 0.75f, 1.5f);
+						p.x_vel = -16.f*(e.h.x - p.h.x);
 					}
 				}
 			}

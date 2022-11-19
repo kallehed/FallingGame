@@ -9,3 +9,11 @@ AND P_x+w intersects B_x+w in CURRENT frame ) ====> BOUNCE!
 ALSO: possible y_vel must be low enough 
 
 // bouncing seems to work with delta-time correctly as of now
+
+Long level with switching environments that become more difficult, earn coins, get upgrades
+
+Clouds have Z-axis their y movement and size depends on this. Background moves the least, is picture that is stretched
+
+Background gets increasingly darker as thunder clouds get closer. Til you lose
+
+Bounce in x based on x-offset to bouncer
