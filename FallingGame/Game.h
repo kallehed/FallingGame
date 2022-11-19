@@ -20,6 +20,9 @@ public:
 	Player p;
 
 	std::vector<Bouncer> bouncers;
+
+	static constexpr float G_WIDTH = 0.8f; // zone for game entities
+	static constexpr float G_HEIGHT = Layer::HEIGHT; // zone for game entities
 private:
 
 };

@@ -93,5 +93,17 @@
     <None Include="f\shaders\image.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="sky.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="sky.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\sides.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\sides.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,5 +1,7 @@
 #pragma once
 
+constexpr bool DRAW_HB = false; // draw hitboxes?
+
 class Game;
 class Drawer;
 
@@ -31,10 +33,14 @@ public:
 	float x, y, w;
 	HoLine(float, float, float); // x, y, w
 	void draw(Drawer& d, const Color& color);
+	float x_dist(HoLine& h); // distance in x to other holine
 };
 
 // random float btw 0 and 1
 float rand_01();
+
+// random float btw -1 and 1
+float rand_uni();
 
 // decr val by dec in absolute terms. dec must be positive. 
 // val could be any number. if dec > abs(val): return 0 

@@ -16,4 +16,7 @@ Clouds have Z-axis their y movement and size depends on this. Background moves t
 
 Background gets increasingly darker as thunder clouds get closer. Til you lose
 
-Bounce in x based on x-offset to bouncer
+Bounce in x based on x-offset to bouncer AND y_vel
+
+Sky shader - draws image of sky with offset 
+

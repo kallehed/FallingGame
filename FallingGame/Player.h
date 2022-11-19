@@ -15,8 +15,10 @@ public:
 	float prev_y = 0.f;
 	float y_vel = 0.f;
 	float x_vel = 0.f;
+	float bounce_x_vel = 0.f;
 	float rotation = 0.f;
 private:
+	constexpr static float WIDTH = 0.3f;
 	constexpr static float MAX_Y_VEL = 7.f;
 	constexpr static float MAX_X_VEL = 3.f;
 };

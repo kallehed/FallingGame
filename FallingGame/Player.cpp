@@ -14,22 +14,26 @@ void Player::logic(Game& g)
 		if (g.l.key_down(SDL_SCANCODE_D)) { x_vel += change; }
 		if (g.l.key_down(SDL_SCANCODE_A)) { x_vel -= change; }
 
-		float dec = g.l.dt * 8.f * x_vel; // decrease in x_vel
-		if (std::abs(x_vel) - std::abs(dec) > 0.f) {
-			x_vel -= dec;
+		float x_dec = g.l.dt * 8.f * x_vel; // decrease in x_vel
+		x_vel = decr_abs_val(x_vel, std::abs(x_dec));
+
+		// bounce_x_vel
+		{
+			float bounce_dec = g.l.dt * 2.f;
+			bounce_x_vel = decr_abs_val(bounce_x_vel, std::abs(bounce_dec));
 		}
 
 		x_vel = std::clamp(x_vel, -MAX_X_VEL, MAX_X_VEL);
 
-		h.x += x_vel * g.l.dt;
+		h.x += (x_vel + bounce_x_vel) * g.l.dt;
 
 		// limit x to borders of screen
-		h.x = std::clamp(h.x, -g.l.WIDTH, g.l.WIDTH - h.w);
+		h.x = std::clamp(h.x, -g.G_WIDTH, g.G_WIDTH - h.w);
 	}
 
 	// y movement
 	{
-		float y_dec = g.l.dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 1.5f))) : 1.f);
+		float y_dec = g.l.dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
 		float new_y_vel = y_vel - y_dec;
 		y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL);
 		prev_y = h.y;
@@ -57,9 +61,13 @@ void Player::logic(Game& g)
 void Player::draw(Game& g)
 {
 	// width "3D" rotation at bounce
-	float w = 0.4f - std::max(0.0f, std::min(0.8f, 1.f * y_vel));
+	float w = WIDTH - std::max(0.0f, std::min(2.f*WIDTH, 1.f * y_vel));
 	// smallification when falling down ONLY
-	w /=  std::max(1.f, - ((y_vel - 5.f) / 5.f));
-	g.d.draw_image(g.c, g.d.bird_texture, h.x + 0.06f, h.y + 0.2f, w, 0.4f, rotation);
-	//h.draw(g.d, { 1.f, 0.f, 0.1f, 0.5f });
+	unsigned int texture = g.d.bird_closed_texture;
+	if (y_vel >= -2.f) {
+		w /= std::max(1.f, -((y_vel - 10.f) / 10.f));
+		texture = g.d.bird_texture;
+	}
+	g.d.draw_image(g.c, texture, h.x + 0.06f, h.y + 0.2f, w, 0.4f, rotation);
+	h.draw(g.d, { 1.f, 0.f, 0.1f, 1.0f });
 }

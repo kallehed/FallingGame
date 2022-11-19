@@ -193,7 +193,7 @@ void Layer::end_frame()
 
 	float milliSecElapsed = ((end - m_start) / (float)SDL_GetPerformanceFrequency()) * 1000.f;
 	
-	Uint32 delay = 0*static_cast<Uint32>(std::max(0.f, 1000.f / 10.f - milliSecElapsed));
+	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / MAX_FPS - milliSecElapsed));
 	dt = (milliSecElapsed + delay) / 1000.f;
 	dt = std::min(1.f / MIN_FPS, dt);
 	SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
