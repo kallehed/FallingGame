@@ -84,8 +84,8 @@ Drawer::Drawer(Game& g)
 	{
 		sky_program = g.l.compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
 		
-		const float y_imgs = 1.f * g.l.HEIGHT;
-		const float x_imgs = 1.f * g.l.WIDTH;
+		const float y_imgs = 5.f * g.l.HEIGHT;
+		const float x_imgs = 5.f * g.l.WIDTH;
 
 		sky_height_per_sky = (2.f * g.G_HEIGHT) / y_imgs;
 
@@ -123,7 +123,7 @@ Drawer::Drawer(Game& g)
 		glGenVertexArrays(1, &sides_VAO);
 		glBindVertexArray(sides_VAO);
 
-		constexpr float y_imgs = 1.f, x_imgs = 1.f;
+		constexpr float y_imgs = 2.5f, x_imgs = 1.f;
 
 		constexpr float img_height = (g.l.HEIGHT * 2.f) / y_imgs;
 		sides_height_per_image = img_height;
@@ -223,7 +223,7 @@ void Drawer::draw_sky(Player& p)
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, sky_texture);
 
-	float y = -p.h.y/20.f;
+	float y = -p.h.y/5.f;
 	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
 	
 	glUniform2f(sky_u_offset, 0.f, y);

@@ -68,6 +68,6 @@ void Player::draw(Game& g)
 		w /= std::max(1.f, -((y_vel - 10.f) / 10.f));
 		texture = g.d.bird_texture;
 	}
-	g.d.draw_image(g.c, texture, h.x + 0.06f, h.y + 0.2f, w, 0.4f, rotation);
+	g.d.draw_image(g.c, texture, h.x + 0.06f, h.y + 0.2f, w, WIDTH* 1.16386555, rotation);
 	h.draw(g.d, { 1.f, 0.f, 0.1f, 1.0f });
 }

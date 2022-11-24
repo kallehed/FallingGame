@@ -9,5 +9,5 @@ void Cloud::logic(Game& g)
 
 void Cloud::draw(Game& g)
 {
-	g.d.draw_image(g.c, g.d.cloud_texture, x, y, 0.1f, 0.1f, 0.f);
+	//g.d.draw_image(g.c, g.d.cloud_texture, x, y, 0.1f, 0.1f, 0.f);
 }
