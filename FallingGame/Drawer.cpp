@@ -84,8 +84,8 @@ Drawer::Drawer(Game& g)
 	{
 		sky_program = g.l.compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
 		
-		const float y_imgs = 5.f * g.l.HEIGHT;
-		const float x_imgs = 5.f * g.l.WIDTH;
+		const float y_imgs = 4.f * g.l.HEIGHT;
+		const float x_imgs = 4.f * g.l.WIDTH;
 
 		sky_height_per_sky = (2.f * g.G_HEIGHT) / y_imgs;
 
@@ -163,13 +163,27 @@ Drawer::Drawer(Game& g)
 	}
 
 	// load textures
-	load_texture("f/images/bird.png", &bird_texture, GL_CLAMP_TO_BORDER);
-	load_texture("f/images/bird_closed.png", &bird_closed_texture, GL_CLAMP_TO_BORDER);
-	load_texture("f/images/mushroom_cap.png", &mushroom_cap_texture, GL_CLAMP_TO_BORDER);
-	load_texture("f/images/mushroom_stem.png", &mushroom_stem_texture, GL_CLAMP_TO_BORDER);
-	load_texture("f/images/side_background.png", &side_background_texture, GL_REPEAT);
-	load_texture("f/images/sky.png", &sky_texture, GL_REPEAT);
-	load_texture("f/images/sky_blurred.png", &sky_blurred_texture, GL_REPEAT);
+	constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
+	{ {
+		{"f/images/bird.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/bird_closed.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/mushroom_cap.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/mushroom_stem.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/side_background.png", GL_CLAMP_TO_BORDER, GL_REPEAT },
+		{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
+		{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
+		{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
+		{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
+		{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
+	} };
+
+	for (int i = 0; i < TEX::TOTAL; ++i) {
+		auto& d = data[i];
+		tex_sizes[i] = load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
+	}
 }
 
 void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
@@ -189,11 +203,11 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_image(Camera& c, unsigned int texture, float x, float y, float w, float h, float rotation)
+void Drawer::draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation)
 {
 	glUseProgram(image_program);
 	glBindVertexArray(image_VAO);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texs[tex]);
 
 	float x_l = -w / 2.f;
 	float y_l = -h / 2.f;
@@ -221,7 +235,7 @@ void Drawer::draw_sky(Player& p)
 {
 	glUseProgram(sky_program);
 	glBindVertexArray(sky_VAO);
-	glBindTexture(GL_TEXTURE_2D, sky_texture);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
 	float y = -p.h.y/5.f;
 	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
@@ -234,7 +248,7 @@ void Drawer::draw_sides(Player& p) {
 	glUseProgram(sides_program);
 	glBindVertexArray(sides_VAO);
 
-	glBindTexture(GL_TEXTURE_2D, side_background_texture);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
 
 	float y = -p.h.y;
 	while (y > sides_height_per_image) { y -= sides_height_per_image; };
@@ -249,13 +263,13 @@ void Drawer::before_draw(Game& g)
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
 }
 
-void Drawer::load_texture(const char* path, unsigned int* image, int wrapping)
+std::array<int, 2> Drawer::load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y)
 {
 	glGenTextures(1, image);
 	glBindTexture(GL_TEXTURE_2D, *image); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping_x);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping_y);
 	{
 		float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
@@ -276,4 +290,5 @@ void Drawer::load_texture(const char* path, unsigned int* image, int wrapping)
 		std::cout << "Failed to load texture: \'" << path << '\'' << std::endl;
 	}
 	stbi_image_free(data);
+	return { width, height };
 }

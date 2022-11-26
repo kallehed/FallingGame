@@ -63,11 +63,11 @@ void Player::draw(Game& g)
 	// width "3D" rotation at bounce
 	float w = WIDTH - std::max(0.0f, std::min(2.f*WIDTH, 1.f * y_vel));
 	// smallification when falling down ONLY
-	unsigned int texture = g.d.bird_closed_texture;
+	TEX::_ texture = TEX::bird_closed;
 	if (y_vel >= -2.f) {
 		w /= std::max(1.f, -((y_vel - 10.f) / 10.f));
-		texture = g.d.bird_texture;
+		texture = TEX::bird;
 	}
-	g.d.draw_image(g.c, texture, h.x + 0.06f, h.y + 0.2f, w, WIDTH* 1.16386555, rotation);
+	g.d.draw_image(g.c, texture, h.x + 0.04f, h.y + 0.135f, w, WIDTH* 1.16386555f, rotation);
 	h.draw(g.d, { 1.f, 0.f, 0.1f, 1.0f });
 }

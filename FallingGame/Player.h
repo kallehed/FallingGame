@@ -11,7 +11,7 @@ public:
 	void logic(Game& g);
 	void draw(Game& g);
 
-	HoLine h{ 0.0f, 0.0f, 0.1f};
+	HoLine h{ 0.0f, 0.0f, 0.07f};
 	float prev_y = 0.f;
 	float y_vel = 0.f;
 	float x_vel = 0.f;

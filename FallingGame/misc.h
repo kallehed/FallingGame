@@ -48,3 +48,25 @@ float decr_abs_val(float val, float dec);
 
 constexpr float pi = 3.14159265359f;
 constexpr float tau = 6.28318530718f;
+
+namespace TEX
+{
+	enum _ : char {
+		bird,
+		bird_closed,
+		mushroom_cap,
+		mushroom_stem,
+		side_background,
+		sky,
+		sky_blurred,
+		sky2,
+		sky3, 
+		cloud_1,
+		cloud_2,
+		cloud_3,
+		cloud_4,
+
+		TOTAL
+	};
+
+}

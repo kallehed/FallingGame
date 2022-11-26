@@ -2,12 +2,48 @@
 
 #include "Game.h"
 
+Cloud::Cloud(Game& g, float depth)
+{
+	z = 0.7f*depth + 0.1f;
+	init(g);
+	
+	x = rand_uni() * g.l.WIDTH;
+	y = rand_uni() * g.l.HEIGHT;
+}
+
 void Cloud::logic(Game& g)
 {
-	x += 0.001f * g.l.dt;
+	if ((x + w) < -g.l.WIDTH || (x - w) > g.l.WIDTH  || (y - h) > g.l.HEIGHT) {
+		init(g);
+	}
+	y += (g.p.prev_y - g.p.h.y) * (1.f - z);
+	x += x_vel * g.l.dt * (1.f - z);
 }
 
 void Cloud::draw(Game& g)
 {
-	//g.d.draw_image(g.c, g.d.cloud_texture, x, y, 0.1f, 0.1f, 0.f);
+	
+	float x_pos = x - g.c.offset().x;
+	float y_pos = y - g.c.offset().y;
+	g.d.draw_image(g.c, tex, x_pos, y_pos, w, h, 0.f);
+}
+
+void Cloud::init(Game& g)
+{
+	tex = (TEX::_)(TEX::cloud_1 + (int)(3.99f * rand_01()));
+
+	constexpr float scale = 0.002f;
+	w = scale * g.d.tex_sizes[TEX::cloud_1][0] * (1.f-z);
+	h = scale * g.d.tex_sizes[TEX::cloud_1][1] * (1-z);
+
+	x_vel = 0.1f;//rand_uni();
+
+	y = ((rand_01() * 8.f) - 8.f) *  g.l.HEIGHT;
+	if (y + h < -g.l.HEIGHT) {
+		x = rand_uni() * g.l.WIDTH;
+	}
+	else {
+		x = (rand_uni() > 0.f) ? g.l.WIDTH : -g.l.WIDTH;
+	}
+	
 }

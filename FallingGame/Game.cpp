@@ -13,6 +13,11 @@ void Game::start()
 
 	float next_bouncer_y = -1.f;
 
+	int total_clouds = 20;
+	for (int i = total_clouds; i > 0; --i) {
+		clouds.emplace_back(*this, (float)i / (float)total_clouds);
+	}
+
 	while (!l.start_frame() && !quit)
 	{
 		// logic
@@ -21,6 +26,7 @@ void Game::start()
 		for (auto& e : bouncers) {
 			e.logic(*this);
 		}
+		for (auto& e : clouds) { e.logic(*this); }
 
 		// collision between bouncers and player
 		{
@@ -46,27 +52,15 @@ void Game::start()
 		// Drawing
 		d.before_draw(*this);
 
-		// sky
-		{
-			d.draw_sky(p);
-			//d.draw_image(c, d.sky_texture, c.x, c.y, (G_WIDTH*1.5f) * 2.f, G_HEIGHT * 2.f, 0.f);
-		}
+		d.draw_sky(p);
+		for (auto& e : clouds) { e.draw(*this); }
 
 		p.draw(*this);
 		for (auto& e : bouncers) {
 			e.draw(*this);
 		}
 		// side background
-		{
-			/*float w = l.WIDTH - G_WIDTH;
-			float h = l.HEIGHT * 2.f;
-			// left side
-			d.draw_image(c, d.side_background_texture, c.x - G_WIDTH - w/2.f, c.y, w, h, 0.f);
-			// right side
-			d.draw_image(c, d.side_background_texture, c.x + G_WIDTH + w / 2.f, c.y, -w, h, 0.f);
-			*/
-			d.draw_sides(p);
-		}
+		d.draw_sides(p);
 		
 		//d.draw_image(0, 0, 0, 0);
 		//stuff

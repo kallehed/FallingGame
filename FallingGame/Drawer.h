@@ -2,6 +2,8 @@
 
 #include "misc.h"
 
+#include <array>
+
 class Layer;
 class Camera;
 class Player;
@@ -14,7 +16,7 @@ public:
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
 	// draws middle of image at x,y. Offset by camera 
-	void draw_image(Camera& c, unsigned int texture, float x, float y, float w, float h, float rotation);
+	void draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation);
 
 	void draw_sky(Player& p);
 
@@ -24,7 +26,8 @@ public:
 
 protected:
 	// wrapping to GL_CLAMP_TO_BORDER will make it transparent after border(disables artifacts)
-	void load_texture(const char* path, unsigned int* image, int wrapping);
+	// returns width and height of image
+	std::array<int, 2> load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y);
 
 private:
 
@@ -49,6 +52,7 @@ private:
 	int sides_u_offset;
 	float sides_height_per_image;
 public:
-	unsigned int bird_texture, bird_closed_texture, mushroom_cap_texture, mushroom_stem_texture, side_background_texture, sky_texture, sky_blurred_texture;
+	std::array<unsigned int, TEX::TOTAL> texs;
+	std::array<std::array<int, 2>, TEX::TOTAL> tex_sizes;
 };
 
