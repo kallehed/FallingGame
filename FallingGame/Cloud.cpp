@@ -2,11 +2,11 @@
 
 #include "Game.h"
 
-Cloud::Cloud(Game& g, float depth)
+void Cloud::construct(Game& g, float depth)
 {
-	z = 0.7f*depth + 0.1f;
+	z = 0.7f * depth + 0.1f;
 	init(g);
-	
+
 	x = rand_uni() * g.l.WIDTH;
 	y = rand_uni() * g.l.HEIGHT;
 }
@@ -38,7 +38,7 @@ void Cloud::init(Game& g)
 
 	x_vel = 0.1f;//rand_uni();
 
-	y = ((rand_01() * 8.f) - 8.f) *  g.l.HEIGHT;
+	y = ((rand_01() * 4.f) - 6.f) *  g.l.HEIGHT;
 	if (y + h < -g.l.HEIGHT) {
 		x = rand_uni() * g.l.WIDTH;
 	}

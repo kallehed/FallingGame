@@ -5,7 +5,7 @@
 class Cloud
 {
 public:
-	Cloud(Game& g, float depth);
+	void construct(Game& g, float depth);
 	void logic(Game& g);
 	void draw(Game& g);
 	// z between 0.f and 1.f

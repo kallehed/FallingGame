@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 
 #include "Layer.h"
 #include "Drawer.h"
@@ -21,7 +22,8 @@ public:
 	Player p;
 
 	std::vector<Bouncer> bouncers;
-	std::vector<Cloud> clouds;
+	std::array<Cloud, 30> clouds;
+	std::vector<Coin> coins;
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities
 	static constexpr float G_HEIGHT = Layer::HEIGHT; // zone for game entities

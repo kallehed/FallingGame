@@ -5,6 +5,9 @@
 
 Game::Game() : l(), d(*this), p()
 {
+	for (int i = 0; i < clouds.size(); ++i) {
+		clouds[i].construct(*this, (float)((int)clouds.size() - i) / (float)clouds.size());
+	}
 }
 
 void Game::start()
@@ -15,7 +18,7 @@ void Game::start()
 
 	int total_clouds = 20;
 	for (int i = total_clouds; i > 0; --i) {
-		clouds.emplace_back(*this, (float)i / (float)total_clouds);
+		//clouds.emplace_back(*this, (float)i / (float)total_clouds);
 	}
 
 	while (!l.start_frame() && !quit)

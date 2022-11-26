@@ -146,6 +146,7 @@
     <ClCompile Include="Bouncer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cloud.cpp" />
+    <ClCompile Include="Coin.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="glad.c" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Bouncer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cloud.h" />
+    <ClInclude Include="Coin.h" />
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Layer.h" />

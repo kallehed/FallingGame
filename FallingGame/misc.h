@@ -65,6 +65,7 @@ namespace TEX
 		cloud_2,
 		cloud_3,
 		cloud_4,
+		coin,
 
 		TOTAL
 	};

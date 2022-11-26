@@ -177,7 +177,8 @@ Drawer::Drawer(Game& g)
 		{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
+		{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
 	} };
 
 	for (int i = 0; i < TEX::TOTAL; ++i) {
