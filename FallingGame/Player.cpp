@@ -25,10 +25,10 @@ void Player::logic(Game& g)
 
 		x_vel = std::clamp(x_vel, -MAX_X_VEL, MAX_X_VEL);
 
-		h.x += (x_vel + bounce_x_vel) * g.l.dt;
+		r.x += (x_vel + bounce_x_vel) * g.l.dt;
 
 		// limit x to borders of screen
-		h.x = std::clamp(h.x, -g.G_WIDTH, g.G_WIDTH - h.w);
+		r.x = std::clamp(r.x, -g.G_WIDTH, g.G_WIDTH - r.w);
 	}
 
 	// y movement
@@ -36,8 +36,8 @@ void Player::logic(Game& g)
 		float y_dec = g.l.dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
 		float new_y_vel = y_vel - y_dec;
 		y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL);
-		prev_y = h.y;
-		h.y += y_vel * g.l.dt;
+		prev_y = r.y;
+		r.y += y_vel * g.l.dt;
 	}
 
 	// rotation
@@ -68,6 +68,7 @@ void Player::draw(Game& g)
 		w /= std::max(1.f, -((y_vel - 10.f) / 10.f));
 		texture = TEX::bird;
 	}
-	g.d.draw_image(g.c, texture, h.x + 0.04f, h.y + 0.135f, w, WIDTH* 1.16386555f, rotation);
-	h.draw(g.d, { 1.f, 0.f, 0.1f, 1.0f });
+	g.d.draw_image(g.c, texture, r.x + 0.045f, r.y + 0.135f, w, WIDTH * 1.16386555f, rotation);
+	r.draw(g.d, { 1.f, 0.f, 0.1f, 0.4f });
+
 }

@@ -16,7 +16,7 @@ void Cloud::logic(Game& g)
 	if ((x + w) < -g.l.WIDTH || (x - w) > g.l.WIDTH  || (y - h) > g.l.HEIGHT) {
 		init(g);
 	}
-	y += (g.p.prev_y - g.p.h.y) * (1.f - z);
+	y += (g.p.prev_y - g.p.r.y) * (1.f - z);
 	x += x_vel * g.l.dt * (1.f - z);
 }
 

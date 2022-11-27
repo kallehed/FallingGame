@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr bool DRAW_HB = false; // draw hitboxes?
+constexpr bool DRAW_HB = true; // draw hitboxes?
 
 class Game;
 class Drawer;
@@ -18,16 +18,20 @@ struct Pos { // position: x, y. floats
 	Pos(float X, float Y) : x(X), y(Y) {};
 };
 
-class Rect
+class HoLine;
+
+class Rect // for hitboxes
 {
 public:
 	float x, y, w, h;
 	Rect(float, float, float, float); // x,y,w,h
+	Rect();
 	void draw(Drawer& d, const Color& color);
 	bool intersect(Rect& e);
+	float x_dist(HoLine&);
 };
 
-class HoLine // a horizontal line, containing x,y,w
+class HoLine // a horizontal line, containing x,y,w. A hitbox
 {
 public:
 	float x, y, w;
@@ -41,6 +45,8 @@ float rand_01();
 
 // random float btw -1 and 1
 float rand_uni();
+
+float sign(float val); // returns 1.f if >= 0, else -1
 
 // decr val by dec in absolute terms. dec must be positive. 
 // val could be any number. if dec > abs(val): return 0 
@@ -66,6 +72,7 @@ namespace TEX
 		cloud_3,
 		cloud_4,
 		coin,
+		coin_blurred,
 
 		TOTAL
 	};

@@ -7,16 +7,25 @@ Rect::Rect(float X, float Y, float W, float H) : x(X), y(Y), w(W), h(H)
 {
 }
 
+Rect::Rect()
+{
+}
+
 void Rect::draw(Drawer& d, const Color& color)
 {
-	
-	d.draw_rectangle(x, y, w, h, color);
-	
+	if constexpr (DRAW_HB) {
+		d.draw_rectangle(x, y, w, h, color);
+	}
 }
 
 bool Rect::intersect(Rect& e)
 {
 	return ((x <= e.x + e.w) && (x + w >= e.x) && (y <= e.y + e.h) && (y + h >= e.y));
+}
+
+float Rect::x_dist(HoLine& h)
+{
+	return (x + w / 2.f) - (h.x + h.w / 2.f);
 }
 
 HoLine::HoLine(float _x, float _y, float _w) : x(_x), y(_y), w(_w)
@@ -43,6 +52,11 @@ float rand_01()
 float rand_uni()
 {
 	return 2.f*(rand_01() - 0.5f);
+}
+
+float sign(float val)
+{
+	return (val >= 0.f) ? (1.f) : (-1.f);
 }
 
 float decr_abs_val(float val, float dec)

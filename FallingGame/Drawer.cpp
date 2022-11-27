@@ -178,7 +178,8 @@ Drawer::Drawer(Game& g)
 		{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
+		{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+		{"f/images/coin_blurred.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
 	} };
 
 	for (int i = 0; i < TEX::TOTAL; ++i) {
@@ -238,7 +239,7 @@ void Drawer::draw_sky(Player& p)
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
-	float y = -p.h.y/5.f;
+	float y = -p.r.y/5.f;
 	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
 	
 	glUniform2f(sky_u_offset, 0.f, y);
@@ -251,7 +252,7 @@ void Drawer::draw_sides(Player& p) {
 
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
 
-	float y = -p.h.y;
+	float y = -p.r.y;
 	while (y > sides_height_per_image) { y -= sides_height_per_image; };
 	glUniform2f(sides_u_offset, 0.f, y);
 	glDrawElements(GL_TRIANGLES, 120, GL_UNSIGNED_INT, 0);

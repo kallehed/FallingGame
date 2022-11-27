@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "Bouncer.h"
 #include "Cloud.h"
+#include "Coin.h"
 
 class Game
 {

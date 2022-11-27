@@ -20,6 +20,7 @@ public:
 	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 
 	float dt = 0.f; // delta time for last frame
+	float timer = 0.f; // total time passed
 	constexpr static float WIDTH = 1.6f; // of SCREEN
 	constexpr static float HEIGHT = 1.f; // of SCREEN
 private:
@@ -38,4 +39,6 @@ private:
 	constexpr static int TOTAL_KEYS = 256;
 	std::array<bool, TOTAL_KEYS> m_keys_down = { false };
 	std::array<bool, TOTAL_KEYS> m_keys_just_down = { false };
+
+	
 };
