@@ -65,13 +65,13 @@ void Game::start()
 		// game logic without place yet
 		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
 			bouncers.emplace_back(G_WIDTH, next_bouncer_y);
-			next_bouncer_y -= 2.f * l.HEIGHT * (0.3f + 0.5f*rand_01());
+			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()))/(1.f + 0.1f*std::sqrt(std::abs(p.r.y)));
 		}
 
-		if (p.r.y - l.HEIGHT*2.f <= next_coin_y)
+		while (p.r.y - l.HEIGHT*2.f <= next_coin_y)
 		{
-			coins.emplace_back(*this, next_bouncer_y);
-			next_coin_y -= 2.f * l.HEIGHT;
+			coins.emplace_back(*this, next_coin_y);
+			next_coin_y -= (2.f * l.HEIGHT)/(1.f + 0.5f*std::sqrt(std::abs(p.r.y)));
 		}
 
 		c.last_in_logic(*this);

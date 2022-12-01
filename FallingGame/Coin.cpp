@@ -14,7 +14,7 @@ Coin::Coin(Game& g, float start_y)
 	r.y = start_y;
 	r.w = (float)g.d.tex_sizes[tex][0] * size;
 	r.h = (float)g.d.tex_sizes[tex][1] * size;
-	time_offset = g.l.timer;
+	time_offset = /*g.l.timer +*/ rand_01()*5.f;
 }
 
 void Coin::logic(Game& g)

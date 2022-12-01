@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr bool DRAW_HB = true; // draw hitboxes?
+constexpr bool DRAW_HB = false; // draw hitboxes?
 
 class Game;
 class Drawer;
