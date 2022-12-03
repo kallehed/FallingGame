@@ -57,7 +57,8 @@ void Game::start()
 				auto& e = coins[i];
 				if (p.r.intersect(e.r)) {
 					std::cout << "COIN \n";
-					coins.erase(coins.begin() + i);
+					//coins.erase(coins.begin() + i);
+					e.got_picked_up(*this);
 				}
 			}
 		}
