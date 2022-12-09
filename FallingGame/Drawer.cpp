@@ -170,6 +170,7 @@ Drawer::Drawer(Game& g)
 		{"f/images/mushroom_cap.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/mushroom_stem.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/side_background.png", GL_CLAMP_TO_BORDER, GL_REPEAT },
+		{"f/images/vines.png", GL_REPEAT, GL_REPEAT },
 		{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
 		{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
 		{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
@@ -233,24 +234,27 @@ void Drawer::draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_sky(Player& p)
+void Drawer::draw_sky(Game& g)
 {
 	glUseProgram(sky_program);
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
-	float y = -p.r.y/5.f;
+	float y = -g.p.r.y/5.f;
 	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
 	
 	glUniform2f(sky_u_offset, 0.f, y);
+	glUniform1f(glGetUniformLocation(sky_program, "u_death_y"), g.death_y - g.c.y);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_sides(Player& p) {
+void Drawer::draw_sides(Player& p)
+{
 	glUseProgram(sides_program);
 	glBindVertexArray(sides_VAO);
 
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
+	//glBindTexture(GL_TEXTURE_2D, texs[TEX::vines]);
 
 	float y = -p.r.y;
 	while (y > sides_height_per_image) { y -= sides_height_per_image; };

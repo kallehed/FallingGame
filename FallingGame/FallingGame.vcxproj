@@ -177,8 +177,8 @@
     <None Include="f\shaders\rectangle.vert" />
     <None Include="f\shaders\sides.frag" />
     <None Include="f\shaders\sides.vert" />
-    <None Include="sky.frag" />
-    <None Include="sky.vert" />
+    <None Include="f\shaders\sky.frag" />
+    <None Include="f\shaders\sky.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

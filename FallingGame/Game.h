@@ -22,6 +22,8 @@ public:
 	Camera c;
 	Player p;
 
+	float death_y = 0.f;
+
 	std::vector<Bouncer> bouncers;
 	std::array<Cloud, 30> clouds;
 	std::vector<Coin> coins;

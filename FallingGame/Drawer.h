@@ -18,7 +18,7 @@ public:
 	// draws middle of image at x,y. Offset by camera 
 	void draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation);
 
-	void draw_sky(Player& p);
+	void draw_sky(Game& g);
 
 	void draw_sides(Player& p);
 

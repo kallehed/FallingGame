@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr bool DRAW_HB = false; // draw hitboxes?
+constexpr bool DRAW_HB = true; // draw hitboxes?
 
 class Game;
 class Drawer;
@@ -63,6 +63,7 @@ namespace TEX
 		mushroom_cap,
 		mushroom_stem,
 		side_background,
+		vines,
 		sky,
 		sky_blurred,
 		sky2,

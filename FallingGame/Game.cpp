@@ -20,6 +20,7 @@ void Game::start()
 	while (!l.start_frame() && !quit)
 	{
 		// logic
+		death_y -= 0.9f * l.dt * std::max(1.f, 0.2f*std::pow(death_y-p.r.y, 2.f) );
 		p.logic(*this);
 		
 		for (auto& e : bouncers) {
@@ -46,6 +47,7 @@ void Game::start()
 						std::cout << "bounce << " << p.y_vel << "\n";
 						p.bounce_x_vel = std::min( 1.f,-0.5f*p.y_vel) * 10.f * p.r.x_dist(e.h);
 						p.y_vel = std::clamp(-0.5f*p.y_vel, 0.75f, 1.5f);
+						e.bounced_on(p.bounce_x_vel);
 						
 					}
 				}
@@ -66,13 +68,13 @@ void Game::start()
 		// game logic without place yet
 		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
 			bouncers.emplace_back(G_WIDTH, next_bouncer_y);
-			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()))/(1.f + 0.1f*std::sqrt(std::abs(p.r.y)));
+			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()));
 		}
 
 		while (p.r.y - l.HEIGHT*2.f <= next_coin_y)
 		{
 			coins.emplace_back(*this, next_coin_y);
-			next_coin_y -= (2.f * l.HEIGHT)/(1.f + 0.5f*std::sqrt(std::abs(p.r.y)));
+			next_coin_y -= (2.f * l.HEIGHT);
 		}
 
 		c.last_in_logic(*this);
@@ -80,7 +82,7 @@ void Game::start()
 		// Drawing
 		d.before_draw(*this);
 
-		d.draw_sky(p);
+		d.draw_sky(*this);
 
 		for (auto& e : clouds) { e.draw(*this); }
 		for (auto& e : coins) { e.draw(*this); }
@@ -89,7 +91,8 @@ void Game::start()
 		for (auto& e : bouncers) { e.draw(*this); }
 		// side background
 		d.draw_sides(p);
-		
+		Rect r{ -l.WIDTH, death_y, 2.f*l.WIDTH, 10.f };
+		r.draw(d, { 0.f,0.f,0.f,0.5f });
 		//d.draw_image(0, 0, 0, 0);
 		//stuff
 		l.end_frame();
