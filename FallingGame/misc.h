@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr bool DRAW_HB = true; // draw hitboxes?
+constexpr bool DRAW_HB = false; // draw hitboxes?
 
 class Game;
 class Drawer;
@@ -67,7 +67,8 @@ namespace TEX
 		sky,
 		sky_blurred,
 		sky2,
-		sky3, 
+		sky3,
+		storm,
 		cloud_1,
 		cloud_2,
 		cloud_3,

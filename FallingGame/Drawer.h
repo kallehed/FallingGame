@@ -51,6 +51,14 @@ private:
 	unsigned int sides_VAO, sides_VBO;
 	int sides_u_offset;
 	float sides_height_per_image;
+
+	/*
+	* float g_death_y; // y where you die
+	* float g_cam_y; // canera y
+	*/
+	constexpr static int UBO_GLOBAL_SIZE = 2 * sizeof(float);
+	unsigned int ubo_globals;
+
 public:
 	std::array<unsigned int, TEX::TOTAL> texs;
 	std::array<std::array<int, 2>, TEX::TOTAL> tex_sizes;

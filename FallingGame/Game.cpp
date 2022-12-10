@@ -91,8 +91,10 @@ void Game::start()
 		for (auto& e : bouncers) { e.draw(*this); }
 		// side background
 		d.draw_sides(p);
-		Rect r{ -l.WIDTH, death_y, 2.f*l.WIDTH, 10.f };
-		r.draw(d, { 0.f,0.f,0.f,0.5f });
+
+		{
+			d.draw_image(c, TEX::storm, 0.f, death_y + l.HEIGHT, l.WIDTH * 2.f, l.HEIGHT * 2.f, 0.f);
+		}
 		//d.draw_image(0, 0, 0, 0);
 		//stuff
 		l.end_frame();

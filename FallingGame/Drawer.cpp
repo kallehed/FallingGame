@@ -162,6 +162,15 @@ Drawer::Drawer(Game& g)
 		sides_u_offset = glGetUniformLocation(sides_program, "u_offset");
 	}
 
+	// uniform buffer object
+	{
+		glGenBuffers(1, &ubo_globals);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
+		glBufferData(GL_UNIFORM_BUFFER, UBO_GLOBAL_SIZE, NULL, GL_DYNAMIC_DRAW);
+
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_globals);
+	}
+
 	// load textures
 	constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
 	{ {
@@ -175,6 +184,7 @@ Drawer::Drawer(Game& g)
 		{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
 		{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
 		{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
+		{"f/images/storm.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
 		{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
@@ -244,7 +254,6 @@ void Drawer::draw_sky(Game& g)
 	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
 	
 	glUniform2f(sky_u_offset, 0.f, y);
-	glUniform1f(glGetUniformLocation(sky_program, "u_death_y"), g.death_y - g.c.y);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -267,6 +276,13 @@ void Drawer::before_draw(Game& g)
 	Pos off = g.c.offset();
 	glUseProgram(rectangle_program);
 	glUniform2f(m_rectangle_u_offset, off.x, off.y);
+
+	// bind unfiform buffer object: Globals
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
+		float data[] = { g.death_y, g.c.y };
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
+	}	
 }
 
 std::array<int, 2> Drawer::load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y)
