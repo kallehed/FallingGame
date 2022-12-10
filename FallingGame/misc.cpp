@@ -54,6 +54,11 @@ float rand_uni()
 	return 2.f*(rand_01() - 0.5f);
 }
 
+int rand_int(int a, int b)
+{
+	return a + (rand() % (b - a));
+}
+
 float sign(float val)
 {
 	return (val >= 0.f) ? (1.f) : (-1.f);

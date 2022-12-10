@@ -20,7 +20,8 @@ void Game::start()
 	while (!l.start_frame() && !quit)
 	{
 		// logic
-		death_y -= 0.9f * l.dt * std::max(1.f, 0.2f*std::pow(death_y-p.r.y, 2.f) );
+		death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
+
 		p.logic(*this);
 		
 		for (auto& e : bouncers) {

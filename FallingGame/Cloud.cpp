@@ -22,15 +22,17 @@ void Cloud::logic(Game& g)
 
 void Cloud::draw(Game& g)
 {
-	
 	float x_pos = x - g.c.offset().x;
 	float y_pos = y - g.c.offset().y;
-	g.d.draw_image(g.c, tex, x_pos, y_pos, w, h, 0.f);
+	//g.d.draw_image(g.c, tex, x_pos, y_pos, w, h, 0.f);
+	
+	g.d.draw_cloud(g, tex, x, y, z, w, h);
 }
 
 void Cloud::init(Game& g)
 {
-	tex = (TEX::_)(TEX::cloud_1 + (int)(3.99f * rand_01()));
+	//tex = (TEX::_)(TEX::cloud_1 + (int)(3.99f * rand_01()));
+	tex = (TEX::_)(TEX::cloud_1 + rand_int(0, 4));
 
 	constexpr float scale = 0.002f;
 	w = scale * g.d.tex_sizes[TEX::cloud_1][0] * (1.f-z);

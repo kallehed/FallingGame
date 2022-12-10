@@ -46,6 +46,9 @@ float rand_01();
 // random float btw -1 and 1
 float rand_uni();
 
+// random int from a to b, not including b
+int rand_int(int a, int b);
+
 float sign(float val); // returns 1.f if >= 0, else -1
 
 // decr val by dec in absolute terms. dec must be positive. 

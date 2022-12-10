@@ -162,6 +162,21 @@ Drawer::Drawer(Game& g)
 		sides_u_offset = glGetUniformLocation(sides_program, "u_offset");
 	}
 
+	{
+		cloud_program = g.l.compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
+		glGenVertexArrays(1, &cloud_VAO);
+		glBindVertexArray(cloud_VAO);
+
+		glGenBuffers(1, &cloud_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, nullptr, GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	}
+
 	// uniform buffer object
 	{
 		glGenBuffers(1, &ubo_globals);
@@ -269,6 +284,31 @@ void Drawer::draw_sides(Player& p)
 	while (y > sides_height_per_image) { y -= sides_height_per_image; };
 	glUniform2f(sides_u_offset, 0.f, y);
 	glDrawElements(GL_TRIANGLES, 120, GL_UNSIGNED_INT, 0);
+}
+
+void Drawer::draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h)
+{
+	glUseProgram(cloud_program);
+	glBindVertexArray(cloud_VAO);
+
+	glBindTexture(GL_TEXTURE_2D, texs[tex]); 
+
+	{
+
+		float vertices[] =
+		{
+			x, y, 0.f, 1.f,
+			x, y + h, 0.f, 0.f,
+			x + w, y + h, 1.f, 0.f,
+			x + w, y, 1.f, 1.f
+		};
+
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	}
+	glUniform1f(glGetUniformLocation(cloud_program, "u_z"), z);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void Drawer::before_draw(Game& g)

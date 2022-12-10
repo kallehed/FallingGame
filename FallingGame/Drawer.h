@@ -22,6 +22,8 @@ public:
 
 	void draw_sides(Player& p);
 
+	void draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h);
+
 	void before_draw(Game& g);
 
 protected:
@@ -51,6 +53,9 @@ private:
 	unsigned int sides_VAO, sides_VBO;
 	int sides_u_offset;
 	float sides_height_per_image;
+
+	unsigned int cloud_program;
+	unsigned int cloud_VAO, cloud_VBO;
 
 	/*
 	* float g_death_y; // y where you die

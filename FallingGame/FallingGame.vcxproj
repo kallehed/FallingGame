@@ -171,6 +171,8 @@
     <Text Include="Todo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="f\shaders\cloud.frag" />
+    <None Include="f\shaders\cloud.vert" />
     <None Include="f\shaders\image.frag" />
     <None Include="f\shaders\image.vert" />
     <None Include="f\shaders\rectangle.frag" />

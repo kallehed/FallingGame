@@ -15,6 +15,6 @@ public:
 	TEX::_ tex;
 
 protected:
-	void init(Game& g);
+	void init(Game& g); // called when cloud should reposition, change image
 };
 
