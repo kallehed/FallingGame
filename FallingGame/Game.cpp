@@ -55,6 +55,15 @@ void Game::start()
 				}
 			}
 		}
+
+		// delete coin particles that are bad
+		for (int i = (int)coin_particles.size() - 1; i >= 0; --i) {
+			auto& e = coin_particles[i];
+			if (timer - e.start_time > 4.f) {
+				coin_particles.erase(coin_particles.begin() + i);
+			}
+		}
+
 		// collision between coins and player
 		{
 			for (int i = (int)coins.size() - 1; i >= 0; --i) {
@@ -62,7 +71,7 @@ void Game::start()
 				if (p.r.intersect(e.r)) {
 					std::cout << "COIN \n";
 					if (!e.picked_up) {
-						coin_particles.emplace_back(e.r.x, e.r.y, timer, 0.1f, p.y_vel * 1.2f);
+						coin_particles.emplace_back(e.r.x + e.r.w/2.f, e.r.y + e.r.h/2.f, timer, p.x_vel * 1.2f, p.y_vel * 1.2f);
 					}
 					//coins.erase(coins.begin() + i);
 					e.got_picked_up(*this);

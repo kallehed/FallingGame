@@ -360,7 +360,7 @@ void Drawer::before_draw(Game& g)
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[] = { g.death_y, g.c.y, g.timer };
+		float data[4] = { g.death_y, g.c.y, g.timer, g.l.WIDTH };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 }
