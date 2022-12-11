@@ -20,6 +20,7 @@ void Game::start()
 	while (!l.start_frame() && !quit)
 	{
 		// logic
+		timer += l.dt;
 		death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
 
 		p.logic(*this);
@@ -33,7 +34,7 @@ void Game::start()
 			}
 		}
 		for (auto & e : coins) { e.logic(*this); }
-		for (int i = (int)coins.size() - 1; i >= 0; --i) { // delete bouncers that have gone too high
+		for (int i = (int)coins.size() - 1; i >= 0; --i) { // delete coins that have gone too high
 			if (coins[i].r.y - l.HEIGHT > p.r.y) { // should be removed
 				coins.erase(coins.begin() + i);
 			}
@@ -60,6 +61,9 @@ void Game::start()
 				auto& e = coins[i];
 				if (p.r.intersect(e.r)) {
 					std::cout << "COIN \n";
+					if (!e.picked_up) {
+						coin_particles.emplace_back(e.r.x, e.r.y, timer, 0.1f, p.y_vel * 1.2f);
+					}
 					//coins.erase(coins.begin() + i);
 					e.got_picked_up(*this);
 				}
@@ -87,6 +91,7 @@ void Game::start()
 
 		for (auto& e : clouds) { e.draw(*this); }
 		for (auto& e : coins) { e.draw(*this); }
+		for (auto& e : coin_particles) { e.draw(*this); }
 
 		p.draw(*this);
 		for (auto& e : bouncers) { e.draw(*this); }

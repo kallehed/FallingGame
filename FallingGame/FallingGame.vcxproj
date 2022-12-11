@@ -147,6 +147,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cloud.cpp" />
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="CoinParticle.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="glad.c" />
@@ -160,6 +161,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cloud.h" />
     <ClInclude Include="Coin.h" />
+    <ClInclude Include="CoinParticle.h" />
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Layer.h" />
@@ -173,6 +175,8 @@
   <ItemGroup>
     <None Include="f\shaders\cloud.frag" />
     <None Include="f\shaders\cloud.vert" />
+    <None Include="f\shaders\coin_particle.frag" />
+    <None Include="f\shaders\coin_particle.vert" />
     <None Include="f\shaders\image.frag" />
     <None Include="f\shaders\image.vert" />
     <None Include="f\shaders\rectangle.frag" />

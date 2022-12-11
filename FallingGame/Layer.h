@@ -20,7 +20,6 @@ public:
 	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 
 	float dt = 0.f; // delta time for last frame
-	float timer = 0.f; // total time passed
 	constexpr static float WIDTH = 1.6f; // of SCREEN
 	constexpr static float HEIGHT = 1.0f; // of SCREEN
 private:

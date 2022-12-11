@@ -54,6 +54,9 @@
     <ClCompile Include="Coin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CoinParticle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Layer.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Coin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoinParticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -121,6 +127,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="f\shaders\cloud.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\coin_particle.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\coin_particle.vert">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

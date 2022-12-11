@@ -2,11 +2,13 @@
 
 #include "misc.h"
 
+
 #include <array>
 
 class Layer;
 class Camera;
 class Player;
+class CoinParticle;
 
 class Drawer
 {
@@ -23,6 +25,8 @@ public:
 	void draw_sides(Player& p);
 
 	void draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h);
+
+	void draw_coin_particle(CoinParticle&);
 
 	void before_draw(Game& g);
 
@@ -57,11 +61,16 @@ private:
 	unsigned int cloud_program;
 	unsigned int cloud_VAO, cloud_VBO;
 
+	unsigned int coin_particle_program;
+	unsigned int coin_particle_VAO, coin_particle_VBO;
+	constexpr static int COIN_PARTICLE_FLOATS_IN_ARRAY = 5;
+
 	/*
 	* float g_death_y; // y where you die
 	* float g_cam_y; // canera y
+	* float g_timer; // time since level started
 	*/
-	constexpr static int UBO_GLOBAL_SIZE = 2 * sizeof(float);
+	constexpr static int UBO_GLOBAL_SIZE = 3 * sizeof(float);
 	unsigned int ubo_globals;
 
 public:

@@ -162,6 +162,7 @@ Drawer::Drawer(Game& g)
 		sides_u_offset = glGetUniformLocation(sides_program, "u_offset");
 	}
 
+	// cloud program
 	{
 		cloud_program = g.l.compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
 		glGenVertexArrays(1, &cloud_VAO);
@@ -177,7 +178,31 @@ Drawer::Drawer(Game& g)
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	}
 
-	// uniform buffer object
+	// coin particle program
+	{
+		coin_particle_program = g.l.compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
+		glGenVertexArrays(1, &coin_particle_VAO);
+		glBindVertexArray(coin_particle_VAO);
+
+		float vertices[] = // rectangle for screen
+		{
+			-1.f, -1.f,
+			-1, 1.f,
+			1.f, 1.f,
+			1.f, -1.f
+		};
+
+		glGenBuffers(1, &coin_particle_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, coin_particle_VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	}
+
+	// uniform buffer object: Globals
 	{
 		glGenBuffers(1, &ubo_globals);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
@@ -311,6 +336,21 @@ void Drawer::draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w,
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void Drawer::draw_coin_particle(CoinParticle& c)
+{
+	glUseProgram(coin_particle_program);
+	glBindVertexArray(coin_particle_VAO);
+	
+	float u_pos_and_vel_and_time[COIN_PARTICLE_FLOATS_IN_ARRAY] =
+	{
+		c.start_x, c.start_y, c.x_vel, c.y_vel, c.start_time
+	};
+
+	glUniform1fv(glGetUniformLocation(coin_particle_program, "u_pos_and_vel_and_time"), COIN_PARTICLE_FLOATS_IN_ARRAY, u_pos_and_vel_and_time);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
 void Drawer::before_draw(Game& g)
 {
 	Pos off = g.c.offset();
@@ -320,7 +360,7 @@ void Drawer::before_draw(Game& g)
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[] = { g.death_y, g.c.y };
+		float data[] = { g.death_y, g.c.y, g.timer };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 }
