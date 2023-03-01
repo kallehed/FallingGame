@@ -173,6 +173,8 @@
     <Text Include="Todo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="f\shaders\bird.frag" />
+    <None Include="f\shaders\bird.vert" />
     <None Include="f\shaders\cloud.frag" />
     <None Include="f\shaders\cloud.vert" />
     <None Include="f\shaders\coin_particle.frag" />

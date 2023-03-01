@@ -135,5 +135,11 @@
     <None Include="f\shaders\coin_particle.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="f\shaders\bird.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\bird.frag">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

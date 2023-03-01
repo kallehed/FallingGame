@@ -27,7 +27,7 @@ void main()
         float dif = (g_death_y - g_cam_y + 2.0) - f_screenCoord.y; // difference to colors, but not alpha
         dif *= 0.2f;
 
-        dif = clamp(dif, 0.25, 1.6); // limit value, nnot too black or too bright
+        dif = clamp(dif, 0.25, 1.4); // limit value, nnot too black or too bright
 
         FragColor *= vec4(vec3(dif), 1.f);
     }

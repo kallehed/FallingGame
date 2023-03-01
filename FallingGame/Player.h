@@ -1,6 +1,7 @@
 #pragma once
 
 #include "misc.h"
+#include <cmath>
 
 class Game;
 
@@ -17,6 +18,7 @@ public:
 	float x_vel = 0.f;
 	float bounce_x_vel = 0.f;
 	float rotation = 0.f;
+	float time_since_coin = pow(10.f,10.f);
 private:
 	constexpr static float WIDTH = 0.23f;
 	constexpr static float MAX_Y_VEL = 7.f;

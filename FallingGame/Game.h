@@ -12,8 +12,6 @@
 #include "Coin.h"
 #include "CoinParticle.h"
 
-
-
 class Game
 {
 public:

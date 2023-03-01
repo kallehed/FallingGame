@@ -50,7 +50,6 @@ void Game::start()
 						p.bounce_x_vel = std::min( 1.f,-0.5f*p.y_vel) * 10.f * p.r.x_dist(e.h);
 						p.y_vel = std::clamp(-0.5f*p.y_vel, 0.75f, 1.5f);
 						e.bounced_on(p.bounce_x_vel);
-						
 					}
 				}
 			}
@@ -71,7 +70,10 @@ void Game::start()
 				if (p.r.intersect(e.r)) {
 					std::cout << "COIN \n";
 					if (!e.picked_up) {
-						coin_particles.emplace_back(e.r.x + e.r.w/2.f, e.r.y + e.r.h/2.f, timer, p.x_vel * 1.2f, p.y_vel * 1.2f);
+						// don't spawn the particle
+						//coin_particles.emplace_back(e.r.x + e.r.w/2.f, e.r.y + e.r.h/2.f, timer, p.x_vel * 1.2f, p.y_vel * 1.2f);
+						// make bird shiny
+						p.time_since_coin = 0.f;
 					}
 					//coins.erase(coins.begin() + i);
 					e.got_picked_up(*this);

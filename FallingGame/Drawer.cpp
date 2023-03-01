@@ -202,6 +202,19 @@ Drawer::Drawer(Game& g)
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	}
 
+	// bird program
+	{
+		bird_program = g.l.compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
+		glGenVertexArrays(1, &bird_VAO);
+		glBindVertexArray(bird_VAO);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		m_bird_u_offset = glGetUniformLocation(bird_program, "u_offset");
+		m_bird_u_rotation_width_height = glGetUniformLocation(bird_program, "u_rotation_width_height");
+		m_bird_u_time_since_coin = glGetUniformLocation(bird_program, "u_time_since_coin");
+	}
+
 	// uniform buffer object: Globals
 	{
 		glGenBuffers(1, &ubo_globals);
@@ -347,6 +360,25 @@ void Drawer::draw_coin_particle(CoinParticle& c)
 	};
 
 	glUniform1fv(glGetUniformLocation(coin_particle_program, "u_pos_and_vel_and_time"), COIN_PARTICLE_FLOATS_IN_ARRAY, u_pos_and_vel_and_time);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin)
+{
+	glUseProgram(bird_program);
+	glBindVertexArray(bird_VAO);
+
+	glBindTexture(GL_TEXTURE_2D, texs[bird_tex]);
+
+	glUniform2f(m_bird_u_offset, x, y);
+	glUniform3f(m_bird_u_rotation_width_height, rotation, width, height);
+	glUniform1f(m_bird_u_time_since_coin, time_since_coin);
+
+	{
+		Pos global_offset = c.offset();
+		glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
+	}
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

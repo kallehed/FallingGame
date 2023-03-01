@@ -28,7 +28,7 @@ void main()
     
     float alpha = 0.0;
 
-    for (int i = 0; i < 40; ++i) {
+    for (int i = 0; i < 5; ++i) {
         vec2 new_pos = start_pos;
         float t1 = time_passed, t2 = t1*t1 / 2.0, t3 = t2*t1 / 3.0; 
         new_pos.y += vel.y*t1 + y_acc*t2 + y_jerk*t3;

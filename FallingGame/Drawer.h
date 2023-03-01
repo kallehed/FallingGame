@@ -2,7 +2,6 @@
 
 #include "misc.h"
 
-
 #include <array>
 
 class Layer;
@@ -27,6 +26,8 @@ public:
 	void draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h);
 
 	void draw_coin_particle(CoinParticle&);
+
+	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin);
 
 	void before_draw(Game& g);
 
@@ -64,6 +65,10 @@ private:
 	unsigned int coin_particle_program;
 	unsigned int coin_particle_VAO, coin_particle_VBO;
 	constexpr static int COIN_PARTICLE_FLOATS_IN_ARRAY = 5;
+
+	unsigned int bird_program;
+	unsigned int bird_VAO;
+	int m_bird_u_offset, m_bird_u_rotation_width_height, m_bird_u_time_since_coin;
 
 	/*
 	* float g_death_y; // y where you die

@@ -56,6 +56,11 @@ void Player::logic(Game& g)
 			rotation -= tau;
 		}
 	}
+
+	// animation details: time since coin,
+	{
+		time_since_coin += g.l.dt;
+	}
 }
 
 void Player::draw(Game& g)
@@ -68,7 +73,7 @@ void Player::draw(Game& g)
 		w /= std::max(1.f, -((y_vel - 10.f) / 10.f));
 		texture = TEX::bird;
 	}
-	g.d.draw_image(g.c, texture, r.x + 0.045f, r.y + 0.135f, w, WIDTH * 1.16386555f, rotation);
+	//g.d.draw_image(g.c, texture, r.x + 0.045f, r.y + 0.135f, w, WIDTH * 1.16386555f, rotation);
 	r.draw(g.d, { 1.f, 0.f, 0.1f, 0.4f });
-
+	g.d.draw_bird(g.c, texture, r.x + 0.045f, r.y + 0.135f, rotation, w, WIDTH * 1.16386555f, time_since_coin);
 }
