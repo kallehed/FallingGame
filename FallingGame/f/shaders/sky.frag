@@ -14,7 +14,6 @@ layout(std140, binding = 0) uniform Globals
     float g_w;
 };
 
-
 void main()
 {
     FragColor = texture(sky_texture, f_texCoord);

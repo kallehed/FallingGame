@@ -168,14 +168,22 @@ Drawer::Drawer(Game& g)
 		glGenVertexArrays(1, &cloud_VAO);
 		glBindVertexArray(cloud_VAO);
 
-		glGenBuffers(1, &cloud_VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, nullptr, GL_DYNAMIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glGenBuffers(1, &cloud_VBO_pos);
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_pos);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * FLOATS_PER_CLOUD_POS * Game::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
+
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glVertexAttribDivisor(0, 1);
+
+		glEnableVertexAttribArray(1);
+		glGenBuffers(1, &cloud_VBO_tex_z);
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_tex_z);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)* TEX_AND_Z_FLOATS* Game::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glVertexAttribDivisor(1, 1);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	}
 
 	// coin particle program
@@ -324,27 +332,73 @@ void Drawer::draw_sides(Player& p)
 	glDrawElements(GL_TRIANGLES, 120, GL_UNSIGNED_INT, 0);
 }
 
+void Drawer::draw_clouds(Game& g)
+{
+	glUseProgram(cloud_program);
+	glBindVertexArray(cloud_VAO);
+
+	// bind cloud textures
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_1]);
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_2]);
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_3]);
+	glActiveTexture(GL_TEXTURE0 + 3);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_4]);
+
+	glActiveTexture(GL_TEXTURE0); // unbind
+
+	// cloud_VBO_pos and cloud_VBO_tex_z initialization
+	{
+		float positions[Game::NR_CLOUDS * FLOATS_PER_CLOUD_POS];
+		
+		float tex_z_values[Game::NR_CLOUDS * TEX_AND_Z_FLOATS];
+		int i_t_z = 0, i_pos = 0;
+		for (auto& e : g.m_clouds) {
+			float w = e.w, h = e.h;
+			float x = e.x;
+			float y = e.y;
+			tex_z_values[i_t_z++] = (float)(e.tex - TEX::cloud_1);
+			tex_z_values[i_t_z++] = e.z;
+
+			positions[i_pos++] = x;
+			positions[i_pos++] = w;
+			positions[i_pos++] = y;
+			positions[i_pos++] = h;
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_pos);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(positions), positions);
+
+		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_tex_z);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(tex_z_values), tex_z_values);
+	}
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, Game::NR_CLOUDS);
+}
+
 void Drawer::draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h)
 {
 	glUseProgram(cloud_program);
 	glBindVertexArray(cloud_VAO);
 
-	glBindTexture(GL_TEXTURE_2D, texs[tex]); 
-
+	GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS; // total textures allowed to use at the same time in shader
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, texs[tex]);
+	
+	glActiveTexture(GL_TEXTURE0);
 	{
-
 		float vertices[] =
 		{
-			x, y, 0.f, 1.f,
-			x, y + h, 0.f, 0.f,
-			x + w, y + h, 1.f, 0.f,
-			x + w, y, 1.f, 1.f
+			x, y, 
+			x, y + h,
+			x + w, y + h,
+			x + w, y,	
 		};
 
-		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
+		//glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 	}
-	glUniform1f(glGetUniformLocation(cloud_program, "u_z"), z);
+	//glUniform1f(m_cloud_u_z, z);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -392,7 +446,7 @@ void Drawer::before_draw(Game& g)
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[4] = { g.death_y, g.c.y, g.timer, g.l.WIDTH };
+		float data[4] = { g.m_death_y, g.c.y, g.m_timer, g.l.WIDTH };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 }

@@ -23,6 +23,8 @@ public:
 
 	void draw_sides(Player& p);
 
+	void draw_clouds(Game& g);
+
 	void draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h);
 
 	void draw_coin_particle(CoinParticle&);
@@ -60,7 +62,9 @@ private:
 	float sides_height_per_image;
 
 	unsigned int cloud_program;
-	unsigned int cloud_VAO, cloud_VBO;
+	static constexpr int FLOATS_PER_CLOUD_POS = 4;
+	static constexpr int TEX_AND_Z_FLOATS = 2;
+	unsigned int cloud_VAO, cloud_VBO_pos, cloud_VBO_tex_z;
 
 	unsigned int coin_particle_program;
 	unsigned int coin_particle_VAO, coin_particle_VBO;

@@ -14,8 +14,8 @@ public:
 	bool start_frame(); // true -> end program
 	void end_frame();
 
-	bool key_down(SDL_Scancode key); // returns whether key is currently down
-	bool key_just_down(SDL_Scancode key);
+	inline bool key_down(SDL_Scancode key); // returns whether key is currently down
+	inline bool key_just_down(SDL_Scancode key);
 
 	unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 

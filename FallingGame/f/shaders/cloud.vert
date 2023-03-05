@@ -1,8 +1,17 @@
 #version 430 core
-layout (location = 0) in vec4 aPos_and_Tex;
+layout (location = 0) in vec4 aX_W_Y_H;
+layout (location = 1) in vec2 aTex_Z;
 
 out vec2 f_texCoord;
 out vec2 f_screenCoord;
+out float f_texture;
+
+vec2 texPos[4] = {
+	{0.f, 1.f},
+    {0.f, 0.f},
+	{1.f, 0.f},
+	{1.f, 1.f},
+}; 
 
 layout(std140, binding = 0) uniform Globals
 {
@@ -14,9 +23,13 @@ layout(std140, binding = 0) uniform Globals
 
 void main()
 {
-    vec2 pos = aPos_and_Tex.xy;
-    gl_Position = vec4(pos.x/g_w, pos.y, 0.0, 1.0);
+    float pos_x = aX_W_Y_H.x + aX_W_Y_H.y * float(gl_VertexID > 1);
+    float pos_y = aX_W_Y_H.z + aX_W_Y_H.w * float(gl_VertexID == 1 || gl_VertexID == 2);
 
-    f_texCoord = aPos_and_Tex.zw;
+    gl_Position = vec4(pos_x/g_w, pos_y, 0.0, 1.0);
+    //gl_Position = vec4(gl_InstanceID * 0.1 + gl_VertexID*0.1, gl_VertexID*0.1, 0.0, 1.0);
+
+    f_texCoord = texPos[gl_VertexID];
     f_screenCoord = gl_Position.xy;
+    f_texture = aTex_Z.x;
 }

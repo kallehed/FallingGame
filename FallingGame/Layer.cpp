@@ -114,7 +114,8 @@ Layer::~Layer()
 	SDL_Quit();
 }
 
-bool Layer::start_frame()
+// true -> end program
+bool Layer::start_frame() 
 {
 	m_start = SDL_GetPerformanceCounter();
 
@@ -158,10 +159,11 @@ bool Layer::start_frame()
 		}
 	}
 
-	if (key_just_down(SDL_SCANCODE_DELETE)) {
+	if (key_just_down(SDL_SCANCODE_DELETE)) { // DELETE- escape hatch
 		return true;
 	}
-	if (key_just_down(SDL_SCANCODE_RETURN)) {
+	if (key_just_down(SDL_SCANCODE_RETURN)) { // Switch fullscreen
+		
 		if (!m_fullscreen) {
 			SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
@@ -182,6 +184,18 @@ bool Layer::start_frame()
 			SDL_GetWindowOpacity(m_window, &o);
 			SDL_SetWindowOpacity(m_window, o + op_change);
 		}
+		
+	}
+	{
+		if (key_just_down(SDL_SCANCODE_3))
+		{
+			auto str = "\x0a\x0a\x57\x4f\x57\x20\x21\x20\x59\x6f\x75\x20\x6a\x75\x73\x74\x20\x72\x65\x63\x65\x69\x76\x65\x64\x20\x61\x6e\x20\x45\x72\x72\x6f\x72\x21\x20\x20\xf0\x9f\x98\x84\x20\xf0\x9f\x98\x81\x20\xf0\x9f\x98\x86\x20\xf0\x9f\x98\x85\x20\xf0\x9f\x98\x82\x20\xf0\x9f\xa4\xa3\x20\xf0\x9f\xa5\xb2";
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "erry", str, m_window);
+
+		}
+		if (key_just_down(SDL_SCANCODE_4)) {
+
+		}
 	}
 	return false;
 }
@@ -191,6 +205,7 @@ void Layer::end_frame()
 	SDL_GL_SwapWindow(m_window);
 	Uint64 end = SDL_GetPerformanceCounter();
 
+	// delay 
 	float milliSecElapsed = ((end - m_start) / (float)SDL_GetPerformanceFrequency()) * 1000.f;
 	
 	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / MAX_FPS - milliSecElapsed));
@@ -199,7 +214,6 @@ void Layer::end_frame()
 	
 	SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
 	SDL_Delay(delay);
-	
 }
 
 bool Layer::key_down(SDL_Scancode key)
@@ -216,19 +230,23 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 {
 	unsigned int shader = glCreateShader(type);
 
-	// load from file
-	char* shaderSource = new char[100000];
 	{
-		std::ifstream f(path);
-		if (f) {
-			f.getline(shaderSource, 100000, '\0');
+		// load from file
+		std::string shaderSource;
+		{
+			std::ifstream f(path);
+			if (f) {
+				//f.getline(shaderSource, 100000, '\0');
+				std::getline(f, shaderSource, '\0');
+			}
+			else {
+				std::cout << "ERROR::FILE_NOT_FOUND: " << path << "\n";
+			}
 		}
-		else {
-			std::cout << "ERROR::FILE_NOT_FOUND: " << path << "\n";
-		}
+	
+		const char* str = shaderSource.c_str();
+		glShaderSource(shader, 1, &str, NULL);
 	}
-
-	glShaderSource(shader, 1, (&shaderSource), NULL);
 	glCompileShader(shader);
 
 	int success;
@@ -240,7 +258,6 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		std::cout << error_msg << infoLog << std::endl;
 	}
-	delete[] shaderSource;
 	return shader;
 }
 

@@ -5,6 +5,7 @@
 class Cloud
 {
 public:
+	// constructs from depth, so to get right size
 	void construct(Game& g, float depth);
 	void logic(Game& g);
 	void draw(Game& g);
@@ -15,6 +16,7 @@ public:
 	TEX::_ tex;
 
 protected:
-	void init(Game& g); // called when cloud should reposition, change image
+	// called when cloud should reposition, change image
+	void init(Game& g); 
 };
 

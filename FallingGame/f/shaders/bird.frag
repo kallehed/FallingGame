@@ -24,7 +24,7 @@ void main()
 
     // boost effect when picking up coins
     {
-        float time = u_time_since_coin * 5 - 2.5*(1-f_texCoord.y);
+        float time = u_time_since_coin * 7.0 - 2.5*(1-f_texCoord.y);
         //time *= 2;
         float radians = time + M_PI*0.20;
         float change = sin(radians) * 0.66 * float(radians < 2* M_PI);

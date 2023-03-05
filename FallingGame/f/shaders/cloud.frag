@@ -4,7 +4,9 @@ out vec4 FragColor;
 
 in vec2 f_texCoord;
 in vec2 f_screenCoord;
-uniform sampler2D cloud_texture;
+in float f_texture;
+
+layout(binding = 0) uniform sampler2D cloudTexs[4];
 
 layout(std140, binding = 0) uniform Globals
 {
@@ -14,13 +16,11 @@ layout(std140, binding = 0) uniform Globals
     float g_w;
 };
 
-uniform float u_z;
-
 void main()
 {
-    FragColor = texture(cloud_texture, f_texCoord);
-    
-    // blur effect
+    FragColor = texture(cloudTexs[int(f_texture)], f_texCoord);
+    //FragColor = vec4(0,0,0,1);
+    /*// blur effect
     {
         float c = 0.01 + 0.075*(u_z - 0.3);
         FragColor += texture(cloud_texture, f_texCoord + vec2(c, 0.0));
@@ -33,7 +33,7 @@ void main()
         FragColor += texture(cloud_texture, f_texCoord + vec2(0.0, -c));
         FragColor *= 1.0/9.0;
         FragColor *= float(FragColor.a > 0.5);
-    }
+    }*/
 
     {
         // make dimer when closer to death

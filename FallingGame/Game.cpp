@@ -5,8 +5,9 @@
 
 Game::Game() : l(), d(*this), p()
 {
-	for (int i = 0; i < clouds.size(); ++i) {
-		clouds[i].construct(*this, (float)((int)clouds.size() - i) / (float)clouds.size());
+	srand(336);
+	for (int i = 0; i < m_clouds.size(); ++i) {
+		m_clouds[i].construct(*this, (float)((int)m_clouds.size() - i) / (float)m_clouds.size());
 	}
 }
 
@@ -20,30 +21,34 @@ void Game::start()
 	while (!l.start_frame() && !quit)
 	{
 		// logic
-		timer += l.dt;
-		death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
+		m_timer += l.dt;
 
+		// increase the more far away the player is from the barrier
+		//death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
+
+		// increase speed of death_y over time
+		m_death_y -= 1.4f * l.dt * std::max(1.f, std::log(m_timer/10.f));
 		p.logic(*this);
 		
-		for (auto& e : bouncers) {
+		for (auto& e : m_bouncers) {
 			e.logic(*this);
 		}
-		for (int i = (int)bouncers.size() - 1; i >= 0; --i) { // delete bouncers that have gone too high
-			if (bouncers[i].h.y  - 1.f * l.HEIGHT > p.r.y) { // should be removed
-				bouncers.erase(bouncers.begin() + i);
+		for (int i = (int)m_bouncers.size() - 1; i >= 0; --i) { // delete bouncers that have gone too high
+			if (m_bouncers[i].h.y  - 1.f * l.HEIGHT > p.r.y) { // should be removed
+				m_bouncers.erase(m_bouncers.begin() + i);
 			}
 		}
-		for (auto & e : coins) { e.logic(*this); }
-		for (int i = (int)coins.size() - 1; i >= 0; --i) { // delete coins that have gone too high
-			if (coins[i].r.y - l.HEIGHT > p.r.y) { // should be removed
-				coins.erase(coins.begin() + i);
+		for (auto & e : m_coins) { e.logic(*this); }
+		for (int i = (int)m_coins.size() - 1; i >= 0; --i) { // delete coins that have gone too high
+			if (m_coins[i].r.y - l.HEIGHT > p.r.y) { // should be removed
+				m_coins.erase(m_coins.begin() + i);
 			}
 		}
-		for (auto& e : clouds) { e.logic(*this); }
+		for (auto& e : m_clouds) { e.logic(*this); }
 
 		// collision between bouncers and player
 		{
-			for (auto& e : bouncers) {
+			for (auto& e : m_bouncers) {
 				if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x+e.h.w && p.r.x + p.r.w > e.h.x) {
 					if (p.y_vel < 0.0f) {
 						std::cout << "bounce << " << p.y_vel << "\n";
@@ -56,17 +61,17 @@ void Game::start()
 		}
 
 		// delete coin particles that are bad
-		for (int i = (int)coin_particles.size() - 1; i >= 0; --i) {
-			auto& e = coin_particles[i];
-			if (timer - e.start_time > 4.f) {
-				coin_particles.erase(coin_particles.begin() + i);
+		for (int i = (int)m_coin_particles.size() - 1; i >= 0; --i) {
+			auto& e = m_coin_particles[i];
+			if (m_timer - e.start_time > 4.f) {
+				m_coin_particles.erase(m_coin_particles.begin() + i);
 			}
 		}
 
 		// collision between coins and player
 		{
-			for (int i = (int)coins.size() - 1; i >= 0; --i) {
-				auto& e = coins[i];
+			for (int i = (int)m_coins.size() - 1; i >= 0; --i) {
+				auto& e = m_coins[i];
 				if (p.r.intersect(e.r)) {
 					std::cout << "COIN \n";
 					if (!e.picked_up) {
@@ -83,13 +88,13 @@ void Game::start()
 
 		// game logic without place yet
 		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
-			bouncers.emplace_back(G_WIDTH, next_bouncer_y);
+			m_bouncers.emplace_back(G_WIDTH, next_bouncer_y);
 			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()));
 		}
 
 		while (p.r.y - l.HEIGHT*2.f <= next_coin_y)
 		{
-			coins.emplace_back(*this, next_coin_y);
+			m_coins.emplace_back(*this, next_coin_y);
 			next_coin_y -= (2.f * l.HEIGHT);
 		}
 
@@ -100,17 +105,19 @@ void Game::start()
 
 		d.draw_sky(*this);
 
-		for (auto& e : clouds) { e.draw(*this); }
-		for (auto& e : coins) { e.draw(*this); }
-		for (auto& e : coin_particles) { e.draw(*this); }
+		//for (auto& e : m_clouds) { e.draw(*this); }
+		this->d.draw_clouds(*this);
+		for (auto& e : m_coins) { e.draw(*this); }
+		for (auto& e : m_coin_particles) { e.draw(*this); }
 
 		p.draw(*this);
-		for (auto& e : bouncers) { e.draw(*this); }
+		for (auto& e : m_bouncers) { e.draw(*this); }
 		// side background
 		d.draw_sides(p);
 
+		// draw death storm at death_y
 		{
-			d.draw_image(c, TEX::storm, 0.f, death_y + l.HEIGHT, l.WIDTH * 2.f, l.HEIGHT * 2.f, 0.f);
+			d.draw_image(c, TEX::storm, 0.f, m_death_y + l.HEIGHT, l.WIDTH * 2.f, l.HEIGHT * 2.f, 0.f);
 		}
 		//d.draw_image(0, 0, 0, 0);
 		//stuff
