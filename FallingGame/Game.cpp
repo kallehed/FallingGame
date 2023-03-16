@@ -5,7 +5,7 @@
 
 Game::Game() : l(), d(*this), p()
 {
-	srand(336);
+	srand(336); //TODO add true randomness
 	for (int i = 0; i < m_clouds.size(); ++i) {
 		m_clouds[i].construct(*this, (float)((int)m_clouds.size() - i) / (float)m_clouds.size());
 	}
@@ -27,7 +27,7 @@ void Game::start()
 		//death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
 
 		// increase speed of death_y over time
-		m_death_y -= 1.4f * l.dt * std::max(1.f, std::log(m_timer/10.f));
+		//m_death_y -= 1.01f * l.dt * std::max(1.f, std::log(m_timer/10.f));
 		p.logic(*this);
 		
 		for (auto& e : m_bouncers) {
@@ -119,6 +119,8 @@ void Game::start()
 		{
 			d.draw_image(c, TEX::storm, 0.f, m_death_y + l.HEIGHT, l.WIDTH * 2.f, l.HEIGHT * 2.f, 0.f);
 		}
+		d.draw_text("This is! A ve@Ry imp^(*%ortant! Text!, So extremely important that it.", Color{ 0,0,0,1 }, -1.5f, 0, 0.001);
+
 		//d.draw_image(0, 0, 0, 0);
 		//stuff
 		l.end_frame();

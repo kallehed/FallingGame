@@ -7,8 +7,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H  
+
 Drawer::Drawer(Game& g)
 {
+
 	// standard rect EBO
 	{
 		unsigned int indices[] = {
@@ -22,6 +26,167 @@ Drawer::Drawer(Game& g)
 		glGenBuffers(1, &standard_rect_EBO);
 		glBindBuffer(GL_ARRAY_BUFFER, standard_rect_EBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	}
+
+	// font stuff with freetype
+
+	{
+		FT_Library ft;
+		if (FT_Init_FreeType(&ft)) {
+			std::cout << "ERROR::FREETYPE: Failed to load FreeType\n";
+			std::cin.get();
+		}
+
+		FT_Face face;
+		if (FT_New_Face(ft, "f/fonts/arial.ttf", 0, &face))
+		{
+			std::cout << "ERROR::FREETYPE: Font failed to load arial\n";
+			std::cin.get();
+		}
+		// set width to 0 to dynamically calculate it
+		FT_Set_Pixel_Sizes(face, 0, 48);
+
+		/*
+		* How to render text efficiently
+		* The easy method is having a seperate texture for each character, 
+		* and then issuing a draw call for each one of them,
+		* where you specify the texture in question and it's rectangular information
+		* precisely. Which is very costly.
+		* Couldn't you just store all the characters in one big image?
+		* Then in an array indexed by the character, you should store where all the
+		* characters are exactly in 2D space, and how big they are.
+		* Let's say you want to render the character A. You pass the shader a uniform
+		* containing the starting position. In the vertex parameters you give it the character.
+		* It indexes into the array buffer stored into the GPU containing the correct offsets
+		* for characters. There it gets the x, y, w and h of the image, which it uses to
+		* successfully query the texture in question and render a part of it. Let's now say we
+		* want to do this for a larger amount of characters at a time; We shall then use instanced
+		* rendering and give each instance it's own letter, but we also have to give it it's
+		* offset compared to the previous characters. They can't all be drawn onto the same
+		* place. So the CPU should first examine the text in question, query all the advancements
+		* of each character and compute where they all should be offset to. Load all that into
+		* an array containing all offsets. Then instancing will take care of moving through that
+		* array one time per instance. Thus, all the vertices in a single instance can use it's
+		* GL_VertexID to compute it's offset as well from the starting position of the character
+		* because they all share the offset, width and height. The instanced array should also
+		* contain the character in question, because there will be static memory storing the 
+		* texture offsets for all the characters in an SSBO, which the fragment shader will index 
+		* into, recieving the correct 4 coordintes in some way. 
+		*/
+
+		unsigned int width = 0, height = 0;
+
+		static constexpr int PIX_OFFSET = 10;
+
+		for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++)
+		{
+			// load character glyph 
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
+				continue;
+			}
+			// generate texture
+			//glTexImage2D(GL_TEXTURE_2D,0, GL_RED, face->glyph->bitmap.width,
+			//	face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer
+			//);
+			width += face->glyph->bitmap.width + PIX_OFFSET;
+			height = std::max(height, face->glyph->bitmap.rows);
+			// now store character for later use
+			Character character = {
+				face->glyph->bitmap.width, face->glyph->bitmap.rows,
+				face->glyph->bitmap_left, face->glyph->bitmap_top,
+				face->glyph->advance.x
+			};
+			m_characters[c] = character;
+		}
+
+		// generate all standard ascii characters
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+
+		// create texture for use
+		glGenTextures(1, &m_main_font_tex);
+		glBindTexture(GL_TEXTURE_2D, m_main_font_tex); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+		int x = PIX_OFFSET;
+
+		// exclude loading space by starting at 33.
+		for (unsigned char c = CHARACTERS_START_AT + 1; c < CHARACTERS; c++)
+		{
+			// load character glyph 
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
+				continue;
+			}
+
+			// generate texture
+		    glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0,
+				face->glyph->bitmap.width, face->glyph->bitmap.rows,
+				GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+			x += face->glyph->bitmap.width + PIX_OFFSET;
+			
+		}
+		
+		
+
+		FT_Done_Face(face);
+		FT_Done_FreeType(ft);
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // turn back on?
+
+		
+		/////////////////  OPENGL buffer stuff
+
+		m_text_program = g.l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
+		glUseProgram(m_text_program);
+
+		glGenVertexArrays(1, &m_text_VAO);
+		glBindVertexArray(m_text_VAO);
+
+		glGenBuffers(1, &m_text_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_text_VBO);
+		glBufferData(GL_ARRAY_BUFFER, TEXT_ATTRIBUTE_BYTES, NULL, GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, TEXT_ATTRIBUTES, GL_FLOAT, GL_FALSE, TEXT_BYTES_PER, (void*)0);
+		glVertexAttribDivisor(0, 1); // one per instance
+
+		m_text_u_offset_scale = glGetUniformLocation(m_text_program, "u_offset_scale");
+
+		{
+			// make it the correct amount of data
+			float data[CHARACTERS][U_TEXT_ATTRIBUTES_PER]; // store the width,height,bearingx,bearingy
+			for (int i = CHARACTERS_START_AT; i < CHARACTERS; ++i) {
+				data[i][0] = m_characters[i].width; // width
+				data[i][1] = m_characters[i].height; // height
+				data[i][2] = m_characters[i].bearing_x; // bearing X
+				data[i][3] = m_characters[i].bearing_y; // bearing Y
+			}
+
+			glUniform4fv(glGetUniformLocation(m_text_program, "u_text"), 128, (float*)data);
+		}
+
+		{
+			float char_x_offset_data[CHARACTERS];
+			float x = 0.f;
+			for (int i = CHARACTERS_START_AT; i < CHARACTERS; ++i) {
+				char_x_offset_data[i] = x;
+				x += m_characters[i].width + PIX_OFFSET;
+			}
+
+			glUniform1fv(glGetUniformLocation(m_text_program, "u_char_x_offsets"), 128, (float*)char_x_offset_data);
+		}
 	}
 
 	// rectangle shader
@@ -135,7 +300,7 @@ Drawer::Drawer(Game& g)
 		constexpr float left = -g.l.WIDTH;
 		constexpr float right = -g.G_WIDTH;
 
-		constexpr float vertices[] = {
+		static constexpr float vertices[] = {
 			// position    texture coordinates
 
 			// left side of screen
@@ -234,31 +399,83 @@ Drawer::Drawer(Game& g)
 	}
 
 	// load textures
-	constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
-	{ {
-		{"f/images/bird.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/bird_closed.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/mushroom_cap.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/mushroom_stem.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/side_background.png", GL_CLAMP_TO_BORDER, GL_REPEAT },
-		{"f/images/vines.png", GL_REPEAT, GL_REPEAT },
-		{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
-		{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
-		{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
-		{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
-		{"f/images/storm.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-		{"f/images/coin_blurred.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
-	} };
+	{
+		
+		static constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
+		{ {
+			{"f/images/bird.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/bird_closed.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/mushroom_cap.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/mushroom_stem.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/side_background.png", GL_CLAMP_TO_BORDER, GL_REPEAT },
+			{"f/images/vines.png", GL_REPEAT, GL_REPEAT },
+			{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/storm.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
+			{"f/images/coin_blurred.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
+		} };
 
-	for (int i = 0; i < TEX::TOTAL; ++i) {
-		auto& d = data[i];
-		tex_sizes[i] = load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
+		for (int i = 0; i < TEX::TOTAL; ++i) {
+			auto& d = data[i];
+			tex_sizes[i] = load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
+		}
 	}
+	
+	// mess with a texture2D
+	{
+		unsigned char data[100][100][4];
+		for (int i = 0; i < 100; ++i) {
+			for (int j = 0; j < 100; ++j) {
+				data[i][j][0] = 255*sin(i/20.0);
+				data[i][j][1] = 0;
+				data[i][j][2] = 0;
+				data[i][j][3] = 255;
+			}
+		}
+
+		for (int i = 0; i < 3; ++i) {
+			glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
+			glTexSubImage2D(GL_TEXTURE_2D, i, 100, 100, 100, 100, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		}
+	}
+}
+
+void Drawer::draw_text(const char* text, Color color, float x, float y, float scale)
+{
+	glUseProgram(m_text_program);
+	glBindVertexArray(m_text_VAO);
+
+	glBindTexture(GL_TEXTURE_2D, m_main_font_tex);
+
+	float data[TEXT_MAX_CHARS_RENDER][TEXT_ATTRIBUTES];
+	float char_x_offset = 0;
+	// i will be the total amount of elements later
+	int i = 0;
+	for (; text[i] != '\0'; ++i) {
+		// char
+		assert(i < TEXT_MAX_CHARS_RENDER);
+		char c = text[i];
+		data[i][0] = (float)c;
+		data[i][1] = (float)char_x_offset;
+
+		//advance is number of 1/64 pixels for some reason
+		char_x_offset += (m_characters[c].advance >> 6) * scale; //bitshift by 6 == * 2^6
+	}
+	const int nr_of_chars = i;
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_text_VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, nr_of_chars * TEXT_BYTES_PER, data);
+
+	glUniform3f(m_text_u_offset_scale, x, y, scale);
+
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, nr_of_chars);
 }
 
 void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
