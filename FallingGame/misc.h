@@ -1,6 +1,8 @@
 #pragma once
 
 constexpr bool DRAW_HB = false; // draw hitboxes?
+// R for hot reload.
+constexpr bool DEV_TOOLS = true; // allow development stuff
 
 class Game;
 class Drawer;

@@ -22,6 +22,8 @@ public:
 	float dt = 0.f; // delta time for last frame
 	constexpr static float WIDTH = 1.6f; // of SCREEN
 	constexpr static float HEIGHT = 1.0f; // of SCREEN
+
+
 private:
 	unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
 

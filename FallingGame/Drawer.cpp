@@ -12,7 +12,6 @@
 
 Drawer::Drawer(Game& g)
 {
-
 	// standard rect EBO
 	{
 		unsigned int indices[] = {
@@ -28,8 +27,11 @@ Drawer::Drawer(Game& g)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	}
 
-	// font stuff with freetype
+	// load all programs
+	this->load_all_programs(g.l);
+	
 
+	// font stuff with freetype
 	{
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft)) {
@@ -76,20 +78,17 @@ Drawer::Drawer(Game& g)
 
 		unsigned int width = 0, height = 0;
 
-		static constexpr int PIX_OFFSET = 10;
+		// the offset between characters in the texture
+		static constexpr int PIX_OFFSET = 1;
 
 		for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++)
 		{
-			// load character glyph 
+			// load character glyph   
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 			{
 				std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
 				continue;
 			}
-			// generate texture
-			//glTexImage2D(GL_TEXTURE_2D,0, GL_RED, face->glyph->bitmap.width,
-			//	face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer
-			//);
 			width += face->glyph->bitmap.width + PIX_OFFSET;
 			height = std::max(height, face->glyph->bitmap.rows);
 			// now store character for later use
@@ -107,8 +106,6 @@ Drawer::Drawer(Game& g)
 		// create texture for use
 		glGenTextures(1, &m_main_font_tex);
 		glBindTexture(GL_TEXTURE_2D, m_main_font_tex); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -168,13 +165,13 @@ Drawer::Drawer(Game& g)
 			// make it the correct amount of data
 			float data[CHARACTERS][U_TEXT_ATTRIBUTES_PER]; // store the width,height,bearingx,bearingy
 			for (int i = CHARACTERS_START_AT; i < CHARACTERS; ++i) {
-				data[i][0] = m_characters[i].width; // width
-				data[i][1] = m_characters[i].height; // height
-				data[i][2] = m_characters[i].bearing_x; // bearing X
-				data[i][3] = m_characters[i].bearing_y; // bearing Y
+				data[i][0] = (float)m_characters[i].width; // width
+				data[i][1] = (float)m_characters[i].height; // height
+				data[i][2] = (float)m_characters[i].bearing_x; // bearing X
+				data[i][3] = (float)m_characters[i].bearing_y; // bearing Y
 			}
 
-			glUniform4fv(glGetUniformLocation(m_text_program, "u_text"), 128, (float*)data);
+			glUniform4fv(glGetUniformLocation(m_text_program, "u_text"), CHARACTERS, (float*)data);
 		}
 
 		{
@@ -185,14 +182,16 @@ Drawer::Drawer(Game& g)
 				x += m_characters[i].width + PIX_OFFSET;
 			}
 
-			glUniform1fv(glGetUniformLocation(m_text_program, "u_char_x_offsets"), 128, (float*)char_x_offset_data);
+			glUniform1fv(glGetUniformLocation(m_text_program, "u_char_x_offsets"), CHARACTERS, (float*)char_x_offset_data);
+		}
+
+		{
+			m_text_u_color = glGetUniformLocation(m_text_program, "u_color");
 		}
 	}
 
 	// rectangle shader
 	{
-		rectangle_program = g.l.compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
-
 		float vertices[] = {
 			-0.5f, -0.5f,
 			-0.5f, 0.5f,
@@ -219,7 +218,7 @@ Drawer::Drawer(Game& g)
 
 	// image shader
 	{
-		image_program = g.l.compile_shader_program("f/shaders/image.vert", "f/shaders/image.frag", "image shader");
+		
 		float vertices[] = { // changed later
 			// position   texture coordinates
 			-0.5f, -0.5f, 0.f, 0.f,
@@ -248,8 +247,6 @@ Drawer::Drawer(Game& g)
 
 	// sky shader
 	{
-		sky_program = g.l.compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
-		
 		const float y_imgs = 4.f * g.l.HEIGHT;
 		const float x_imgs = 4.f * g.l.WIDTH;
 
@@ -284,8 +281,7 @@ Drawer::Drawer(Game& g)
 	}
 
 	// sides shader
-	{
-		sides_program = g.l.compile_shader_program("f/shaders/sides.vert", "f/shaders/sides.frag", "sides shader");
+	{	
 		glGenVertexArrays(1, &sides_VAO);
 		glBindVertexArray(sides_VAO);
 
@@ -329,8 +325,7 @@ Drawer::Drawer(Game& g)
 	}
 
 	// cloud program
-	{
-		cloud_program = g.l.compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
+	{	
 		glGenVertexArrays(1, &cloud_VAO);
 		glBindVertexArray(cloud_VAO);
 
@@ -354,7 +349,7 @@ Drawer::Drawer(Game& g)
 
 	// coin particle program
 	{
-		coin_particle_program = g.l.compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
+		
 		glGenVertexArrays(1, &coin_particle_VAO);
 		glBindVertexArray(coin_particle_VAO);
 
@@ -378,7 +373,7 @@ Drawer::Drawer(Game& g)
 
 	// bird program
 	{
-		bird_program = g.l.compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
+		
 		glGenVertexArrays(1, &bird_VAO);
 		glBindVertexArray(bird_VAO);
 
@@ -429,7 +424,7 @@ Drawer::Drawer(Game& g)
 	}
 	
 	// mess with a texture2D
-	{
+	/* {
 		unsigned char data[100][100][4];
 		for (int i = 0; i < 100; ++i) {
 			for (int j = 0; j < 100; ++j) {
@@ -444,7 +439,7 @@ Drawer::Drawer(Game& g)
 			glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
 			glTexSubImage2D(GL_TEXTURE_2D, i, 100, 100, 100, 100, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		}
-	}
+	}*/
 }
 
 void Drawer::draw_text(const char* text, Color color, float x, float y, float scale)
@@ -474,6 +469,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	glBufferSubData(GL_ARRAY_BUFFER, 0, nr_of_chars * TEXT_BYTES_PER, data);
 
 	glUniform3f(m_text_u_offset_scale, x, y, scale);
+	glUniform4f(m_text_u_color, color.r, color.b, color.g, color.a);
 
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, nr_of_chars);
 }
@@ -667,6 +663,51 @@ void Drawer::before_draw(Game& g)
 		float data[4] = { g.m_death_y, g.c.y, g.m_timer, g.l.WIDTH };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
+
+	 // hot reloading of shaders
+	if constexpr (DEV_TOOLS) { 
+		if (g.l.key_just_down(SDL_SCANCODE_R)) {
+			load_all_programs(g.l);
+		}
+	}
+}
+
+void Drawer::draw_fps(float dt)
+{
+	static constexpr int SIZE = 10;
+	char fps_string[SIZE];
+	snprintf(fps_string, SIZE, "%f", 1.f/dt);
+
+	draw_text(fps_string, Color{ 0,0,0,1 }, -Layer::WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
+}
+
+
+void Drawer::load_all_programs(Layer& l)
+{
+	// the uniforms for the text shader are only set once, and they are removed when reloading shader...
+	//glDeleteProgram(m_text_program);
+	//m_text_program = l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
+
+	glDeleteProgram(rectangle_program);
+	rectangle_program = l.compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
+
+	glDeleteProgram(image_program);
+	image_program = l.compile_shader_program("f/shaders/image.vert", "f/shaders/image.frag", "image shader");
+
+	glDeleteProgram(sky_program);
+	sky_program = l.compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
+
+	glDeleteProgram(sides_program);
+	sides_program = l.compile_shader_program("f/shaders/sides.vert", "f/shaders/sides.frag", "sides shader");
+
+	glDeleteProgram(cloud_program);
+	cloud_program = l.compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
+
+	glDeleteProgram(coin_particle_program);
+	coin_particle_program = l.compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
+
+	glDeleteProgram(bird_program);
+	bird_program = l.compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
 }
 
 std::array<int, 2> Drawer::load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y)

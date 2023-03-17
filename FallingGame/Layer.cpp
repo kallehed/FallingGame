@@ -13,7 +13,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	const void* userParam)
 {
 	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+	//if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;
@@ -120,7 +120,7 @@ bool Layer::start_frame()
 	m_start = SDL_GetPerformanceCounter();
 
 	glClearColor(0.0, 1.0, 1.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
+	//glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 
 	m_keys_just_down = { false }; // reset before getting events
 	SDL_Event e;
@@ -205,14 +205,14 @@ void Layer::end_frame()
 	SDL_GL_SwapWindow(m_window);
 	Uint64 end = SDL_GetPerformanceCounter();
 
-	// delay 
+	// delay if framerate going too fast
 	float milliSecElapsed = ((end - m_start) / (float)SDL_GetPerformanceFrequency()) * 1000.f;
 	
 	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / MAX_FPS - milliSecElapsed));
 	dt = (milliSecElapsed + delay) / 1000.f;
 	dt = std::min(1.f / MIN_FPS, dt);
 	
-	SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
+	//SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
 	SDL_Delay(delay);
 }
 
@@ -236,7 +236,6 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		{
 			std::ifstream f(path);
 			if (f) {
-				//f.getline(shaderSource, 100000, '\0');
 				std::getline(f, shaderSource, '\0');
 			}
 			else {
