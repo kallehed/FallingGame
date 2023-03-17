@@ -15,6 +15,8 @@ endif()
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
+find_package(Freetype REQUIRED)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
 set(default_build_type "Release")
@@ -26,4 +28,5 @@ set(SOURCES
 
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
+#target_link_libraries(${PROJECT_NAME} ${FREETYPE_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES})
