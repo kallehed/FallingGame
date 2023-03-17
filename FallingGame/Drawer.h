@@ -14,7 +14,7 @@ struct Character {
 	unsigned int height; // height of glyph
 	int bearing_x; // x start position
 	int bearing_y; // y start position, kind of?
-	int advance; // x length to next glyph
+	long long advance; // x length to next glyph
 };
 
 class Drawer
