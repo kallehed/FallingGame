@@ -1,4 +1,4 @@
-#version 430 core
+
 
 out vec4 FragColor;
 
@@ -7,15 +7,7 @@ in vec2 f_screenCoord;
 in float f_texture;
 in float f_z;
 
-layout(binding = 0) uniform sampler2D cloudTexs[4];
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
+uniform sampler2D cloudTexs[4];
 
 void main()
 {

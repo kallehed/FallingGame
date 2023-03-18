@@ -1,4 +1,4 @@
-#version 430 core
+
 
 out vec2 f_texCoord;
 out vec2 f_screenCoord;
@@ -18,14 +18,6 @@ vec2 texCoords[4] = {
     vec2(1.f,0.f),
     vec2(0.f,0.f),
     vec2(0.f,1.f)
-};
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
 };
 
 void main()

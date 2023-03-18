@@ -27,18 +27,18 @@ void Game::start()
 		//death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
 
 		// increase speed of death_y over time
-		m_death_y -= 1.01f * l.dt * std::max(1.f, std::log(m_timer/10.f));
+		m_death_y -= 1.01f * l.dt * std::max(1.f, std::log(m_timer / 10.f));
 		p.logic(*this);
-		
+
 		for (auto& e : m_bouncers) {
 			e.logic(*this);
 		}
 		for (int i = (int)m_bouncers.size() - 1; i >= 0; --i) { // delete bouncers that have gone too high
-			if (m_bouncers[i].h.y  - 1.f * l.HEIGHT > p.r.y) { // should be removed
+			if (m_bouncers[i].h.y - 1.f * l.HEIGHT > p.r.y) { // should be removed
 				m_bouncers.erase(m_bouncers.begin() + i);
 			}
 		}
-		for (auto & e : m_coins) { e.logic(*this); }
+		for (auto& e : m_coins) { e.logic(*this); }
 		for (int i = (int)m_coins.size() - 1; i >= 0; --i) { // delete coins that have gone too high
 			if (m_coins[i].r.y - l.HEIGHT > p.r.y) { // should be removed
 				m_coins.erase(m_coins.begin() + i);
@@ -49,11 +49,11 @@ void Game::start()
 		// collision between bouncers and player
 		{
 			for (auto& e : m_bouncers) {
-				if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x+e.h.w && p.r.x + p.r.w > e.h.x) {
+				if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
 					if (p.y_vel < 0.0f) {
 						std::cout << "bounce << " << p.y_vel << "\n";
-						p.bounce_x_vel = std::min( 1.f,-0.5f*p.y_vel) * 10.f * p.r.x_dist(e.h);
-						p.y_vel = std::clamp(-0.5f*p.y_vel, 0.75f, 1.5f);
+						p.bounce_x_vel = std::min(1.f, -0.5f * p.y_vel) * 10.f * p.r.x_dist(e.h);
+						p.y_vel = std::clamp(-0.5f * p.y_vel, 0.75f, 1.5f);
 						e.bounced_on(p.bounce_x_vel);
 					}
 				}
@@ -79,6 +79,7 @@ void Game::start()
 						//coin_particles.emplace_back(e.r.x + e.r.w/2.f, e.r.y + e.r.h/2.f, timer, p.x_vel * 1.2f, p.y_vel * 1.2f);
 						// make bird shiny
 						p.time_since_coin = 0.f;
+						++p.coins;
 					}
 					//coins.erase(coins.begin() + i);
 					e.got_picked_up(*this);
@@ -87,12 +88,12 @@ void Game::start()
 		}
 
 		// game logic without place yet
-		if (p.r.y - l.HEIGHT*2.f <= next_bouncer_y) {
+		if (p.r.y - l.HEIGHT * 2.f <= next_bouncer_y) {
 			m_bouncers.emplace_back(G_WIDTH, next_bouncer_y);
-			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f*rand_01()));
+			next_bouncer_y -= (2.f * l.HEIGHT * (0.3f + 0.5f * rand_01()));
 		}
 
-		while (p.r.y - l.HEIGHT*2.f <= next_coin_y)
+		while (p.r.y - l.HEIGHT * 2.f <= next_coin_y)
 		{
 			m_coins.emplace_back(*this, next_coin_y);
 			next_coin_y -= (2.f * l.HEIGHT);
@@ -120,8 +121,18 @@ void Game::start()
 			d.draw_image(c, TEX::storm, 0.f, m_death_y + l.HEIGHT, l.WIDTH * 2.f, l.HEIGHT * 2.f, 0.f);
 		}
 
-		d.draw_fps(l.dt);
+		// draw coin counter
+		{
+			char buf[10];
+			snprintf(buf, 10, "Coins: %d", p.coins);
+			d.draw_text(buf, {1.f,1.f,0.f,1.f}, Game::G_WIDTH + 0.4f, Layer::HEIGHT - 0.2f, 0.001f);
+		}
+	
 
+
+		if constexpr (DEV_TOOLS) {
+			d.draw_fps(l.dt);
+		}
 		//stuff
 		l.end_frame();
 	}

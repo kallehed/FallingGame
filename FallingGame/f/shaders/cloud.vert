@@ -1,4 +1,4 @@
-#version 430 core
+
 layout (location = 0) in vec4 aX_W_Y_H;
 layout (location = 1) in vec2 aTex_Z;
 
@@ -13,14 +13,6 @@ vec2 texPos[4] = {
 	{1.f, 0.f},
 	{1.f, 1.f},
 }; 
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 void main()
 {

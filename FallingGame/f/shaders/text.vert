@@ -1,15 +1,7 @@
-#version 430 core
+
 layout (location = 0) in vec2 aChar_XOffset;
 
 uniform vec3 u_offset_scale;
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 uniform sampler2D u_font_tex;
 
@@ -20,11 +12,11 @@ out vec2 f_texCoord;
 
 void main()
 {
-    const vec2 u_offset = u_offset_scale.xy;
-    const float u_scale = u_offset_scale.z;
+    vec2 u_offset = u_offset_scale.xy;
+    float u_scale = u_offset_scale.z;
     // character
-    const int c = int(aChar_XOffset.x);
-    const float x_offset = aChar_XOffset.y;
+    int c = int(aChar_XOffset.x);
+    float x_offset = aChar_XOffset.y;
 
     float width = u_text[c].x * float(gl_VertexID > 1);
     float height = u_text[c].y * float(gl_VertexID == 1 || gl_VertexID == 2);

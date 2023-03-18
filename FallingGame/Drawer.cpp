@@ -4,8 +4,6 @@
 
 #include <iostream>
 #include <tuple>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -28,7 +26,7 @@ Drawer::Drawer(Game& g)
 	}
 
 	// load all programs
-	this->load_all_programs(g.l);
+	this->load_all_programs();
 	
 
 	// font stuff with freetype
@@ -132,19 +130,21 @@ Drawer::Drawer(Game& g)
 			x += face->glyph->bitmap.width + PIX_OFFSET;
 			
 		}
-		
-		
 
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // turn back on?
 
-		
 		/////////////////  OPENGL buffer stuff
 
 		m_text_program = g.l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
 		glUseProgram(m_text_program);
+
+		{
+			unsigned int lights_index = glGetUniformBlockIndex(m_text_program, "Globals");
+			glUniformBlockBinding(m_text_program, lights_index, UBO_GLOBAL_BIND);
+		}
 
 		glGenVertexArrays(1, &m_text_VAO);
 		glBindVertexArray(m_text_VAO);
@@ -373,7 +373,6 @@ Drawer::Drawer(Game& g)
 
 	// bird program
 	{
-		
 		glGenVertexArrays(1, &bird_VAO);
 		glBindVertexArray(bird_VAO);
 
@@ -390,7 +389,7 @@ Drawer::Drawer(Game& g)
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
 		glBufferData(GL_UNIFORM_BUFFER, UBO_GLOBAL_SIZE, NULL, GL_DYNAMIC_DRAW);
 
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo_globals);
+		glBindBufferBase(GL_UNIFORM_BUFFER, UBO_GLOBAL_BIND, ubo_globals);
 	}
 
 	// load textures
@@ -419,7 +418,7 @@ Drawer::Drawer(Game& g)
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {
 			auto& d = data[i];
-			tex_sizes[i] = load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
+			tex_sizes[i] = Layer::load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
 		}
 	}
 	
@@ -455,7 +454,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	int i = 0;
 	for (; text[i] != '\0'; ++i) {
 		// char
-		assert(i < TEXT_MAX_CHARS_RENDER);
+		SDL_assert(i < TEXT_MAX_CHARS_RENDER);
 		char c = text[i];
 		data[i][0] = (float)c;
 		data[i][1] = (float)char_x_offset;
@@ -469,7 +468,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	glBufferSubData(GL_ARRAY_BUFFER, 0, nr_of_chars * TEXT_BYTES_PER, data);
 
 	glUniform3f(m_text_u_offset_scale, x, y, scale);
-	glUniform4f(m_text_u_color, color.r, color.b, color.g, color.a);
+	glUniform4f(m_text_u_color, color.r, color.g, color.b, color.a);
 
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, nr_of_chars);
 }
@@ -590,33 +589,6 @@ void Drawer::draw_clouds(Game& g)
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, Game::NR_CLOUDS);
 }
 
-void Drawer::draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h)
-{
-	glUseProgram(cloud_program);
-	glBindVertexArray(cloud_VAO);
-
-	GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS; // total textures allowed to use at the same time in shader
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, texs[tex]);
-	
-	glActiveTexture(GL_TEXTURE0);
-	{
-		float vertices[] =
-		{
-			x, y, 
-			x, y + h,
-			x + w, y + h,
-			x + w, y,	
-		};
-
-		//glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	}
-	//glUniform1f(m_cloud_u_z, z);
-
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
 void Drawer::draw_coin_particle(CoinParticle& c)
 {
 	glUseProgram(coin_particle_program);
@@ -667,7 +639,7 @@ void Drawer::before_draw(Game& g)
 	 // hot reloading of shaders
 	if constexpr (DEV_TOOLS) { 
 		if (g.l.key_just_down(SDL_SCANCODE_R)) {
-			load_all_programs(g.l);
+			load_all_programs();
 		}
 	}
 }
@@ -682,60 +654,38 @@ void Drawer::draw_fps(float dt)
 }
 
 
-void Drawer::load_all_programs(Layer& l)
+void Drawer::load_all_programs()
 {
 	// the uniforms for the text shader are only set once, and they are removed when reloading shader...
 	//glDeleteProgram(m_text_program);
 	//m_text_program = l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
 
 	glDeleteProgram(rectangle_program);
-	rectangle_program = l.compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
+	rectangle_program = Layer::compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
+	glUniformBlockBinding(rectangle_program, glGetUniformBlockIndex(rectangle_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(image_program);
-	image_program = l.compile_shader_program("f/shaders/image.vert", "f/shaders/image.frag", "image shader");
+	image_program = Layer::compile_shader_program("f/shaders/image.vert", "f/shaders/image.frag", "image shader");
+	glUniformBlockBinding(image_program, glGetUniformBlockIndex(image_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(sky_program);
-	sky_program = l.compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
+	sky_program = Layer::compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
+	glUniformBlockBinding(sky_program, glGetUniformBlockIndex(sky_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(sides_program);
-	sides_program = l.compile_shader_program("f/shaders/sides.vert", "f/shaders/sides.frag", "sides shader");
+	sides_program = Layer::compile_shader_program("f/shaders/sides.vert", "f/shaders/sides.frag", "sides shader");
+	glUniformBlockBinding(sides_program, glGetUniformBlockIndex(sides_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(cloud_program);
-	cloud_program = l.compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
+	cloud_program = Layer::compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
+	glUniformBlockBinding(cloud_program, glGetUniformBlockIndex(cloud_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(coin_particle_program);
-	coin_particle_program = l.compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
+	coin_particle_program = Layer::compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
+	glUniformBlockBinding(coin_particle_program, glGetUniformBlockIndex(coin_particle_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(bird_program);
-	bird_program = l.compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
+	bird_program = Layer::compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
+	glUniformBlockBinding(bird_program, glGetUniformBlockIndex(bird_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 }
 
-std::array<int, 2> Drawer::load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y)
-{
-	glGenTextures(1, image);
-	glBindTexture(GL_TEXTURE_2D, *image); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping_x);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping_y);
-	{
-		float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	}
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture: \'" << path << '\'' << std::endl;
-	}
-	stbi_image_free(data);
-	return { width, height };
-}

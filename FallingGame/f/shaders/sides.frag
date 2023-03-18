@@ -1,17 +1,10 @@
-#version 430 core
+
 
 out vec4 FragColor;
 
 in vec2 f_texCoord;
 uniform sampler2D sky_texture;
 
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 void main()
 {

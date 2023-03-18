@@ -1,4 +1,4 @@
-#version 430 core
+
 
 out vec4 FragColor;
 
@@ -8,13 +8,6 @@ in vec2 f_texCoord;
 in vec2 f_screenCoord;
 uniform sampler2D bird_texture;
 
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 #define M_PI (3.1415926535897932384626433832795)
 

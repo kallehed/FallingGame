@@ -21,15 +21,6 @@ void Cloud::logic(Game& g)
 	x += x_vel * g.l.dt * (1.f - z);
 }
 
-void Cloud::draw(Game& g)
-{
-	float x_pos = x - g.c.offset().x;
-	float y_pos = y - g.c.offset().y;
-	//g.d.draw_image(g.c, tex, x_pos, y_pos, w, h, 0.f);
-	
-	g.d.draw_cloud(g, tex, x, y, z, w, h);
-}
-
 void Cloud::init(Game& g)
 {
 	//tex = (TEX::_)(TEX::cloud_1 + (int)(3.99f * rand_01()));

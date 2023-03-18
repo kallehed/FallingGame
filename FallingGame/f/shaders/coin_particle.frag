@@ -1,16 +1,8 @@
-#version 430 core
+
 
 out vec4 FragColor;
 
 in vec2 f_screenCoord;
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 uniform float u_pos_and_vel_and_time[5];
 

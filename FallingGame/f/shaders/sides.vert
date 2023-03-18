@@ -1,17 +1,9 @@
-#version 430 core
+
 layout (location = 0) in vec4 aPos_and_Tex;
 
 out vec2 f_texCoord;
 
 uniform vec2 u_offset;
-
-layout(std140, binding = 0) uniform Globals
-{
-    float g_death_y;
-    float g_cam_y;
-    float g_timer;
-    float g_w;
-};
 
 void main()
 {

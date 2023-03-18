@@ -1,8 +1,8 @@
 #pragma once
 
-constexpr bool DRAW_HB = false; // draw hitboxes?
+constexpr inline bool DRAW_HB = false; // draw hitboxes?s
 // R for hot reload.
-constexpr bool DEV_TOOLS = true; // allow development stuff
+constexpr inline bool DEV_TOOLS = true; // allow development stuff
 
 class Game;
 class Drawer;

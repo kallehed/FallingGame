@@ -35,8 +35,6 @@ public:
 
 	void draw_clouds(Game& g);
 
-	void draw_cloud(Game& g, TEX::_ tex, float x, float y, float z, float w, float h);
-
 	void draw_coin_particle(CoinParticle&);
 
 	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin);
@@ -48,11 +46,7 @@ public:
 
 protected:
 	// loads all programs including their source code, including hot reloads
-	void load_all_programs(Layer& l);
-
-	// wrapping to GL_CLAMP_TO_BORDER will make it transparent after border(disables artifacts)
-	// returns width and height of image
-	std::array<int, 2> load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y);
+	void load_all_programs();
 
 private:
 	// how many there are to draw
@@ -85,8 +79,6 @@ private:
 	// Height
 	// Bearing X
 	// Bearing Y
-
-	//
 
 	static constexpr int UBO_TEXT_SIZE = CHARACTERS * sizeof(float);
 
@@ -133,6 +125,19 @@ private:
 	* float g_timer; // time since level started
 	* float g_w; // how much bigger the width is to the height, CONSTANT = 1.6 = g.l.WIDTH
 	*/
+	public:
+	static constexpr const char* SHADER_START_TEXT = 
+		"#version 330 core\n"
+		"layout(std140) uniform Globals\n"
+		"{"
+		"	float g_death_y;"
+		"	float g_cam_y;"
+		"	float g_timer;"
+		"	float g_w;"
+		"};\n";
+	private:
+	static constexpr int UBO_GLOBAL_BIND = 0;
+	static constexpr const char* UBO_GLOBAL_NAME = "Globals";
 	constexpr static int UBO_GLOBAL_SIZE = 4 * sizeof(float);
 	unsigned int ubo_globals; // BINDING 0.
 
