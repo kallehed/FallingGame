@@ -2,6 +2,8 @@
 
 #include "Game.h"
 
+#include <cmath>
+
 Bouncer::Bouncer(float spawn_width, float y) : h(0.f,0.f,0.f)
 {
 	h.w = 0.3f + 0.1f*rand_uni();
