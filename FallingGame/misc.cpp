@@ -1,7 +1,8 @@
 #include "misc.h"
 
 #include "Drawer.h"
-#include <cstdlib>
+//#include <cstdlib>
+#include <cmath>
 
 Rect::Rect(float X, float Y, float W, float H) : x(X), y(Y), w(W), h(H)
 {
