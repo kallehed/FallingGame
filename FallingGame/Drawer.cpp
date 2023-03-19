@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <tuple>
+#include <cmath>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H  
@@ -251,7 +252,7 @@ void Drawer::init(Game& g)
 
 		sky_height_per_sky = (2.f * g.G_HEIGHT) / y_imgs;
 
-		const float left = -g.G_WIDTH * 2.f;
+		const float left = -Game::G_WIDTH * 2.f;
 		const float bottom = -g.G_HEIGHT - sky_height_per_sky;
 		const float y_top = g.G_HEIGHT;
 		
@@ -286,16 +287,16 @@ void Drawer::init(Game& g)
 
 		constexpr float y_imgs = 2.5f, x_imgs = 1.f;
 
-		constexpr float img_height = (g.l.HEIGHT * 2.f) / y_imgs;
+		constexpr float img_height = (Layer::HEIGHT * 2.f) / y_imgs;
 		sides_height_per_image = img_height;
 
-		constexpr float top = g.l.HEIGHT;
-		constexpr float bottom = -g.l.HEIGHT - img_height;
+		constexpr float top = Layer::HEIGHT;
+		constexpr float bottom = -Layer::HEIGHT - img_height;
 		
-		constexpr float left = -g.l.WIDTH;
-		constexpr float right = -g.G_WIDTH;
+		constexpr float left = -Layer::WIDTH;
+		constexpr float right = -Game::G_WIDTH;
 
-		static constexpr float vertices[] = {
+		const float vertices[] = {
 			// position    texture coordinates
 
 			// left side of screen
