@@ -8,7 +8,7 @@
 class Layer
 {
 public:
-	Layer();
+	void init();
 	~Layer();
 
 	bool start_frame(); // true -> end program

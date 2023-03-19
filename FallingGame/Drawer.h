@@ -20,10 +20,11 @@ struct Character {
 class Drawer
 {
 public:
-	Drawer(Game& g);
+	void init(Game& g);
 
 	void draw_text(const char* text, Color color, float x, float y, float scale);
 
+	// draw a rectangle RELATIVE to the playeer.
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
 	// draws middle of image at x,y. Offset by camera 
@@ -90,7 +91,6 @@ private:
 	unsigned int rectangle_program = 0;
 	unsigned int rectangle_VAO, rectangle_VBO;
 	int m_rectangle_u_color;
-	int m_rectangle_u_offset; // set to camera offset
 
 	unsigned int image_program = 0;
 	unsigned int image_VAO, image_VBO;
@@ -138,7 +138,8 @@ private:
 	private:
 	static constexpr int UBO_GLOBAL_BIND = 0;
 	static constexpr const char* UBO_GLOBAL_NAME = "Globals";
-	constexpr static int UBO_GLOBAL_SIZE = 4 * sizeof(float);
+	static constexpr int UBO_GOBAL_FLOATS = 4;
+	static constexpr int UBO_GLOBAL_SIZE = UBO_GOBAL_FLOATS * sizeof(float);
 	unsigned int ubo_globals; // BINDING 0.
 
 public:

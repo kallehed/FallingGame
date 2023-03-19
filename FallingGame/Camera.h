@@ -9,4 +9,3 @@ public:
 	Pos offset() const; // get offset to set uniform to
 	float x = 0.f, y = 0.f;
 };
-

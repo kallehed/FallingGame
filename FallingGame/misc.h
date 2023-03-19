@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr inline bool DRAW_HB = false; // draw hitboxes?s
+constexpr inline bool DRAW_HB = true; // draw hitboxes?s
 // R for hot reload.
 constexpr inline bool DEV_TOOLS = true; // allow development stuff
 
@@ -57,8 +57,8 @@ float sign(float val); // returns 1.f if >= 0, else -1
 // val could be any number. if dec > abs(val): return 0 
 float decr_abs_val(float val, float dec);
 
-constexpr float pi = 3.14159265359f;
-constexpr float tau = 6.28318530718f;
+constexpr inline float pi = 3.14159265359f;
+constexpr inline float tau = 6.28318530718f;
 
 namespace TEX
 {

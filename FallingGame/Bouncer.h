@@ -15,6 +15,5 @@ public:
 
 	HoLine h;
 	float bounce_timer = 0.f;
-private:
 };
 

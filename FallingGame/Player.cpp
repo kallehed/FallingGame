@@ -3,8 +3,19 @@
 #include "Game.h"
 #include <algorithm>
 #include <cmath>
+#include "misc.h"
 
-Player::Player() {}
+void Player::init()
+{
+	r = { 0.0f, 0.0f, 0.08f, 0.166f };
+	prev_y = 0.f;
+	y_vel = 0.f;
+	x_vel = 0.f;
+	bounce_x_vel = 0.f;
+	rotation = 0.f;
+	time_since_coin = pow(10.f, 10.f);
+	coins = 0;
+}
 
 void Player::logic(Game& g)
 {

@@ -8,7 +8,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
-Drawer::Drawer(Game& g)
+void Drawer::init(Game& g)
 {
 	// standard rect EBO
 	{
@@ -213,7 +213,6 @@ Drawer::Drawer(Game& g)
 		glEnableVertexAttribArray(0);
 
 		m_rectangle_u_color = glGetUniformLocation(rectangle_program, "u_color");
-		m_rectangle_u_offset = glGetUniformLocation(rectangle_program, "u_offset");
 	}
 
 	// image shader
@@ -465,7 +464,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	const int nr_of_chars = i;
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_text_VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, nr_of_chars * TEXT_BYTES_PER, data);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (size_t)nr_of_chars * TEXT_BYTES_PER, data);
 
 	glUniform3f(m_text_u_offset_scale, x, y, scale);
 	glUniform4f(m_text_u_color, color.r, color.g, color.b, color.a);
@@ -525,7 +524,7 @@ void Drawer::draw_sky(Game& g)
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
 	float y = -g.p.r.y/5.f;
-	while (y > sky_height_per_sky) { y -= sky_height_per_sky; }
+	y -= (sky_height_per_sky) * std::floor(y / sky_height_per_sky);
 	
 	glUniform2f(sky_u_offset, 0.f, y);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -625,14 +624,10 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 
 void Drawer::before_draw(Game& g)
 {
-	Pos off = g.c.offset();
-	glUseProgram(rectangle_program);
-	glUniform2f(m_rectangle_u_offset, off.x, off.y);
-
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[4] = { g.m_death_y, g.c.y, g.m_timer, g.l.WIDTH };
+		float data[UBO_GOBAL_FLOATS] = { g.m_death_y, g.c.y, g.m_timer, g.l.WIDTH };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 
@@ -650,7 +645,7 @@ void Drawer::draw_fps(float dt)
 	char fps_string[SIZE];
 	snprintf(fps_string, SIZE, "%f", 1.f/dt);
 
-	draw_text(fps_string, Color{ 0,0,0,1 }, -Layer::WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
+	draw_text(fps_string, Color{ 0,0,1,1 }, -Layer::WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
 }
 
 

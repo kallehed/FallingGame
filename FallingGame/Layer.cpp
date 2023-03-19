@@ -58,7 +58,7 @@ void APIENTRY glDebugOutput(GLenum source,
 
 }
 
-Layer::Layer()
+void Layer::init()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -74,7 +74,8 @@ Layer::Layer()
 	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
 
 
-	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST), SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
+	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
+		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	if (m_window == NULL) std::cout << "ERROR::WINDOW_COULD_NOT_BE_CREATED\n";
 
 	m_glcontext = SDL_GL_CreateContext(m_window);
@@ -126,9 +127,6 @@ bool Layer::start_frame()
 {
 	m_start = SDL_GetPerformanceCounter();
 
-	//glClearColor(1.0, 1.0, 1.0, 1.0);
-	//glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
-
 	m_keys_just_down = { false }; // reset before getting events
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
@@ -142,7 +140,6 @@ bool Layer::start_frame()
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				int w, h;
 				SDL_GL_GetDrawableSize(m_window, &w, &h);
-
 				glViewport(0, 0, w, h);
 				std::cout << "window PIXELsize: " << w << " h: " << h << '\n';
 				SDL_GetWindowSize(m_window, &w, &h);
@@ -168,16 +165,36 @@ bool Layer::start_frame()
 
 
 	if (key_just_down(SDL_SCANCODE_RETURN)) { // Switch fullscreen
-		
-		if (!m_fullscreen) {
+		bool is_fullscreen = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN; // should work?
+		SDL_SetWindowFullscreen(m_window, is_fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+		/*if (!m_fullscreen) {
 			SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
 		else {
 			SDL_SetWindowFullscreen(m_window, 0);
 		}
 		m_fullscreen = !m_fullscreen;
+		*/
 	}
+	
 	if constexpr (DEV_TOOLS) {
+
+		if (key_just_down(SDL_SCANCODE_Q)) { // query
+			SDL_DisplayMode mode;
+			SDL_GetWindowDisplayMode(m_window, &mode);
+			std::cout << "query:\nformat: " << mode.format << "\nwidth: " << mode.w
+				<< "\nheight: " << mode.h << "\n driverdata: " << mode.driverdata << "\n";
+
+			auto df = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
+			std::cout << "is desktop fullscreen: " << df << "\n";
+
+			auto f = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN;
+			std::cout << "is REAL fullscreen: " << f << "\n";
+
+			auto all = SDL_GetWindowFlags(m_window);
+			std::cout << "all flags: " << all << "\n";
+		}
+
 		if (key_just_down(SDL_SCANCODE_DELETE)) { // DELETE- escape hatch
 			return true;
 		}

@@ -14,8 +14,9 @@
 
 class Game
 {
+private:
+	void init();
 public:
-	Game();
 	void start();
 
 	Layer l;
@@ -23,8 +24,8 @@ public:
 	Camera c;
 	Player p;
 
-	float m_death_y = 3.f; // y coordinate of the death barrier
-	float m_timer = 0.f; // total time passed
+	float m_death_y; // y coordinate of the death barrier
+	float m_timer; // total time passed
 
 	std::vector<Bouncer> m_bouncers;
 	static constexpr const int NR_CLOUDS = 30;
