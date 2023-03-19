@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <cmath>
+
 void Game::init()
 {
 	l.init();
