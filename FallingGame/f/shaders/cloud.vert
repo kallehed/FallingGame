@@ -7,12 +7,12 @@ out vec2 f_screenCoord;
 out float f_texture;
 out float f_z;
 
-vec2 texPos[4] = {
-	{0.f, 1.f},
-    {0.f, 0.f},
-	{1.f, 0.f},
-	{1.f, 1.f},
-}; 
+vec2 texPos[4] = vec2[4](
+	vec2(0.f, 1.f),
+    vec2(0.f, 0.f),
+	vec2(1.f, 0.f),
+	vec2(1.f, 1.f)
+); 
 
 void main()
 {

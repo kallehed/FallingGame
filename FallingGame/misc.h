@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr inline bool DRAW_HB = true; // draw hitboxes?s
+constexpr inline bool DRAW_HB = false; // draw hitboxes?s
 // R for hot reload.
 constexpr inline bool DEV_TOOLS = true; // allow development stuff
 

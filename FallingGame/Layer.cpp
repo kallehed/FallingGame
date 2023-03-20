@@ -61,7 +61,7 @@ void APIENTRY glDebugOutput(GLenum source,
 void Layer::init()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -88,7 +88,7 @@ void Layer::init()
 		std::cin.get();
 	}
 
-	{
+	if constexpr (false) {
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 		{

@@ -6,19 +6,19 @@ out vec2 f_screenCoord;
 uniform vec2 u_offset;
 uniform vec3 u_rotation_width_height;
 
-vec2 poses[4] = {
+vec2 poses[4] = vec2[4](
     vec2(-0.5f,-0.5f),
     vec2(-0.5f,0.5f),
     vec2(0.5f,0.5f),
     vec2(0.5f,-0.5f)
-};
+);
 
-vec2 texCoords[4] = {
+vec2 texCoords[4] = vec2[4](
     vec2(1.f,1.f),
     vec2(1.f,0.f),
     vec2(0.f,0.f),
     vec2(0.f,1.f)
-};
+);
 
 void main()
 {
