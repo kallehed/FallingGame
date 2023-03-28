@@ -127,8 +127,8 @@ private:
 	*/
 	public:
 	static constexpr const char* SHADER_START_TEXT = 
-		"#version 330 core\n"
-		"layout(std140) uniform Globals\n"
+		"#version 430 core\n"
+		"layout(std140, binding = 0) uniform Globals\n"
 		"{"
 		"	float g_death_y;"
 		"	float g_cam_y;"
@@ -137,7 +137,7 @@ private:
 		"};\n";
 	private:
 	static constexpr int UBO_GLOBAL_BIND = 0;
-	static constexpr const char* UBO_GLOBAL_NAME = "Globals";
+	static constexpr const char* UBO_GLOBAL_NAME = "Globals"; // never used
 	static constexpr int UBO_GOBAL_FLOATS = 4;
 	static constexpr int UBO_GLOBAL_SIZE = UBO_GOBAL_FLOATS * sizeof(float);
 	unsigned int ubo_globals; // BINDING 0.

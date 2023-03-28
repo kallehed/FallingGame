@@ -61,18 +61,18 @@ void APIENTRY glDebugOutput(GLenum source,
 void Layer::init()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+		 //SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0); // if not using depth buffers
 	//SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
-
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
@@ -88,7 +88,8 @@ void Layer::init()
 		std::cin.get();
 	}
 
-	if constexpr (false) {
+	// debug mode
+	if constexpr (true) {
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 		{
@@ -153,6 +154,7 @@ bool Layer::start_frame()
 					m_keys_down[e.key.keysym.scancode] = true;
 					m_keys_just_down[e.key.keysym.scancode] = true;
 				}	
+				SDL_Log("Just jmotioned!");
 			//}
 			break;
 		case SDL_KEYUP:
@@ -160,7 +162,11 @@ bool Layer::start_frame()
 				m_keys_down[e.key.keysym.scancode] = false;
 			//}
 			break;
+		case SDL_FINGERDOWN: // will NOT be called on a computer
+			SDL_Log("Just motioned!");
+			break;
 		}
+		
 	}
 
 

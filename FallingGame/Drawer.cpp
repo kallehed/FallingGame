@@ -142,11 +142,6 @@ void Drawer::init(Game& g)
 		m_text_program = g.l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
 		glUseProgram(m_text_program);
 
-		{
-			unsigned int lights_index = glGetUniformBlockIndex(m_text_program, "Globals");
-			glUniformBlockBinding(m_text_program, lights_index, UBO_GLOBAL_BIND);
-		}
-
 		glGenVertexArrays(1, &m_text_VAO);
 		glBindVertexArray(m_text_VAO);
 
@@ -658,30 +653,23 @@ void Drawer::load_all_programs()
 
 	glDeleteProgram(rectangle_program);
 	rectangle_program = Layer::compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
-	glUniformBlockBinding(rectangle_program, glGetUniformBlockIndex(rectangle_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(image_program);
 	image_program = Layer::compile_shader_program("f/shaders/image.vert", "f/shaders/image.frag", "image shader");
-	glUniformBlockBinding(image_program, glGetUniformBlockIndex(image_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(sky_program);
 	sky_program = Layer::compile_shader_program("f/shaders/sky.vert", "f/shaders/sky.frag", "sky shader");
-	glUniformBlockBinding(sky_program, glGetUniformBlockIndex(sky_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(sides_program);
 	sides_program = Layer::compile_shader_program("f/shaders/sides.vert", "f/shaders/sides.frag", "sides shader");
-	glUniformBlockBinding(sides_program, glGetUniformBlockIndex(sides_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(cloud_program);
 	cloud_program = Layer::compile_shader_program("f/shaders/cloud.vert", "f/shaders/cloud.frag", "cloud shader");
-	glUniformBlockBinding(cloud_program, glGetUniformBlockIndex(cloud_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(coin_particle_program);
 	coin_particle_program = Layer::compile_shader_program("f/shaders/coin_particle.vert", "f/shaders/coin_particle.frag", "coin particle shader");
-	glUniformBlockBinding(coin_particle_program, glGetUniformBlockIndex(coin_particle_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 
 	glDeleteProgram(bird_program);
 	bird_program = Layer::compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
-	glUniformBlockBinding(bird_program, glGetUniformBlockIndex(bird_program, UBO_GLOBAL_NAME), UBO_GLOBAL_BIND);
 }
 
