@@ -358,6 +358,12 @@ void Drawer::init(Game& g)
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glVertexAttribDivisor(1, 1);
 
+		// set samplers to right places
+		/*glUseProgram(cloud_program);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex0"), 0);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex1"), 1);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex2"), 2);
+		*/
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
 	}
 
@@ -565,13 +571,13 @@ void Drawer::draw_clouds(Game& g)
 	glBindVertexArray(cloud_VAO);
 
 	// bind cloud textures
-	glActiveTexture(GL_TEXTURE0 + 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_1]);
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_2]);
-	glActiveTexture(GL_TEXTURE0 + 2);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_3]);
-	glActiveTexture(GL_TEXTURE0 + 3);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_4]);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_4]);
 
 	glActiveTexture(GL_TEXTURE0); // unbind

@@ -7,7 +7,7 @@ in vec2 f_screenCoord;
 in float f_texture;
 in float f_z;
 
-uniform sampler2D cloudTexs[4];
+layout(binding=0) uniform sampler2D cloudTexs[4];
 
 void main()
 {
