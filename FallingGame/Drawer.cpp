@@ -11,7 +11,6 @@
 
 void Drawer::init(Game& g)
 {
-	SDL_Log("SDL KALLE In drawer 1");
 	// standard rect EBO
 	{
 		unsigned int indices[] = {
@@ -26,11 +25,9 @@ void Drawer::init(Game& g)
 		glBindBuffer(GL_ARRAY_BUFFER, standard_rect_EBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	}
-	SDL_Log("SDL KALLE IN drawer 2");
 
 	// load all programs
 	this->load_all_programs();
-	SDL_Log("SDL KALLE IN drawer 3");
 
 	// font stuff with freetype
 	{
@@ -41,12 +38,8 @@ void Drawer::init(Game& g)
 		}
 
 		FT_Face face;
-		// Old way of loading font
-		//if (FT_New_Face(ft, "f/fonts/arial.ttf", 0, &face))
-		//{
-		//	SDL_Log( "ERROR::FREETYPE: Font failed to load arial");
-		//	std::cin.get();
-		//}
+		// can ONLY be freed after FT_Done_Face
+		unsigned char* font_buffer = NULL;
 
 		{
 		// Load font by first loading it into memory
@@ -54,35 +47,18 @@ void Drawer::init(Game& g)
 			SDL_RWops* io = SDL_RWFromFile("f/fonts/arial.ttf", "rb");
 			if (io == NULL) SDL_Log("ERROR CANT LOAD arial.ttf file");
 			auto file_length = io->size(io);
-			SDL_Log("SIze of the font file: %d", file_length);
-			unsigned char* buffer = new unsigned char[file_length];
+			font_buffer = new unsigned char[file_length];
 
-			
-			auto res =  io->read(io, buffer, file_length, 1); 
-			SDL_Log("Retuerned length from SDL RWOPS: %d", res);
-			if (res == 0)
-				SDL_Log("ERROR CANT READ FROM arial.ttf file");
-
-			SDL_Log("Font file: %s", buffer);
-
+			io->read(io, font_buffer, file_length, 1); // read to buffer from file
 			SDL_RWclose(io);
 
-			if (FT_New_Memory_Face(ft, buffer, file_length, 0, &face)) {
+			if (FT_New_Memory_Face(ft, font_buffer, (long)file_length, 0, &face)) {
 				SDL_Log("ERROR::FREETYPE: Font failed to load arial");
-			}	
-
-			SDL_Log("Value of face: %d", (unsigned long long)face);
-
-
-			SDL_Log("Got to delete buffer!");
-			//delete [] buffer;
+			}
 		}
-		SDL_Log("got another place");
 		
 		// set width to 0 to dynamically calculate it
 		FT_Set_Pixel_Sizes(face, 0, 48);
-
-		SDL_Log("SDL KALLE IN drawer 44");
 
 		/*
 		* How to render text efficiently
@@ -135,7 +111,6 @@ void Drawer::init(Game& g)
 			};
 			m_characters[c] = character;
 		}
-		SDL_Log("SDL KALLE IN drawer 45");
 
 		// generate all standard ascii characters
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
@@ -148,7 +123,6 @@ void Drawer::init(Game& g)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-SDL_Log("SDL KALLE IN drawer 46");
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 		int x = PIX_OFFSET;
@@ -170,20 +144,18 @@ SDL_Log("SDL KALLE IN drawer 46");
 			x += face->glyph->bitmap.width + PIX_OFFSET;
 			
 		}
-SDL_Log("SDL KALLE IN drawer 47");
 
 		FT_Done_Face(face);
+		delete[] font_buffer;
+
 		FT_Done_FreeType(ft);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // turn back on?
 
 		/////////////////  OPENGL buffer stuff
-	SDL_Log("SDL KALLE IN drawer 48");
 
 		m_text_program = g.l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
-SDL_Log("SDL KALLE IN drawer 49");
 		glUseProgram(m_text_program);
-SDL_Log("SDL KALLE IN drawer 547");
 
 		glGenVertexArrays(1, &m_text_VAO);
 		glBindVertexArray(m_text_VAO);
@@ -191,23 +163,17 @@ SDL_Log("SDL KALLE IN drawer 547");
 		glGenBuffers(1, &m_text_VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_text_VBO);
 		glBufferData(GL_ARRAY_BUFFER, TEXT_ATTRIBUTE_BYTES, NULL, GL_DYNAMIC_DRAW);
-SDL_Log("SDL KALLE IN drawer 548");
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
-SDL_Log("SDL KALLE IN drawer 5481");
 		glEnableVertexAttribArray(0);
-		SDL_Log("SDL KALLE IN drawer 5482");
 
 		glVertexAttribPointer(0, TEXT_ATTRIBUTES, GL_FLOAT, GL_FALSE, TEXT_BYTES_PER, (void*)0);
-SDL_Log("SDL KALLE IN drawer 5483");
 
 		glVertexAttribDivisor(0, 1); // one per instance
 		//glVertexBindingDivisor(0,1);
-SDL_Log("SDL KALLE IN drawer 5484");
 
 
 		m_text_u_offset_scale = glGetUniformLocation(m_text_program, "u_offset_scale");
-SDL_Log("SDL KALLE IN drawer 549");
 
 		{
 			// make it the correct amount of data
@@ -222,7 +188,6 @@ SDL_Log("SDL KALLE IN drawer 549");
 			glUniform4fv(glGetUniformLocation(m_text_program, "u_text"), CHARACTERS, (float*)data);
 		}
 
-SDL_Log("SDL KALLE IN drawer 550");
 		{
 			float char_x_offset_data[CHARACTERS];
 			float x = 0.f;
@@ -238,7 +203,6 @@ SDL_Log("SDL KALLE IN drawer 550");
 			m_text_u_color = glGetUniformLocation(m_text_program, "u_color");
 		}
 	}
-	SDL_Log("SDL KALLE After text drawing");
 
 	// rectangle shader
 	{
@@ -265,7 +229,6 @@ SDL_Log("SDL KALLE IN drawer 550");
 		m_rectangle_u_color = glGetUniformLocation(rectangle_program, "u_color");
 	}
 
-	SDL_Log("SDL KALLE after rectangle");
 
 	// image shader
 	{

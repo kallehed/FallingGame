@@ -28,7 +28,6 @@ public:
 
 	bool key_down(SDL_Scancode key) const; // returns whether key is currently down
 	bool key_just_down(SDL_Scancode key) const;
-
 	static unsigned int compile_shader_program(const char* vertexShaderSource, const char* fragmentShaderSource, const char* name_for_error);
 
 	// wrapping to GL_CLAMP_TO_BORDER will make it transparent after border(disables artifacts)
