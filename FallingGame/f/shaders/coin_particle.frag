@@ -26,7 +26,7 @@ void main()
         new_pos.y += vel.y*t1 + y_acc*t2 + y_jerk*t3;
         new_pos.x += vel.x*t1 + x_acc*t2;
 
-        float decr_radi = (i * 0.0 + 1);
+        float decr_radi = ( /*i * 0.0 + */ 1.0);
 
         //float change = max(0.0, 1.0 - decr_radi* 100.0 * pow(distance(screen_pos, new_pos), (1.5)));
         float change = max(0.0, 1.0 - decr_radi* 100.0 * pow(abs(screen_pos.x - new_pos.x) + abs(screen_pos.y-new_pos.y), (1.5)));

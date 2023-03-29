@@ -1,4 +1,5 @@
 #include "Layer.h"
+#include "SDL_rwops.h"
 
 #include <iostream>
 #include <string>
@@ -9,6 +10,7 @@
 
 #include "misc.h"
 #include "Drawer.h"
+
 
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
@@ -21,6 +23,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	// ignore non-significant error/warning codes
 	//if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
+	SDL_Log("KALLE SDL big error happened BIG ERROORRRRRRRRR");
 	std::cout << "---------------" << std::endl;
 	std::cout << "Debug message (" << id << "): " << message << std::endl;
 
@@ -60,10 +63,25 @@ void APIENTRY glDebugOutput(GLenum source,
 
 void Layer::init()
 {
+	SDL_Log("KALLE SDL app do be started");
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+
+#ifndef __ANDROID__
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+
+
+#endif
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -73,21 +91,38 @@ void Layer::init()
 	//SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
+	SDL_Log("KALLE SDL 2 app do be started");
+
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	if (m_window == NULL) std::cout << "ERROR::WINDOW_COULD_NOT_BE_CREATED\n";
 
+
+	SDL_Log("KALLE SDL 3 app do be started");
+
 	m_glcontext = SDL_GL_CreateContext(m_window);
 	if (!m_glcontext) { std::cout << "ERROR::GLContext_NOT_CREATED\n"; }
 	SDL_GL_MakeCurrent(m_window, m_glcontext);
 
+	SDL_Log("KALLE SDL 4 app do be started");
+#ifndef __ANDROID__
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		std::cin.get();
 	}
+#else
+	if (!gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress))
+	{
+		SDL_Log("KALLE Failed to initialize GLAD");
+	}
 
+#endif
+
+
+	SDL_Log("KALLE SDL 5 app do be started");
+//#ifndef __ANDROID__
 	// debug mode
 	if constexpr (true) {
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
@@ -99,14 +134,26 @@ void Layer::init()
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 	}
+//#endif
+
+	SDL_Log("KALLE SDL 6 app do be started");
 
 	// 1 for vsync, which works for all platforms tested so far
 	SDL_GL_SetSwapInterval(1);
 
-	{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " = " << a << '\n'; }
-	{int a = -2; std::cout << "depth sizes: " << SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &a) << " = " << a << '\n'; }
+
+	SDL_Log("KALLE SDL 7 app do be started");
+
+	//{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " = " << a << '\n'; }
+	//{int a = -2; std::cout << "depth sizes: " << SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &a) << " = " << a << '\n'; }
+	SDL_Log("KALLE SDL PART 1 app do be started");
 	glEnable(GL_BLEND);
+	SDL_Log("KALLE SDL PART 2 app do be started");
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	SDL_Log("KALLE SDL PART 3 app do be started");
+
+	SDL_Log("KALLE SDL 8 app do be started");
 	
 	// don't know if this is necessary? maybe on high-dpi platforms?
 	{
@@ -114,6 +161,7 @@ void Layer::init()
 		SDL_GL_GetDrawableSize(m_window, &w, &h);
 		glViewport(0, 0, w, h);
 	}
+	SDL_Log("KALLE SDL 9 app do be started");
 }
 
 Layer::~Layer()
@@ -127,6 +175,9 @@ Layer::~Layer()
 bool Layer::start_frame() 
 {
 	m_start = SDL_GetPerformanceCounter();
+
+
+	//SDL_Log("KALLE SDL Start of frame");
 
 	m_keys_just_down = { false }; // reset before getting events
 	SDL_Event e;
@@ -162,9 +213,24 @@ bool Layer::start_frame()
 				m_keys_down[e.key.keysym.scancode] = false;
 			//}
 			break;
+		case SDL_FINGERMOTION:
 		case SDL_FINGERDOWN: // will NOT be called on a computer
-			SDL_Log("Just motioned!");
+			SDL_Log("KALLE SDL Just motioned!");
+			m_keys_just_down[SDL_SCANCODE_O] = true;
+
+			m_keys_down[SDL_SCANCODE_A] = false;
+			m_keys_down[SDL_SCANCODE_D] = false;
+
+			m_keys_down[(e.tfinger.x < 0.5f) ? (SDL_SCANCODE_A) : (SDL_SCANCODE_D)] = true; 
+
 			break;
+		
+		case SDL_FINGERUP:
+			m_keys_down[SDL_SCANCODE_A] = false;
+			m_keys_down[SDL_SCANCODE_D] = false;
+
+			break;
+
 		}
 		
 	}
@@ -266,7 +332,7 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 
 	{
 		// load from file
-		std::string shaderSource;
+		/*std::string shaderSource;
 		{
 			std::ifstream f(path);
 			if (f) {
@@ -275,10 +341,15 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 			else {
 				std::cout << "ERROR::FILE_NOT_FOUND: " << path << "\n";
 			}
-		}
+		}*/
+		SDL_RWops* io = SDL_RWFromFile(path, "r");
+		char str[10000] = {'\0'};
+		SDL_RWread(io, str, sizeof (str), 1);	
 	
-		const char* str = shaderSource.c_str();
+		SDL_RWclose(io);
+		//const char* str = shaderSource.c_str();
 		const char* strs[] = {Drawer::SHADER_START_TEXT, str};
+		//SDL_Log("SDL KALLE Compiling a new shader: %s. with following code: %s %s", path, strs[0], strs[1]);
 		glShaderSource(shader, sizeof(strs)/sizeof(const char*), strs, NULL); // last null because null-terminated-strings
 	}
 	glCompileShader(shader);
@@ -290,6 +361,7 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
+		SDL_Log("SDL KALLE ERROR compile shader in %s: %s ... INFOLOG: %s$", path, error_msg, infoLog);
 		std::cout << error_msg << infoLog << std::endl;
 	}
 	return shader;
@@ -338,8 +410,21 @@ std::array<int, 2> Layer::load_texture(const char* path, unsigned int* image, in
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	SDL_Log("SDL KALLE Got to spicy part");
+	// new
+	//unsigned char buffer[1000000] = {'\0'};
+	int BUFSIZE = 10000000;
+	unsigned char* buffer = new unsigned char[BUFSIZE]{0};
+	SDL_RWops* io = SDL_RWFromFile(path, "rb");
+	if (io == NULL) SDL_Log("SDL KALLE ERROR OPENING FILE load_texture rb");
+	SDL_RWread(io, buffer, BUFSIZE, 1);
+	SDL_RWclose(io);
+
+
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+	//unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load_from_memory(buffer, BUFSIZE, &width, &height, &nrChannels, 0);
+	delete [] buffer;
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -347,7 +432,7 @@ std::array<int, 2> Layer::load_texture(const char* path, unsigned int* image, in
 	}
 	else
 	{
-		std::cout << "Failed to load texture: \'" << path << '\'' << std::endl;
+		SDL_Log("SDL KALLE Failed to load texture: \'%s\'", path);
 	}
 	stbi_image_free(data);
 	return { width, height };

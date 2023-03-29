@@ -17,13 +17,13 @@ void main()
 
     // boost effect when picking up coins
     {
-        float time = u_time_since_coin * 7.0 - 2.5*(1-f_texCoord.y);
-        //time *= 2;
+        float time = u_time_since_coin * 7.0 - 2.5*(1.0-f_texCoord.y);
+        //time *= 2.0;
         float radians = time + M_PI*0.20;
-        float change = sin(radians) * 0.66 * float(radians < 2* M_PI);
-        change = max(0,change);
+        float change = sin(radians) * 0.66 * float(radians < 2.0* M_PI);
+        change = max(0.0,change);
         //change *= float(time < 11.0);
         //change *= float(u_time_since_coin < 2.0);
-        FragColor += vec4(change,change,0.f,0.f); 
+        FragColor += vec4(change,change,0.0,0.0); 
     }
 }

@@ -1,7 +1,19 @@
 #pragma once
 
-#include <glad/glad.h> 
+#ifndef __ANDROID__
+
+#include <glad/glad.h>
 #include <SDL/SDL.h>
+
+#else
+
+#include <gladES/glad.h>
+#include <SDL/SDL.h>
+//#include <SDL/SDL_opengles2.h>
+//#include <GLES3/gl32.h>
+
+#endif
+
 #include <array>
 
 // Layer for SDL: window management, events, some opengl, some image loading ...

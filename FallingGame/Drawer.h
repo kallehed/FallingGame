@@ -127,7 +127,12 @@ private:
 	*/
 	public:
 	static constexpr const char* SHADER_START_TEXT = 
+#ifndef __ANDROID__
 		"#version 430 core\n"
+#else
+		"#version 320 es\n"
+		"precision highp float;\n"
+#endif
 		"layout(std140, binding = 0) uniform Globals\n"
 		"{"
 		"	float g_death_y;"
