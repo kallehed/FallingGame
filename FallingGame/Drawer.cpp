@@ -562,7 +562,7 @@ void Drawer::draw_sides(Player& p)
 	float y = -p.r.y;
 	while (y > sides_height_per_image) { y -= sides_height_per_image; };
 	glUniform2f(sides_u_offset, 0.f, y);
-	glDrawElements(GL_TRIANGLES, 120, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 }
 
 void Drawer::draw_clouds(Game& g)
