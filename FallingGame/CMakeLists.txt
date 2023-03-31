@@ -6,6 +6,18 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
 	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp Player.h stb_image.h 
+
+Bouncer.h
+Camera.h
+Cloud.h
+Coin.h
+CoinParticle.h
+Drawer.h
+Game.h
+Layer.h
+misc.h
+Player.h
+
 )
 
 
