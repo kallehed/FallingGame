@@ -88,69 +88,73 @@ void Drawer::init(Game& g)
 		* into, recieving the correct 4 coordintes in some way. 
 		*/
 
-		unsigned int width = 0, height = 0;
-
-		// the offset between characters in the texture
 		static constexpr int PIX_OFFSET = 1;
-
-		for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++)
+		// load glyphs twice and make a texture with all of them
 		{
-			// load character glyph   
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-			{
-				std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
-				continue;
-			}
-			width += face->glyph->bitmap.width + PIX_OFFSET;
-			height = std::max(height, face->glyph->bitmap.rows);
-			// now store character for later use
-			Character character = {
-				face->glyph->bitmap.width, face->glyph->bitmap.rows,
-				face->glyph->bitmap_left, face->glyph->bitmap_top,
-				face->glyph->advance.x
-			};
-			m_characters[c] = character;
-		}
+			unsigned int width = 0, height = 0;
 
-		// generate all standard ascii characters
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-
-		// create texture for use
-		glGenTextures(1, &m_main_font_tex);
-		glBindTexture(GL_TEXTURE_2D, m_main_font_tex); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
-		int x = PIX_OFFSET;
-
-		// exclude loading space by starting at 33.
-		for (unsigned char c = CHARACTERS_START_AT + 1; c < CHARACTERS; c++)
-		{
-			// load character glyph 
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-			{
-				std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
-				continue;
-			}
-
-			// generate texture
-		    glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0,
-				face->glyph->bitmap.width, face->glyph->bitmap.rows,
-				GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-			x += face->glyph->bitmap.width + PIX_OFFSET;
+			// the offset between characters in the texture
 			
+
+			for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++)
+			{
+				// load character glyph   
+				if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+				{
+					std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
+					continue;
+				}
+				width += face->glyph->bitmap.width + PIX_OFFSET;
+				height = std::max(height, face->glyph->bitmap.rows);
+				// now store character for later use
+				Character character = {
+					face->glyph->bitmap.width, face->glyph->bitmap.rows,
+					face->glyph->bitmap_left, face->glyph->bitmap_top,
+					face->glyph->advance.x
+				};
+				m_characters[c] = character;
+			}
+
+			// generate all standard ascii characters
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+
+			// create texture for use
+			glGenTextures(1, &m_main_font_tex);
+			glBindTexture(GL_TEXTURE_2D, m_main_font_tex); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+			int x = PIX_OFFSET;
+
+			// exclude loading space by starting at 33.
+			for (unsigned char c = CHARACTERS_START_AT + 1; c < CHARACTERS; c++)
+			{
+				// load character glyph 
+				if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+				{
+					std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
+					continue;
+				}
+
+				// generate texture
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0,
+					face->glyph->bitmap.width, face->glyph->bitmap.rows,
+					GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+				x += face->glyph->bitmap.width + PIX_OFFSET;
+
+			}
+
+			FT_Done_Face(face);
+			delete[] font_buffer;
+
+			FT_Done_FreeType(ft);
+
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // turn back on?
 		}
-
-		FT_Done_Face(face);
-		delete[] font_buffer;
-
-		FT_Done_FreeType(ft);
-
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // turn back on?
 
 		/////////////////  OPENGL buffer stuff
 
@@ -637,7 +641,7 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 
 	{
 		Pos global_offset = c.offset();
-		glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
+		glUniform2f(m_bird_u_offset, global_offset.x + x, global_offset.y + y);
 	}
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

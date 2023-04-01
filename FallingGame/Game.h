@@ -34,7 +34,7 @@ public:
 	std::vector<CoinParticle> m_coin_particles;
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities
-	static constexpr float G_HEIGHT = Layer::HEIGHT; // zone for game entities
+	static constexpr float G_HEIGHT = 1.0; // zone for game entities
 private:
 
 };

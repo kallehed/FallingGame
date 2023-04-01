@@ -24,9 +24,9 @@ bool Rect::intersect(Rect& e)
 	return ((x <= e.x + e.w) && (x + w >= e.x) && (y <= e.y + e.h) && (y + h >= e.y));
 }
 
-float Rect::x_dist(HoLine& h)
+float Rect::x_dist(HoLine& hl)
 {
-	return (x + w / 2.f) - (h.x + h.w / 2.f);
+	return (x + w / 2.f) - (hl.x + hl .w / 2.f);
 }
 
 HoLine::HoLine(float _x, float _y, float _w) : x(_x), y(_y), w(_w)

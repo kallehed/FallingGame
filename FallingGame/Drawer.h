@@ -123,7 +123,7 @@ private:
 	* float g_death_y; // y where you die
 	* float g_cam_y; // canera y
 	* float g_timer; // time since level started
-	* float g_w; // how much bigger the width is to the height, CONSTANT = 1.6 = g.l.WIDTH
+	* float g_w; // how much bigger the width is to the height, CONSTANT = 1.6 probs = g.l.WIDTH
 	*/
 	public:
 	static constexpr const char* SHADER_START_TEXT = 

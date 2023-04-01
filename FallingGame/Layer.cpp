@@ -83,7 +83,7 @@ void Layer::init()
 
 #endif
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+	//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 		 //SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0); // if not using depth buffers
@@ -94,12 +94,11 @@ void Layer::init()
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
-	if (m_window == NULL) std::cout << "ERROR::WINDOW_COULD_NOT_BE_CREATED\n";
-
+	if (m_window == NULL) SDL_LogError(0, "ERROR::WINDOW_COULD_NOT_BE_CREATED");
 
 
 	m_glcontext = SDL_GL_CreateContext(m_window);
-	if (!m_glcontext) { std::cout << "ERROR::GLContext_NOT_CREATED\n"; }
+	if (!m_glcontext) { SDL_LogError(0, "ERROR::GLContext_NOT_CREATED"); }
 	SDL_GL_MakeCurrent(m_window, m_glcontext);
 
 #ifndef __ANDROID__
