@@ -908,7 +908,7 @@ static void find_coreGLES2(void) {
 	}
 }
 
-int gladLoadGLES2Loader(GLADloadproc load) {
+int gladLoadGLLoader(GLADloadproc load) {
 	GLVersion.major = 0; GLVersion.minor = 0;
 	glGetString = (PFNGLGETSTRINGPROC)load("glGetString");
 	if(glGetString == NULL) return 0;

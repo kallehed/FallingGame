@@ -101,18 +101,13 @@ void Layer::init()
 	if (!m_glcontext) SDL_LogError(0, "ERROR::GLContext_NOT_CREATED: %s", SDL_GetError());
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
-#ifndef __ANDROID__
+	// I changed the name of the load function in gladES file
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 	{
 		SDL_LogError(0, "Failed to initialize GLAD");
 	}
-#else
-	if (!gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress))
-	{
-		SDL_LogError(0,"KALLE Failed to initialize GLAD");
-	}
 
-#endif
+
 	// debug mode
 	if constexpr (true) {
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);

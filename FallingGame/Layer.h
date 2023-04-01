@@ -16,6 +16,8 @@
 
 #include <array>
 
+#define MOBILE_ON_COMPUTER
+
 // Layer for SDL: window management, events, some opengl, some image loading ...
 class Layer
 {
@@ -35,12 +37,12 @@ public:
 	static std::array<int, 2> load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y);
 
 	float dt = 0.f; // delta time for last frame
-#ifndef __ANDROID__
+#if !(defined(__ANDROID__)) && !(defined(MOBILE_ON_COMPUTER)) // Computer
 	static constexpr float WIDTH = 1.6f; // of SCREEN
 	static constexpr float HEIGHT = 1.0f; // of SCREEN
-#else
-	static constexpr float WIDTH = 0.8f; // of SCREEN
-	static constexpr float HEIGHT = 1.6f; // of SCREEN
+#else // Mobile
+	static constexpr float WIDTH = 1.0f; // of SCREEN
+	static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
 #endif
 	
 

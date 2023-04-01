@@ -54,7 +54,7 @@
     <ClCompile Include="CoinParticle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
+    <ClCompile Include="gladES.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

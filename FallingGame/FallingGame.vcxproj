@@ -151,7 +151,7 @@
     <ClCompile Include="CoinParticle.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="glad.c" />
+    <ClCompile Include="gladES.c" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="misc.cpp" />
