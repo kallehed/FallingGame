@@ -26,11 +26,9 @@ void main()
     float pos_y =             u_offset.y + u_scale * (u_text[c].w - height);
 
     vec2 pos = vec2(pos_x, pos_y);
-    gl_Position = vec4(pos.x/g_w, pos.y, 0.0, 1.0);
+    gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
 
     f_texCoord = vec2((u_char_x_offsets[c] + width), height);
     ivec2 asd = textureSize(u_font_tex, 0);
     f_texCoord /= vec2(asd.x, asd.y);
     //f_texCoord /= vec2(2099.0, 45.0);
-    
-}

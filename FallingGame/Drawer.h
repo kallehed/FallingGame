@@ -139,11 +139,12 @@ private:
 		"	float g_cam_y;"
 		"	float g_timer;"
 		"	float g_w;"
+		"   float g_h;"
 		"};\n";
 	private:
 	static constexpr int UBO_GLOBAL_BIND = 0;
 	static constexpr const char* UBO_GLOBAL_NAME = "Globals"; // never used
-	static constexpr int UBO_GOBAL_FLOATS = 4;
+	static constexpr int UBO_GOBAL_FLOATS = 5;
 	static constexpr int UBO_GLOBAL_SIZE = UBO_GOBAL_FLOATS * sizeof(float);
 	unsigned int ubo_globals; // BINDING 0.
 

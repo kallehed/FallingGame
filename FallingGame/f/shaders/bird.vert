@@ -33,8 +33,7 @@ void main()
     vec2 pos = poses[gl_VertexID] * vec2(width, height);
     pos = rot * pos;
     pos = pos + u_offset;
-    gl_Position = vec4(pos.x/g_w, pos.y, 0.0, 1.0);
+    gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
 
     f_texCoord = texCoords[gl_VertexID];
     f_screenCoord = gl_Position.xy;
-}

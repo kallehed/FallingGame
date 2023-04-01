@@ -8,8 +8,8 @@ void Cloud::construct(Game& g, float depth)
 	init(g);
 
 	// this places the cloud in a random screen position, while init() will place the cloud at the edges. 
-	x = rand_uni() * g.l.WIDTH;
-	y = rand_uni() * g.l.HEIGHT;
+	x = rand_uni() * Layer::WIDTH;
+	y = rand_uni() * Layer::HEIGHT;
 }
 
 void Cloud::logic(Game& g)

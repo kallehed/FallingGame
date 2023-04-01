@@ -87,6 +87,7 @@ void Game::start()
 		case GAME_STATE::Menu:
 			while (!go_to_new_state) {
 				start_func();
+
 				glClearColor(1.0, 1.0, 1.0, 1.0);
 				glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 				
@@ -227,7 +228,7 @@ void Game::start()
 				{
 					char buf[10];
 					snprintf(buf, 10, "Coins: %d", p.coins);
-					d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH + 0.4f, Layer::HEIGHT - 0.2f, 0.001f);
+					d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
 				}
 
 				end_func();

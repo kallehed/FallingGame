@@ -264,8 +264,8 @@ void Drawer::init(Game& g)
 
 	// sky shader
 	{
-		const float y_imgs = 4.f * g.l.HEIGHT;
-		const float x_imgs = 4.f * g.l.WIDTH;
+		const float y_imgs = 4.f * Layer::HEIGHT;
+		const float x_imgs = 4.f * Layer::WIDTH;
 
 		sky_height_per_sky = (2.f * g.G_HEIGHT) / y_imgs;
 
@@ -650,7 +650,7 @@ void Drawer::before_draw(Game& g)
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[UBO_GOBAL_FLOATS] = { g.m_death_y, g.c.y, g.m_timer, g.l.WIDTH };
+		float data[UBO_GOBAL_FLOATS] = { g.m_death_y, g.c.y, g.m_timer, Layer::WIDTH, Layer::HEIGHT};
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 
@@ -668,7 +668,7 @@ void Drawer::draw_fps(float dt)
 	char fps_string[SIZE];
 	snprintf(fps_string, SIZE, "%f", 1.f/dt);
 
-	draw_text(fps_string, Color{ 0,0,1,1 }, -Layer::WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
+	draw_text(fps_string, Color{ 0,0,1,1 }, -Game::G_WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
 }
 
 

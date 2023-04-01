@@ -315,6 +315,7 @@ bool Layer::key_just_down(SDL_Scancode key) const
 
 unsigned int Layer::compile_shader_from_file(int type, const char* path, const char* error_msg)
 {
+	SDL_assert(type == GL_VERTEX_SHADER || type == GL_FRAGMENT_SHADER);
 	unsigned int shader = glCreateShader(type);
 
 	{
@@ -327,8 +328,17 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		}
 		SDL_RWclose(io);
 		str[file_size] = '\0';
+
+		const char* sh_end = "";
+		if (type == GL_VERTEX_SHADER) {
+			sh_end =
+				"\n"
+				"	gl_Position.x /= g_w;"
+				"	gl_Position.y /= g_h;"
+				"}\n";
+		}
 	
-		const char* strs[] = {Drawer::SHADER_START_TEXT, str};
+		const char* strs[] = {Drawer::SHADER_START_TEXT, str, sh_end};
 		//SDL_Log("SDL KALLE Compiling a new shader: %s. with following code: %s %s", path, strs[0], strs[1]);
 		glShaderSource(shader, sizeof(strs)/sizeof(const char*), strs, NULL); // last null because null-terminated-strings
 		delete[] str;

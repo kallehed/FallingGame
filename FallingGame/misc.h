@@ -1,5 +1,11 @@
 #pragma once
 
+// set this if on computer and wanting to develop for mobile
+#if defined __ANDROID__  || true
+// make game for vertical playing
+#define KALLE_GAME_VERTICAL 
+#endif
+
 constexpr inline bool DRAW_HB = false; // draw hitboxes?s
 // R for hot reload.
 constexpr inline bool DEV_TOOLS = true; // allow development stuff

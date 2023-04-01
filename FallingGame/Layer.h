@@ -1,5 +1,7 @@
 #pragma once
 
+#include "misc.h"
+
 //#ifndef __ANDROID__
 
 #include <glad/glad.h>
@@ -15,12 +17,6 @@
 //#endif
 
 #include <array>
-
-// set this if on computer and wanting to develop for mobile
-#if defined __ANDROID__ // || true
-// make game for vertical playing
-#define KALLE_GAME_VERTICAL 
-#endif
 
 
 
@@ -43,9 +39,10 @@ public:
 	static std::array<int, 2> load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y);
 
 	float dt = 0.f; // delta time for last frame
-#if defined KALLE_GAME_VERTICAL // Mobile
-static constexpr float WIDTH = 1.0f; // of SCREEN
-static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
+#if defined(KALLE_GAME_VERTICAL) // Mobile
+	static constexpr float WIDTH = 0.8f; // of SCREEN
+	//static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
+	static constexpr float HEIGHT = WIDTH * (2722.f / 1440.f); // my exact phone dimensions;
 #else // Computer
 	static constexpr float WIDTH = 1.6f; // of SCREEN
 	static constexpr float HEIGHT = 1.0f; // of SCREEN
@@ -56,7 +53,7 @@ static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
 private:
 	static unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
 
-	static constexpr float START_LENGTH_CONST = 500.f; // used for setting inital width/height
+	static constexpr float START_LENGTH_CONST = 600.f; // used for setting inital width/height
 
 	static constexpr float MIN_FPS = 60.f;
 	static constexpr float MAX_FPS = 240.f;
