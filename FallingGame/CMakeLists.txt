@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
 	glad.c
-	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp Player.h stb_image.h 
+	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp stb_image.h 
 
 Bouncer.h
 Camera.h
@@ -24,7 +24,7 @@ Player.h
 
 if(BUILD_SHARED_LIBS)
 	add_library(main SHARED)
-	target_sources(main PRIVATE ${SOURCES} gladES.c)
+	target_sources(main PRIVATE ${SOURCES})
 
         include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
