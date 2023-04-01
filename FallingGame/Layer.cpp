@@ -62,7 +62,6 @@ void APIENTRY glDebugOutput(GLenum source,
 
 }
 
-#define CHKSDL(ARG) {if (ARG) {SDL_LogError(0, "Error at line %d \"%s\": %s", __LINE__, #ARG , SDL_GetError());}}
 
 void Layer::init()
 {
@@ -321,6 +320,8 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 	{
 		// load from file
 		SDL_RWops* io = SDL_RWFromFile(path, "r");
+		CHKSDL(!io);
+		if (io == NULL) goto GOTO_AFTER_READFILE;
 		auto file_size = io->size(io);
 		char* str = new char[file_size + 1]; // one extra for null termination
 		if (!SDL_RWread(io, str, 1, file_size)) {
@@ -343,6 +344,7 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		glShaderSource(shader, sizeof(strs)/sizeof(const char*), strs, NULL); // last null because null-terminated-strings
 		delete[] str;
 	}
+	GOTO_AFTER_READFILE:
 	glCompileShader(shader);
 
 	int success;
@@ -399,7 +401,8 @@ std::array<int, 2> Layer::load_texture(const char* path, unsigned int* image, in
 	// new
 	
 	SDL_RWops* io = SDL_RWFromFile(path, "rb");
-	if (io == NULL) SDL_Log("SDL KALLE ERROR OPENING FILE load_texture rb: %s, error: %s", path, SDL_GetError());
+	CHKSDL(!io);
+	if (!io) return { 0,0 };
 	Sint64 file_size = io->size(io);
 	unsigned char* buffer = new unsigned char[file_size];
 	

@@ -6,6 +6,8 @@
 #define KALLE_GAME_VERTICAL 
 #endif
 
+#define CHKSDL(ARG) {if (ARG) {SDL_LogError(0, "Error at line %d in file %s \"%s\": %s", __LINE__, __FILE__, #ARG , SDL_GetError());}}
+
 constexpr inline bool DRAW_HB = false; // draw hitboxes?s
 // R for hot reload.
 constexpr inline bool DEV_TOOLS = true; // allow development stuff

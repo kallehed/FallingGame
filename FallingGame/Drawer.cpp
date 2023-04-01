@@ -37,7 +37,7 @@ void Drawer::init(Game& g)
 			std::cin.get();
 		}
 
-		FT_Face face;
+		FT_Face face = NULL;
 		// can ONLY be freed after FT_Done_Face
 		unsigned char* font_buffer = NULL;
 
@@ -45,7 +45,8 @@ void Drawer::init(Game& g)
 		// Load font by first loading it into memory
 
 			SDL_RWops* io = SDL_RWFromFile("f/fonts/arial.ttf", "rb");
-			if (io == NULL) SDL_Log("ERROR CANT LOAD arial.ttf file");
+			CHKSDL(!io);
+			if (!io) goto GOTO_AFTER_FONT_LOAD;
 			auto file_length = io->size(io);
 			font_buffer = new unsigned char[file_length];
 
@@ -56,6 +57,7 @@ void Drawer::init(Game& g)
 				SDL_Log("ERROR::FREETYPE: Font failed to load arial");
 			}
 		}
+		GOTO_AFTER_FONT_LOAD:
 		
 		// set width to 0 to dynamically calculate it
 		FT_Set_Pixel_Sizes(face, 0, 48);
