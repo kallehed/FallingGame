@@ -61,6 +61,8 @@ void APIENTRY glDebugOutput(GLenum source,
 
 }
 
+#define CHKSDL(ARG) {if (ARG) {SDL_LogError(0, "Error at \"%s\": %s", #ARG , SDL_GetError());}}
+
 void Layer::init()
 {
 	SDL_Log("KALLE SDL app started");
@@ -76,48 +78,47 @@ void Layer::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-	//SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-	//SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
-	//SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-
-
 #endif
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-		 //SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
+	
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
+	//SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 64);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0); // if not using depth buffers
-	//SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	//SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	//SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	//SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0); // not used
+
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	if (m_window == NULL) SDL_LogError(0, "ERROR::WINDOW_COULD_NOT_BE_CREATED");
-
-
 	m_glcontext = SDL_GL_CreateContext(m_window);
-	if (!m_glcontext) { SDL_LogError(0, "ERROR::GLContext_NOT_CREATED"); }
-	SDL_GL_MakeCurrent(m_window, m_glcontext);
+	if (!m_glcontext) SDL_LogError(0, "ERROR::GLContext_NOT_CREATED: %s", SDL_GetError());
+	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
 #ifndef __ANDROID__
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		std::cin.get();
+		SDL_LogError(0, "Failed to initialize GLAD");
 	}
 #else
 	if (!gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress))
 	{
-		SDL_Log("KALLE Failed to initialize GLAD");
+		SDL_LogError(0,"KALLE Failed to initialize GLAD");
 	}
 
 #endif
 	// debug mode
 	if constexpr (true) {
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-		if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+		bool debug_on = flags & GL_CONTEXT_FLAG_DEBUG_BIT;
+		SDL_Log("Using debug context: %d", debug_on);
+		if (debug_on)
 		{
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -126,17 +127,40 @@ void Layer::init()
 		}
 	}
 
-
 	// 1 for vsync, which works for all platforms tested so far
-	SDL_GL_SetSwapInterval(1);
 
-	//{int a = -2; std::cout << "color sizes: " << SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &a) << " = " << a << '\n'; }
-	//{int a = -2; std::cout << "depth sizes: " << SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &a) << " = " << a << '\n'; }
+	CHKSDL(SDL_GL_SetSwapInterval(1));
+
+	glDisable(GL_STENCIL_TEST);
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	
+	{
+		int r = -2, g = -2, b = -2, a = -2, d = -2, s = -2, buf=-2, dbuf=-2;
+		auto res_r = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &r); 
+		auto res_g = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &g); 
+		auto res_b = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &b);
+		auto res_a = SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, &a);
+		auto res_buf = SDL_GL_GetAttribute(SDL_GL_BUFFER_SIZE, &buf);
+		auto res_db = SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &dbuf);
+
+		// these two may crash on linux specifically
+		auto res_d = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &d);
+		auto res_s = SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &s);
+
+		SDL_Log("Red RES: %d, Size: %d ", res_r, r);
+		SDL_Log("Green RES: %d, Size: %d ", res_g, g);
+		SDL_Log("Blue RES: %d, Size: %d ", res_b, b);
+		SDL_Log("Alpha RES: %d, Size: %d ", res_a, a);
+		SDL_Log("Buffer RES: %d, Size: %d ", res_buf, buf);
+		SDL_Log("Doublebuffer RES: %d, Value: %d", res_db, dbuf);
+
+		SDL_Log("Depth RES: %d, Size: %d ", res_d, d);
+		SDL_Log("Stencil RES: %d, Size: %d", res_s, a);
+		
+	}
+
 	// don't know if this is necessary? maybe on high-dpi platforms?
 	{
 		int w, h;
@@ -171,13 +195,15 @@ bool Layer::start_frame()
 		case SDL_WINDOWEVENT:
 			switch (e.window.event) {
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
+			{
 				int w, h;
 				SDL_GL_GetDrawableSize(m_window, &w, &h);
 				glViewport(0, 0, w, h);
-				std::cout << "window PIXELsize: " << w << " h: " << h << '\n';
+				SDL_Log("Window PIXELsize: w: %d, h: %d ", w, h);
 				SDL_GetWindowSize(m_window, &w, &h);
-				std::cout << "window SCREENsize: " << w << " h: " << h << '\n';
+				SDL_Log("Window SCREENsize: w: %d, h: %d ", w, h);
 				break;
+			}
 			}
 			break;
 		case SDL_KEYDOWN:
@@ -186,7 +212,7 @@ bool Layer::start_frame()
 					m_keys_down[e.key.keysym.scancode] = true;
 					m_keys_just_down[e.key.keysym.scancode] = true;
 				}	
-				SDL_Log("Just jmotioned!");
+				//SDL_Log("Just jmotioned!");
 			//}
 			break;
 		case SDL_KEYUP:
@@ -196,7 +222,6 @@ bool Layer::start_frame()
 			break;
 		case SDL_FINGERMOTION:
 		case SDL_FINGERDOWN: // will NOT be called on a computer
-			SDL_Log("KALLE SDL Just motioned!");
 			m_keys_just_down[SDL_SCANCODE_O] = true;
 
 			m_keys_down[SDL_SCANCODE_A] = false;
@@ -205,15 +230,12 @@ bool Layer::start_frame()
 			m_keys_down[(e.tfinger.x < 0.5f) ? (SDL_SCANCODE_A) : (SDL_SCANCODE_D)] = true; 
 
 			break;
-		
 		case SDL_FINGERUP:
 			m_keys_down[SDL_SCANCODE_A] = false;
 			m_keys_down[SDL_SCANCODE_D] = false;
 
 			break;
-
 		}
-		
 	}
 
 
