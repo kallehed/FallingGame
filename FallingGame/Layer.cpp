@@ -12,6 +12,7 @@
 #include "Drawer.h"
 
 
+
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
 	unsigned int id,
@@ -61,55 +62,53 @@ void APIENTRY glDebugOutput(GLenum source,
 
 }
 
-#define CHKSDL(ARG) {if (ARG) {SDL_LogError(0, "Error at \"%s\": %s", #ARG , SDL_GetError());}}
+#define CHKSDL(ARG) {if (ARG) {SDL_LogError(0, "Error at line %d \"%s\": %s", __LINE__, #ARG , SDL_GetError());}}
 
 void Layer::init()
 {
 	SDL_Log("KALLE SDL app started");
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+	CHKSDL(SDL_Init(SDL_INIT_VIDEO));
 
 #ifndef __ANDROID__
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3));
+	
 #else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2));
 
 #endif
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1));
 	//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 	
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8); // cont headers... graph
-	//SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 64);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0); // if not using depth buffers
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0); // not used
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8)); // cont headers... graph
+	//CHKSDL(SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 64));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0)); // if not using depth buffers
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0)); // not used
 
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+	//CHKSDL(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1));
+	//CHKSDL(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1));
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
-	if (m_window == NULL) SDL_LogError(0, "ERROR::WINDOW_COULD_NOT_BE_CREATED");
+	if (m_window == NULL) SDL_LogError(0, "ERROR::WINDOW_COULD_NOT_BE_CREATED: %s", SDL_GetError());
 	m_glcontext = SDL_GL_CreateContext(m_window);
-	if (!m_glcontext) SDL_LogError(0, "ERROR::GLContext_NOT_CREATED: %s", SDL_GetError());
+	CHKSDL(!m_glcontext);
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
 	// I changed the name of the load function in gladES file
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-	{
+	if (!gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress))
 		SDL_LogError(0, "Failed to initialize GLAD");
-	}
 
-
-	// debug mode
-	if constexpr (true) {
+	// debug mode	
+#if 1
+	{
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 		bool debug_on = flags & GL_CONTEXT_FLAG_DEBUG_BIT;
 		SDL_Log("Using debug context: %d", debug_on);
@@ -121,6 +120,7 @@ void Layer::init()
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 	}
+#endif
 
 	// 1 for vsync, which works for all platforms tested so far
 
@@ -153,7 +153,6 @@ void Layer::init()
 
 		SDL_Log("Depth RES: %d, Size: %d ", res_d, d);
 		SDL_Log("Stencil RES: %d, Size: %d", res_s, a);
-		
 	}
 
 	// don't know if this is necessary? maybe on high-dpi platforms?
@@ -175,7 +174,6 @@ Layer::~Layer()
 bool Layer::start_frame() 
 {
 	m_start = SDL_GetPerformanceCounter();
-
 
 	//SDL_Log("KALLE SDL Start of frame");
 
@@ -235,20 +233,11 @@ bool Layer::start_frame()
 
 
 	if (key_just_down(SDL_SCANCODE_RETURN)) { // Switch fullscreen
-		bool is_fullscreen = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN; // should work?
+		bool is_fullscreen = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN_DESKTOP; // should work?
 		SDL_SetWindowFullscreen(m_window, is_fullscreen ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
-		/*if (!m_fullscreen) {
-			SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		}
-		else {
-			SDL_SetWindowFullscreen(m_window, 0);
-		}
-		m_fullscreen = !m_fullscreen;
-		*/
 	}
 	
 	if constexpr (DEV_TOOLS) {
-
 		if (key_just_down(SDL_SCANCODE_Q)) { // query
 			SDL_DisplayMode mode;
 			SDL_GetWindowDisplayMode(m_window, &mode);
@@ -330,27 +319,19 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 
 	{
 		// load from file
-		/*std::string shaderSource;
-		{
-			std::ifstream f(path);
-			if (f) {
-				std::getline(f, shaderSource, '\0');
-			}
-			else {
-				std::cout << "ERROR::FILE_NOT_FOUND: " << path << "\n";
-			}
-		}*/
 		SDL_RWops* io = SDL_RWFromFile(path, "r");
-		char str[10000] = {'\0'};
-		if (SDL_RWread(io, str, sizeof(str), 1)) {
-			SDL_Log("ERROR in SDL_RWread at file(probably too big) %s", path);
+		auto file_size = io->size(io);
+		char* str = new char[file_size + 1]; // one extra for null termination
+		if (!SDL_RWread(io, str, 1, file_size)) {
+			SDL_Log("ERROR in SDL_RWread at file(probably too big) %s, error: %s", path, SDL_GetError());
 		}
-	
 		SDL_RWclose(io);
-		//const char* str = shaderSource.c_str();
+		str[file_size] = '\0';
+	
 		const char* strs[] = {Drawer::SHADER_START_TEXT, str};
 		//SDL_Log("SDL KALLE Compiling a new shader: %s. with following code: %s %s", path, strs[0], strs[1]);
 		glShaderSource(shader, sizeof(strs)/sizeof(const char*), strs, NULL); // last null because null-terminated-strings
+		delete[] str;
 	}
 	glCompileShader(shader);
 
@@ -402,27 +383,20 @@ std::array<int, 2> Layer::load_texture(const char* path, unsigned int* image, in
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping_x);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping_y);
-	{
-		float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
 	// new
 	
 	SDL_RWops* io = SDL_RWFromFile(path, "rb");
-	if (io == NULL) SDL_Log("SDL KALLE ERROR OPENING FILE load_texture rb: %s", path);
+	if (io == NULL) SDL_Log("SDL KALLE ERROR OPENING FILE load_texture rb: %s, error: %s", path, SDL_GetError());
 	Sint64 file_size = io->size(io);
 	unsigned char* buffer = new unsigned char[file_size];
 	
-	SDL_RWread(io, buffer, file_size, 1);
+	SDL_RWread(io, buffer, 1, file_size);
 	SDL_RWclose(io);
 
 	int width, height, nrChannels;
-	//unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 	unsigned char* data = stbi_load_from_memory(buffer, (int)file_size, &width, &height, &nrChannels, 0);
 	delete [] buffer;
 	if (data)

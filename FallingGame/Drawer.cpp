@@ -174,7 +174,6 @@ void Drawer::init(Game& g)
 		glVertexAttribPointer(0, TEXT_ATTRIBUTES, GL_FLOAT, GL_FALSE, TEXT_BYTES_PER, (void*)0);
 
 		glVertexAttribDivisor(0, 1); // one per instance
-		//glVertexBindingDivisor(0,1);
 
 
 		m_text_u_offset_scale = glGetUniformLocation(m_text_program, "u_offset_scale");
@@ -418,26 +417,25 @@ void Drawer::init(Game& g)
 
 	// load textures
 	{
-		
 		static constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
 		{ {
-			{"f/images/bird.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/bird_closed.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/mushroom_cap.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/mushroom_stem.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/side_background.png", GL_CLAMP_TO_BORDER, GL_REPEAT },
+			{"f/images/bird.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/bird_closed.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/mushroom_cap.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/mushroom_stem.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/side_background.png", GL_CLAMP_TO_EDGE, GL_REPEAT },
 			{"f/images/vines.png", GL_REPEAT, GL_REPEAT },
 			{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/storm.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/cloud_1.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/cloud_2.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/cloud_3.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/cloud_4.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/coin.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER},
-			{"f/images/coin_blurred.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER}
+			{"f/images/storm.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/cloud_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/cloud_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/cloud_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/cloud_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/coin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE}
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {

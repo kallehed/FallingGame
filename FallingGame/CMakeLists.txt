@@ -5,6 +5,7 @@ project(FallingGameCmake)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
+	glad.c
 	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp Player.h stb_image.h 
 
 Bouncer.h
@@ -46,6 +47,6 @@ else()
 	set(default_build_type "Release")
 
 	add_executable(${PROJECT_NAME})
-	target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} glad.c)
+	target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 	target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES})
 endif()

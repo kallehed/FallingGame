@@ -1,22 +1,28 @@
 #pragma once
 
-#ifndef __ANDROID__
+//#ifndef __ANDROID__
 
 #include <glad/glad.h>
 #include <SDL/SDL.h>
 
-#else
+//#else
 
-#include <gladES/glad.h>
-#include <SDL/SDL.h>
+//#include <gladES/glad.h>
+//#include <SDL/SDL.h>
 //#include <SDL/SDL_opengles2.h>
 //#include <GLES3/gl32.h>
 
-#endif
+//#endif
 
 #include <array>
 
-#define MOBILE_ON_COMPUTER
+// set this if on computer and wanting to develop for mobile
+#if defined __ANDROID__ // || true
+// make game for vertical playing
+#define KALLE_GAME_VERTICAL 
+#endif
+
+
 
 // Layer for SDL: window management, events, some opengl, some image loading ...
 class Layer
@@ -37,12 +43,13 @@ public:
 	static std::array<int, 2> load_texture(const char* path, unsigned int* image, int wrapping_x, int wrapping_y);
 
 	float dt = 0.f; // delta time for last frame
-#if !(defined(__ANDROID__)) && !(defined(MOBILE_ON_COMPUTER)) // Computer
+#if defined KALLE_GAME_VERTICAL // Mobile
+static constexpr float WIDTH = 1.0f; // of SCREEN
+static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
+#else // Computer
 	static constexpr float WIDTH = 1.6f; // of SCREEN
 	static constexpr float HEIGHT = 1.0f; // of SCREEN
-#else // Mobile
-	static constexpr float WIDTH = 1.0f; // of SCREEN
-	static constexpr float HEIGHT = 1.890277777777777f; // of SCREEN
+
 #endif
 	
 
