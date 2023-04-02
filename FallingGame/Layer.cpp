@@ -243,11 +243,11 @@ bool Layer::start_frame()
 
 		case SDL_FINGERDOWN: // will NOT be called on a computer
 			m_finger_just_down = true;
-			m_finger_down = true;
-
+			
 			// * fallthrough *
 	
 		case SDL_FINGERMOTION:
+			m_finger_down = true;
 			m_finger_pos.x = e.tfinger.x;
 			m_finger_pos.y = e.tfinger.y;
 
