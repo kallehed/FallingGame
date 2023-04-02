@@ -74,7 +74,7 @@ void Player::logic(Game& g)
 	}
 }
 
-void Player::draw(Game& g)
+void Player::draw(Game& g, Camera& c)
 {
 	// width "3D" rotation at bounce
 	float w = WIDTH - std::max(0.0f, std::min(2.f*WIDTH, 1.f * y_vel));
@@ -86,5 +86,5 @@ void Player::draw(Game& g)
 	}
 	//g.d.draw_image(g.c, texture, r.x + 0.045f, r.y + 0.135f, w, WIDTH * 1.16386555f, rotation);
 	r.draw(g.d, { 1.f, 0.f, 0.1f, 0.4f });
-	g.d.draw_bird(g.c, texture, r.x + 0.045f, r.y + 0.135f, rotation, w, WIDTH * 1.16386555f, time_since_coin);
+	g.d.draw_bird(c, texture, r.x + 0.045f, r.y + 0.135f, rotation, w, HEIGHT, time_since_coin);
 }

@@ -2,6 +2,8 @@
 
 #include "Game.h"
 
+#include "CoinParticle.h"
+
 #include <iostream>
 #include <tuple>
 #include <cmath>
@@ -352,7 +354,7 @@ void Drawer::init(Game& g)
 		glEnableVertexAttribArray(0);
 		glGenBuffers(1, &cloud_VBO_pos);
 		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_pos);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * FLOATS_PER_CLOUD_POS * Game::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * FLOATS_PER_CLOUD_POS * CloudHandler::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
 
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glVertexAttribDivisor(0, 1);
@@ -360,7 +362,7 @@ void Drawer::init(Game& g)
 		glEnableVertexAttribArray(1);
 		glGenBuffers(1, &cloud_VBO_tex_z);
 		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_tex_z);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)* TEX_AND_Z_FLOATS* Game::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float)* TEX_AND_Z_FLOATS* CloudHandler::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glVertexAttribDivisor(1, 1);
 
@@ -544,13 +546,13 @@ void Drawer::draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_sky(Game& g)
+void Drawer::draw_sky(Game& g, Camera& c)
 {
 	glUseProgram(sky_program);
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
-	float y = -g.p.r.y/5.f;
+	float y = -c.y/5.f;
 	y -= (sky_height_per_sky) * std::floor(y / sky_height_per_sky);
 	
 	glUniform2f(sky_u_offset, 0.f, y);
@@ -565,13 +567,10 @@ void Drawer::draw_sides(Player& p)
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
 	//glBindTexture(GL_TEXTURE_2D, texs[TEX::vines]);
 
-	float y = -p.r.y;
-	while (y > sides_height_per_image) { y -= sides_height_per_image; };
-	glUniform2f(sides_u_offset, 0.f, y);
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_clouds(Game& g)
+void Drawer::draw_clouds(CloudHandler& ch)
 {
 	glUseProgram(cloud_program);
 	glBindVertexArray(cloud_VAO);
@@ -590,11 +589,11 @@ void Drawer::draw_clouds(Game& g)
 
 	// cloud_VBO_pos and cloud_VBO_tex_z initialization
 	{
-		float positions[Game::NR_CLOUDS * FLOATS_PER_CLOUD_POS];
+		float positions[ch.NR_CLOUDS * FLOATS_PER_CLOUD_POS];
 		
-		float tex_z_values[Game::NR_CLOUDS * TEX_AND_Z_FLOATS];
+		float tex_z_values[ch.NR_CLOUDS * TEX_AND_Z_FLOATS];
 		int i_t_z = 0, i_pos = 0;
-		for (auto& e : g.m_clouds) {
+		for (auto& e : ch.clouds) {
 			float w = e.w, h = e.h;
 			float x = e.x;
 			float y = e.y;
@@ -612,7 +611,7 @@ void Drawer::draw_clouds(Game& g)
 		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_tex_z);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(tex_z_values), tex_z_values);
 	}
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, Game::NR_CLOUDS);
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, ch.NR_CLOUDS);
 }
 
 void Drawer::draw_coin_particle(CoinParticle& c)
@@ -648,12 +647,12 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::before_draw(Game& g)
+void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer)
 {
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[UBO_GOBAL_FLOATS] = { g.m_death_y, g.c.y, g.m_timer, Layer::WIDTH, Layer::HEIGHT};
+		float data[UBO_GOBAL_FLOATS] = { death_y, cam_y, timer, Layer::WIDTH, Layer::HEIGHT};
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 

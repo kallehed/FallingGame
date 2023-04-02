@@ -151,6 +151,7 @@
     <ClCompile Include="CoinParticle.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameState.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="CoinParticle.h" />
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="Player.h" />

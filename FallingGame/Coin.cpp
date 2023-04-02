@@ -21,25 +21,25 @@ void Coin::logic(Game& g)
 {
 }
 
-void Coin::draw(Game& g)
+void Coin::draw(Game& g, Camera& c, BaseState& gs)
 {
 	if (!picked_up) {
-		float sin_val = std::sin((g.m_timer - time_offset) * 2.f);
+		float sin_val = std::sin((gs.timer - time_offset) * 2.f);
 		float width = r.w * (std::pow(std::abs(sin_val), 0.9f)) * sign(sin_val);
-		g.d.draw_image(g.c, tex, r.x + r.w / 2, r.y + r.h / 2, width, r.h, 0.f);
+		g.d.draw_image(c, tex, r.x + r.w / 2, r.y + r.h / 2, width, r.h, 0.f);
 
 		r.draw(g.d, { 1.f,0.f,0.f,0.4f });
 	} 
 	else // spin away animation
 	{
-		float sin_val = std::sin(g.m_timer * 20.f);
+		float sin_val = std::sin(gs.timer * 20.f);
 		float width = r.w * (std::pow(std::abs(sin_val), 0.9f)) * sign(sin_val);
 		float height = r.h;
 		float dec = (1.f + 50.f * time_offset * time_offset * time_offset );
 		width /= dec;
 		height /= dec;
 		
-		g.d.draw_image(g.c, tex, r.x + r.w / 2, r.y + r.h / 2, width, height, 0.f);
+		g.d.draw_image(c, tex, r.x + r.w / 2, r.y + r.h / 2, width, height, 0.f);
 
 		r.draw(g.d, { 1.f,0.f,0.f,0.4f });
 

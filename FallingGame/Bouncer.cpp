@@ -15,7 +15,7 @@ void Bouncer::logic(Game& g)
 {
 }
 
-void Bouncer::draw(Game& g)
+void Bouncer::draw(Game& g, Camera& c)
 {
 	{
 		constexpr float scale = 0.0008f;
@@ -31,11 +31,11 @@ void Bouncer::draw(Game& g)
 			rot *= -1.f;
 		}
 		
-		g.d.draw_image(g.c, TEX::mushroom_stem, x, h.y - 0.23f, width, height, rot);
+		g.d.draw_image(c, TEX::mushroom_stem, x, h.y - 0.23f, width, height, rot);
 	}
 
 	// cap
-	g.d.draw_image(g.c, TEX::mushroom_cap, h.x + h.w / 2.f, h.y - 0.05f, h.w + 0.05f, 0.15f, bounce_timer);
+	g.d.draw_image(c, TEX::mushroom_cap, h.x + h.w / 2.f, h.y - 0.05f, h.w + 0.05f, 0.15f, bounce_timer);
 	
 	bounce_timer = decr_abs_val(bounce_timer, 0.5f*g.l.dt * (1.f + 5.f*std::abs(bounce_timer)));
 

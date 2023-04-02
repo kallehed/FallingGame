@@ -5,12 +5,13 @@
 class Camera
 {
 public:
-	void set_in_game(Game& g);
+	void init();
+	void set_in_game(Player& p);
 
-	float x = 0.f;
-	float y = 0.f;
+	float x;
+	float y;
 private:
-	float prev_y = 0.f;
+	float prev_y;
 public:
-	float y_dif = 0.f;
+	float y_dif;
 };

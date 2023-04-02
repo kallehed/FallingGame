@@ -9,7 +9,7 @@ public:
 	
 	void logic(Game& g);
 
-	void draw(Game& g);
+	void draw(Game& g, Camera& c);
 
 	void bounced_on(float moment);
 

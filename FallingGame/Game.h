@@ -10,7 +10,8 @@
 #include "Bouncer.h"
 #include "Cloud.h"
 #include "Coin.h"
-#include "CoinParticle.h"
+#include "GameState.h"
+
 
 class Game
 {
@@ -21,20 +22,14 @@ public:
 
 	Layer l;
 	Drawer d;
-	Camera c;
-	Player p;
 
-	float m_death_y; // y coordinate of the death barrier
-	float m_timer; // total time passed
+	bool full_exit = false;
 
-	std::vector<Bouncer> m_bouncers;
-	static constexpr const int NR_CLOUDS = 30;
-	std::array<Cloud, NR_CLOUDS> m_clouds;
-	std::vector<Coin> m_coins;
+	BaseState* gs;
+	void (*loop_to_run)(BaseState&, Game& g);
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities
 	static constexpr float G_HEIGHT = Layer::HEIGHT; // zone for game entities
-private:
 
 };
 

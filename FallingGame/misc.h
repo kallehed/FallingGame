@@ -14,6 +14,9 @@ constexpr inline bool DEV_TOOLS = true; // allow development stuff
 
 class Game;
 class Drawer;
+class Player;
+struct BaseState;
+class Camera;
 
 struct Color {
 	float r;

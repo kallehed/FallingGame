@@ -8,6 +8,7 @@ class Layer;
 class Camera;
 class Player;
 class CoinParticle;
+struct CloudHandler;
 
 struct Character {
 	unsigned int width; // width of glyph
@@ -30,18 +31,18 @@ public:
 	// draws middle of image at x,y. Offset by camera 
 	void draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation);
 
-	void draw_sky(Game& g);
+	void draw_sky(Game& g, Camera& c);
 
 	void draw_sides(Player& p);
 
-	void draw_clouds(Game& g);
+	void draw_clouds(CloudHandler& ch);
 
 	void draw_coin_particle(CoinParticle&);
 
 	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin);
 
 	// updates relevant global shader values
-	void before_draw(Game& g);
+	void before_draw(Game& g, float death_y, float cam_y, float timer);
 
 	void draw_fps(float dt);
 
