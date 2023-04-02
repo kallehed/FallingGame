@@ -17,10 +17,6 @@ Coin::Coin(Game& g, float start_y)
 	time_offset = /*g.l.timer +*/ rand_01()*5.f;
 }
 
-void Coin::logic(Game& g)
-{
-}
-
 void Coin::draw(Game& g, Camera& c, BaseState& gs)
 {
 	if (!picked_up) {

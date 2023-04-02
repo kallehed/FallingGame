@@ -30,13 +30,14 @@ void new_game_session_from_menu(Game& g)
 {
 	delete g.gs;
 	g.gs = new GameState{};
-	GameState::init(*(GameState*)g.gs, g);
+	++g.level_at;
+	GameState::init(*(GameState*)g.gs, g, 6.f * g.level_at * g.level_at);
 }
 
 // from game session, switch the function to winning game session, where no gameplay happens. Still the same state though.
-void new_game_win_session_from_game(Game& g)
+void new_game_win_session_from_game(GameState& gs)
 {
-	g.loop_to_run = (void (*)(BaseState&, Game & g))GameState::main_loop<false>;
+	gs.win_state = true;
 }
 
 
@@ -97,20 +98,21 @@ void MenuState::init(MenuState& gs, Game& g)
 	gs.ch.init_menu(gs.ch, g.d);
 
 	gs.c.init();
-
-	g.loop_to_run = (void (*)(BaseState&, Game& g))MenuState::main_loop;
 }
 
-void MenuState::main_loop(MenuState& gs, Game & g)
+void MenuState::entry_point(Game & g)
 {
+	MenuState& gs = *this;
 	while (true) {
 		if (start_func(gs, g)) return;
 
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 
+		g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.m_finger_just_down;
+
 		//logic
-		if (g.l.key_just_down(SDL_SCANCODE_O)) {
+		if (g.ge.enter_game_session) {
 			new_game_session_from_menu(g);
 			return;
 		}
@@ -134,7 +136,7 @@ void MenuState::main_loop(MenuState& gs, Game & g)
 
 
 
-void GameState::init(GameState& gs, Game& g)
+void GameState::init(GameState& gs, Game& g, float level_length)
 {
 	gs.next_bouncer_y = -1.f;
 	gs.next_coin_y = -1.5f;
@@ -143,13 +145,28 @@ void GameState::init(GameState& gs, Game& g)
 	gs.timer = 0.f;
 	gs.p.init();
 	gs.c.init();
-	gs.c.set_in_game(gs.p);
 
 	gs.ch.init_game(gs.ch, g.d);
 
-	g.loop_to_run = (void (*)(BaseState&, Game & g))GameState::main_loop<true>;
+	gs.level_length = level_length;
+
+	gs.win_state = false;
+
+	
 }
 
+void GameState::entry_point(Game& g)
+{
+	GameState& gs = *this;
+
+	if (!gs.win_state)
+	{
+		GameState::main_loop<true>(gs, g);
+	}
+	else {
+		GameState::main_loop<false>(gs, g);
+	}
+}
 
 template <bool playing>
 void GameState::main_loop(GameState& gs, Game& g)
@@ -161,15 +178,34 @@ void GameState::main_loop(GameState& gs, Game& g)
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 
+		// events
+		g.ge.player_to_right = g.l.key_down(SDL_SCANCODE_D);
+		g.ge.player_to_left = g.l.key_down(SDL_SCANCODE_A);
+		if (g.l.m_finger_down) {
+			g.ge.player_to_left = g.l.m_finger_pos.x < 0.5f;
+			g.ge.player_to_right = !g.ge.player_to_left;
+		}
+
+		g.ge.exit_active_game_session = g.l.key_just_down(SDL_SCANCODE_P);
+		g.ge.exit_winning_game_state = g.l.key_just_down(SDL_SCANCODE_P)  || g.l.m_finger_just_down;
+
 		// logic
+
+		if constexpr (!playing) {
+			if (g.ge.exit_winning_game_state) {
+				MenuState::new_menu_session(g);
+				return;
+			}
+		}
+
 		if constexpr (playing) {
-			if (g.l.key_just_down(SDL_SCANCODE_P)) {
+			if (g.ge.exit_active_game_session) {
 				MenuState::new_menu_session(g);
 				return;
 			}
 
 			if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT) {
-				new_game_win_session_from_game(g);
+				new_game_win_session_from_game(gs);
 				return;
 			}
 
@@ -192,7 +228,6 @@ void GameState::main_loop(GameState& gs, Game& g)
 					gs.bouncers.erase(gs.bouncers.begin() + i);
 				}
 			}
-			for (auto& e : gs.coins) { e.logic(g); }
 
 			for (int i = (int)gs.coins.size() - 1; i >= 0; --i) { // delete coins that have gone too high
 				if (gs.coins[i].r.y > remove_bound) { // should be removed
@@ -252,7 +287,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 			// set CAMERA position
 			{
-				gs.c.set_in_game(gs.p);
+				gs.c.set_in_game(gs.p, -gs.level_length);
 			}
 		}
 		// Drawing
@@ -278,6 +313,10 @@ void GameState::main_loop(GameState& gs, Game& g)
 			char buf[10];
 			snprintf(buf, 10, "Coins: %d", gs.p.coins);
 			g.d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
+		}
+
+		if constexpr (!playing) {
+			g.d.draw_text("You really won the level huh!", { 1.f,1.f,1.f,1.f }, -Game::G_WIDTH, 0.f, 0.002f);
 		}
 
 		end_func(g);

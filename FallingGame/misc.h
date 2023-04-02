@@ -1,7 +1,7 @@
 #pragma once
 
 // set this if on computer and wanting to develop for mobile
-#if defined __ANDROID__  || true
+#if defined __ANDROID__  //|| true
 // make game for vertical playing
 #define KALLE_GAME_VERTICAL 
 #endif

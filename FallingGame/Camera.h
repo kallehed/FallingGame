@@ -6,7 +6,7 @@ class Camera
 {
 public:
 	void init();
-	void set_in_game(Player& p);
+	void set_in_game(Player& p, const float cam_bound);
 
 	float x;
 	float y;

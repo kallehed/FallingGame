@@ -22,8 +22,8 @@ void Player::logic(Game& g)
 	// x movement
 	{
 		const float change = g.l.dt * 20.f;
-		if (g.l.key_down(SDL_SCANCODE_D)) { x_vel += change; }
-		if (g.l.key_down(SDL_SCANCODE_A)) { x_vel -= change; }
+		if (g.ge.player_to_right) { x_vel += change; }
+		if (g.ge.player_to_left) { x_vel -= change; }
 
 		float x_dec = g.l.dt * 8.f * x_vel; // decrease in x_vel
 		x_vel = decr_abs_val(x_vel, std::abs(x_dec));

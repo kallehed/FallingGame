@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
 	glad.c
+	GameState.cpp
 	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp stb_image.h 
 
 Bouncer.h
@@ -18,7 +19,7 @@ Game.h
 Layer.h
 misc.h
 Player.h
-
+GameState.h
 )
 
 
@@ -26,15 +27,9 @@ if(BUILD_SHARED_LIBS)
 	add_library(main SHARED)
 	target_sources(main PRIVATE ${SOURCES})
 
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
+      include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
-	#find_library(
-	#	GLESv32-lib
-
-	#	GLESv32
-	#)
-
-	target_link_libraries(main SDL2 freetype)# GLESv3)
+	target_link_libraries(main SDL2 freetype)
 else()
 	find_package(SDL2 REQUIRED)
 	include_directories(${SDL2_INCLUDE_DIRS})

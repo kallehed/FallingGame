@@ -49,6 +49,11 @@ public:
 
 #endif
 	
+	// SHOULD NOT BE CHANGED OUTSIDE CLASS
+	bool m_finger_just_down = false;
+	bool m_finger_down = false;
+	// x and y, normalized from 0 to 1
+	Pos m_finger_pos = { 0.f,0.f };
 
 private:
 	static unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
@@ -68,5 +73,8 @@ private:
 	std::array<bool, TOTAL_KEYS> m_keys_down = { false };
 	std::array<bool, TOTAL_KEYS> m_keys_just_down = { false };
 
+	// for normalizing mouse input, for testing touch on computer
+	int window_width_screen_coordinates = 0;
+	int window_height_screen_coordinates = 0;
 	
 };

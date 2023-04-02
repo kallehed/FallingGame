@@ -42,6 +42,6 @@ void Game::start()
 	*/
 
 	while (!full_exit) {
-		this->loop_to_run(*gs, *this);
+		gs->entry_point(*this);
 	}
 }

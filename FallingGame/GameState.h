@@ -27,9 +27,12 @@ struct CloudHandler
 struct BaseState
 {
 	float timer; // total time passed
+	virtual ~BaseState() = default;
+	// where game calls in for the state
+	virtual void entry_point(Game& g) = 0;
 };
 
-struct MenuState : public BaseState
+struct MenuState final : public BaseState
 {
 	Camera c;
 	CloudHandler ch;
@@ -37,20 +40,21 @@ struct MenuState : public BaseState
 	static void new_menu_session(Game& g);
 
 	static void init(MenuState& s, Game& g);
-	static void main_loop(MenuState& gs, Game& g);
-	
+	virtual void entry_point(Game& g) override;
+
 };
 
-
-
-struct GameState : public BaseState
+struct GameState final : public BaseState
 {
 public:
 	Camera c;
 	Player p;
 
+	bool win_state;
+
 	float death_y; // y coordinate of the death barrier
 	
+	float level_length;
 
 	float next_bouncer_y;
 	float next_coin_y;
@@ -60,7 +64,9 @@ public:
 	CloudHandler ch;
 	std::vector<Coin> coins;
 
-	static void init(GameState& gs, Game& g);
+	static void init(GameState& gs, Game& g, float level_length);
+
+	virtual void entry_point(Game& g) override;
 
 	// playing decides if win has happened or not
 	template <bool playing>

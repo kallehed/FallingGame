@@ -158,6 +158,13 @@ void Layer::init()
 		int w, h;
 		SDL_GL_GetDrawableSize(m_window, &w, &h);
 		glViewport(0, 0, w, h);
+
+		SDL_Log("STARTUP: Window VIEWPORTsize: w: %d, h: %d ", w, h);
+		SDL_GetWindowSize(m_window, &w, &h);
+		SDL_Log("STARTUP: Window SCREENsize: w: %d, h: %d ", w, h);
+
+		window_width_screen_coordinates = w; // exclusively for mouse on desktop lol
+		window_height_screen_coordinates = h;
 	}
 }
 
@@ -176,6 +183,7 @@ bool Layer::start_frame()
 	//SDL_Log("KALLE SDL Start of frame");
 
 	m_keys_just_down = { false }; // reset before getting events
+	m_finger_just_down = false;
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
 	{
@@ -193,6 +201,9 @@ bool Layer::start_frame()
 				SDL_Log("Window PIXELsize: w: %d, h: %d ", w, h);
 				SDL_GetWindowSize(m_window, &w, &h);
 				SDL_Log("Window SCREENsize: w: %d, h: %d ", w, h);
+
+				window_width_screen_coordinates = w;
+				window_height_screen_coordinates = h;
 				break;
 			}
 			}
@@ -211,19 +222,38 @@ bool Layer::start_frame()
 				m_keys_down[e.key.keysym.scancode] = false;
 			//}
 			break;
-		case SDL_FINGERMOTION:
+
+
+		case SDL_MOUSEBUTTONDOWN: // mouse events currently mirroring finger events
+			m_finger_just_down = true;
+			m_finger_down = true;
+
+			// * fallthrough *
+
+		case SDL_MOUSEMOTION:
+			m_finger_pos.x = float(e.motion.x) / float(window_width_screen_coordinates);
+			m_finger_pos.y = float(e.motion.y) / float(window_height_screen_coordinates);
+
+			break;
+		case SDL_MOUSEBUTTONUP:
+			m_finger_down = false;
+
+			break;
+
+
 		case SDL_FINGERDOWN: // will NOT be called on a computer
-			m_keys_just_down[SDL_SCANCODE_O] = true;
+			m_finger_just_down = true;
+			m_finger_down = true;
 
-			m_keys_down[SDL_SCANCODE_A] = false;
-			m_keys_down[SDL_SCANCODE_D] = false;
-
-			m_keys_down[(e.tfinger.x < 0.5f) ? (SDL_SCANCODE_A) : (SDL_SCANCODE_D)] = true; 
+			// * fallthrough *
+	
+		case SDL_FINGERMOTION:
+			m_finger_pos.x = e.tfinger.x;
+			m_finger_pos.y = e.tfinger.y;
 
 			break;
 		case SDL_FINGERUP:
-			m_keys_down[SDL_SCANCODE_A] = false;
-			m_keys_down[SDL_SCANCODE_D] = false;
+			m_finger_down = false;
 
 			break;
 		}
@@ -239,8 +269,8 @@ bool Layer::start_frame()
 		if (key_just_down(SDL_SCANCODE_Q)) { // query
 			SDL_DisplayMode mode;
 			SDL_GetWindowDisplayMode(m_window, &mode);
-			std::cout << "query:\nformat: " << mode.format << "\nwidth: " << mode.w
-				<< "\nheight: " << mode.h << "\n driverdata: " << mode.driverdata << "\n";
+			std::cout << "DisplayMode information(nearest fullscreen):" << "query: format: " << mode.format << " width: " << mode.w
+				<< " height: " << mode.h << " driverdata: " << mode.driverdata << "\n";
 
 			auto df = SDL_GetWindowFlags(m_window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 			std::cout << "is desktop fullscreen: " << df << "\n";

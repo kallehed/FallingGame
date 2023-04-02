@@ -10,14 +10,14 @@ void Camera::init()
 	y_dif = 0.f;
 }
 
-void Camera::set_in_game(Player& p)
+void Camera::set_in_game(Player& p, const float cam_bound)
 {
-	static constexpr float CAM_BOUND = -6.f;
 
 	prev_y = y;
 	y = p.r.y - Layer::HEIGHT * 0.665f; // set camera position
-	y = std::max(y, CAM_BOUND);
+	y = std::max(y, cam_bound);
 
+	// prevent jump if camera travels too far in frame (happens at startup of game from menu)
 	y_dif = prev_y - y;
 	if (std::abs(y_dif) > 0.5f) y_dif = 0.f;
 }
