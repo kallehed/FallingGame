@@ -16,7 +16,7 @@ void main()
 
     vec2 pos = aPos_and_Tex.xy;
     pos = rot * pos;
-    pos = pos + u_offset;
+    pos = pos + u_offset + vec2(0.0, -g_cam_y);
 
     gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
 

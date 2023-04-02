@@ -1,9 +1,5 @@
 
-
-out vec4 FragColor;
-
 in vec2 f_texCoord;
-in vec2 f_screenCoord;
 in float f_texture;
 in float f_z;
 
@@ -38,5 +34,3 @@ void main()
         float change = 1.05 -  abs(0.1*f_screenCoord.x + 0.2*f_screenCoord.y);
         FragColor *= vec4(vec3(change), max(-111.9, change));
     }
-    
-}

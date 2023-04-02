@@ -81,6 +81,8 @@ namespace TEX
 		sky_blurred,
 		sky2,
 		sky3,
+		sky_space1,
+		sky_space2,
 		storm,
 		cloud_1,
 		cloud_2,

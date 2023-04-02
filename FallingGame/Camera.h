@@ -5,7 +5,12 @@
 class Camera
 {
 public:
-	void last_in_logic(Game& g); // set offset for this frame
-	Pos offset() const; // get offset to set uniform to
-	float x = 0.f, y = 0.f;
+	void set_in_game(Game& g);
+
+	float x = 0.f;
+	float y = 0.f;
+private:
+	float prev_y = 0.f;
+public:
+	float y_dif = 0.f;
 };

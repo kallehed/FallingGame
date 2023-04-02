@@ -266,8 +266,9 @@ void Drawer::init(Game& g)
 
 	// sky shader
 	{
-		const float y_imgs = 4.f * Layer::HEIGHT;
-		const float x_imgs = 4.f * Layer::WIDTH;
+		const float imgs = 4.f;
+		const float y_imgs = imgs;
+		const float x_imgs = imgs + 1.f;
 
 		sky_height_per_sky = (2.f * g.G_HEIGHT) / y_imgs;
 
@@ -431,6 +432,8 @@ void Drawer::init(Game& g)
 			{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/sky_space1.png", GL_REPEAT, GL_REPEAT},
+			{"f/images/sky_space2.png", GL_REPEAT, GL_REPEAT},
 			{"f/images/storm.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/cloud_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/cloud_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
@@ -438,6 +441,7 @@ void Drawer::init(Game& g)
 			{"f/images/cloud_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/coin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE}
+			
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {
@@ -532,9 +536,7 @@ void Drawer::draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float 
 	glBindBuffer(GL_ARRAY_BUFFER, image_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
 
-	{
-		Pos global_offset = c.offset();
-		glUniform2f(m_image_u_offset, global_offset.x + x, global_offset.y + y);
+	{		glUniform2f(m_image_u_offset, x, y);
 	}
 	glUniform1f(m_image_u_rotation, rotation);
 	//glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
@@ -640,8 +642,7 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 	glUniform1f(m_bird_u_time_since_coin, time_since_coin);
 
 	{
-		Pos global_offset = c.offset();
-		glUniform2f(m_bird_u_offset, global_offset.x + x, global_offset.y + y);
+		glUniform2f(m_bird_u_offset, x,  y);
 	}
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

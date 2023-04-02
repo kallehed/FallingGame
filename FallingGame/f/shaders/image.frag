@@ -1,6 +1,4 @@
 
-out vec4 FragColor;
-
 in vec2 f_texCoord;
 uniform sampler2D texture1;
 
@@ -11,4 +9,3 @@ void main()
     FragColor *= vec4(vec3(change), 1.0);
 
     //FragColor *= 0.5;
-}

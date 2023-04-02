@@ -59,7 +59,6 @@ void APIENTRY glDebugOutput(GLenum source,
 	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
 	} std::cout << std::endl;
 	std::cout << std::endl;
-
 }
 
 
@@ -96,7 +95,7 @@ void Layer::init()
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
-	if (m_window == NULL) SDL_LogError(0, "ERROR::WINDOW_COULD_NOT_BE_CREATED: %s", SDL_GetError());
+	CHKSDL(!m_window);
 	m_glcontext = SDL_GL_CreateContext(m_window);
 	CHKSDL(!m_glcontext);
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
@@ -330,16 +329,61 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		SDL_RWclose(io);
 		str[file_size] = '\0';
 
-		const char* sh_end = "";
-		if (type == GL_VERTEX_SHADER) {
+		// these are specific for vertex and fragment shaders.
+		const char* sh_end = ""; 
+		const char* sh_start = "";
+
+		switch (type) {
+		case GL_VERTEX_SHADER:
+			sh_start =
+				"\n"
+				"out vec2 f_screenCoord;"
+				"\n";
 			sh_end =
 				"\n"
 				"	gl_Position.x /= g_w;"
 				"	gl_Position.y /= g_h;"
+				"	f_screenCoord = gl_Position.xy;"
 				"}\n";
+			break;
+		case GL_FRAGMENT_SHADER:
+			sh_start =
+				"\n"
+				"out vec4 FragColor;"
+				"in vec2 f_screenCoord;"
+				"\n";
+			sh_end =
+				"\n{"
+				"    float t = g_timer - (f_screenCoord.x + 1.0)*2.0 - (f_screenCoord.y + 1.0)*2.0;"
+				"    t /= 1.0f;"
+				"    float x = 0.4;"
+				"    float y = 1.2 * (1.0 - x);"
+				"    FragColor.b *= x + y * abs(1.0*cos(t * 0.11));"
+				"    FragColor.g *= x + y * abs(1.0*cos(t * 0.12));"
+				"    FragColor.r *= x + y * abs(1.0*cos(t * 0.13));"
+				"}}\n";
+			break;
+		default:
+			SDL_assert(false);
 		}
+
+		static constexpr const char* SHADER_START_FOR_ALL =
+#ifndef __ANDROID__
+			"#version 430 core\n"
+#else
+			"#version 320 es\n"
+			"precision highp float;\n"
+#endif
+			"layout(std140, binding = 0) uniform Globals\n"
+			"{"
+			"	float g_death_y;"
+			"	float g_cam_y;"
+			"	float g_timer;"
+			"	float g_w;"
+			"   float g_h;"
+			"};\n";
 	
-		const char* strs[] = {Drawer::SHADER_START_TEXT, str, sh_end};
+		const char* strs[] = { SHADER_START_FOR_ALL, sh_start, str, sh_end};
 		//SDL_Log("SDL KALLE Compiling a new shader: %s. with following code: %s %s", path, strs[0], strs[1]);
 		glShaderSource(shader, sizeof(strs)/sizeof(const char*), strs, NULL); // last null because null-terminated-strings
 		delete[] str;
@@ -402,7 +446,7 @@ std::array<int, 2> Layer::load_texture(const char* path, unsigned int* image, in
 	
 	SDL_RWops* io = SDL_RWFromFile(path, "rb");
 	CHKSDL(!io);
-	if (!io) return { 0,0 };
+	if (!io) return { 100,100 };
 	Sint64 file_size = io->size(io);
 	unsigned char* buffer = new unsigned char[file_size];
 	

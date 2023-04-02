@@ -1,8 +1,5 @@
 
-out vec4 FragColor;
-
 in vec2 f_texCoord;
-in vec2 f_screenCoord;
 uniform sampler2D sky_texture;
 
 void main()
@@ -21,4 +18,3 @@ void main()
 
         FragColor *= vec4(vec3(dif), 1.f);
     }
-}

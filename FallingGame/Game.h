@@ -31,7 +31,6 @@ public:
 	static constexpr const int NR_CLOUDS = 30;
 	std::array<Cloud, NR_CLOUDS> m_clouds;
 	std::vector<Coin> m_coins;
-	std::vector<CoinParticle> m_coin_particles;
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities
 	static constexpr float G_HEIGHT = Layer::HEIGHT; // zone for game entities

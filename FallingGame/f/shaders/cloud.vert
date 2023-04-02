@@ -3,7 +3,6 @@ layout (location = 0) in vec4 aX_W_Y_H;
 layout (location = 1) in vec2 aTex_Z;
 
 out vec2 f_texCoord;
-out vec2 f_screenCoord;
 out float f_texture;
 out float f_z;
 
@@ -23,6 +22,5 @@ void main()
     //gl_Position = vec4(gl_InstanceID * 0.1 + gl_VertexID*0.1, gl_VertexID*0.1, 0.0, 1.0);
 
     f_texCoord = texPos[gl_VertexID];
-    f_screenCoord = gl_Position.xy;
     f_texture = aTex_Z.x;
     f_z = aTex_Z.y;

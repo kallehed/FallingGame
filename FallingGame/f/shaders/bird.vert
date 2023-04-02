@@ -1,7 +1,6 @@
 
 
 out vec2 f_texCoord;
-out vec2 f_screenCoord;
 
 uniform vec2 u_offset;
 uniform vec3 u_rotation_width_height;
@@ -32,8 +31,7 @@ void main()
 
     vec2 pos = poses[gl_VertexID] * vec2(width, height);
     pos = rot * pos;
-    pos = pos + u_offset;
+    pos = pos + u_offset - vec2(0.f, g_cam_y);
     gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
 
     f_texCoord = texCoords[gl_VertexID];
-    f_screenCoord = gl_Position.xy;

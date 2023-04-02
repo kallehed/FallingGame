@@ -125,22 +125,15 @@ private:
 	* float g_timer; // time since level started
 	* float g_w; // how much bigger the width is to the height, CONSTANT = 1.6 probs = g.l.WIDTH
 	*/
-	public:
-	static constexpr const char* SHADER_START_TEXT = 
-#ifndef __ANDROID__
-		"#version 430 core\n"
-#else
-		"#version 320 es\n"
-		"precision highp float;\n"
-#endif
-		"layout(std140, binding = 0) uniform Globals\n"
-		"{"
-		"	float g_death_y;"
-		"	float g_cam_y;"
-		"	float g_timer;"
-		"	float g_w;"
-		"   float g_h;"
-		"};\n";
+	// shader start text and stuff is in Layer.cpp::compile_shader_from_file
+
+	// MORE NOTES:
+	// All vertex output vec2 f_screenCoord, and all fragment shaders input it.
+	// f_screenCoord is automatically set at the end of all vertex shaders based on gl_Position
+	// All fragment shaders output vec4 FragColor.
+	// gl_Position will be modified after all vertex shaders
+	// 
+
 	private:
 	static constexpr int UBO_GLOBAL_BIND = 0;
 	static constexpr const char* UBO_GLOBAL_NAME = "Globals"; // never used

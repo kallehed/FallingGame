@@ -17,7 +17,7 @@ void Cloud::logic(Game& g)
 	if ((x + w) < -Layer::WIDTH || (x - w) > Layer::WIDTH  || (y - h) > Layer::HEIGHT) {
 		init(g);
 	}
-	y += (g.p.prev_y - g.p.r.y) * (1.f - z);
+	y += (g.c.y_dif) * (1.f - z);
 	x += x_vel * g.l.dt * (1.f - z);
 }
 
@@ -41,7 +41,6 @@ void Cloud::menu_logic(Game& g)
 		//}
 		x_vel *= -1.f;
 	}
-	//y += (g.p.prev_y - g.p.r.y) * (1.f - z);
 	x += x_vel * g.l.dt * (1.f - z);
 }
 

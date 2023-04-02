@@ -1,9 +1,5 @@
 
 
-out vec4 FragColor;
-
-in vec2 f_screenCoord;
-
 uniform float u_pos_and_vel_and_time[5];
 
 void main()
@@ -40,4 +36,3 @@ void main()
 
     FragColor = vec4(alpha * 2.0, 1.0, 0.0, alpha);
     //FragColor = vec4(255.0/255.0, 204.0/255.0, 106.0/255.0, FragColor.a);
-}
