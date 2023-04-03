@@ -189,6 +189,7 @@ bool Layer::start_frame()
 	{
 		switch (e.type) {
 		case SDL_QUIT:
+			SDL_Log("User wants to quit!");
 			return true;
 			break;
 		case SDL_WINDOWEVENT:
@@ -325,7 +326,6 @@ void Layer::end_frame()
 	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / MAX_FPS - milliSecElapsed));
 	dt = (milliSecElapsed + delay) / 1000.f;
 	dt = std::min(1.f / MIN_FPS, dt);
-
 	// slow
 	//SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
 	SDL_Delay(delay);

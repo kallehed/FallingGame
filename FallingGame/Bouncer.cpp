@@ -11,9 +11,6 @@ Bouncer::Bouncer(float spawn_width, float y) : h(0.f,0.f,0.f)
 	h.y = y;
 }
 
-void Bouncer::logic(Game& g)
-{
-}
 
 void Bouncer::draw(Game& g, Camera& c)
 {

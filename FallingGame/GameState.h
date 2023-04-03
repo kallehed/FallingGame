@@ -50,7 +50,12 @@ public:
 	Camera c;
 	Player p;
 
-	bool win_state;
+	enum class State : unsigned char {
+		Playing, Win, Lose
+
+	};
+
+	State state;
 
 	float death_y; // y coordinate of the death barrier
 	
@@ -69,7 +74,7 @@ public:
 	virtual void entry_point(Game& g) override;
 
 	// playing decides if win has happened or not
-	template <bool playing>
+	template <GameState::State state>
 	static void main_loop(GameState& gs, Game& g);
 };
 

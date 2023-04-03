@@ -31,15 +31,10 @@ void new_game_session_from_menu(Game& g)
 {
 	delete g.gs;
 	g.gs = new GameState{};
-	++g.level_at;
+	//++g.level_at;
 	GameState::init(*(GameState*)g.gs, g, 6.f * g.level_at * g.level_at);
 }
 
-// from game session, switch the function to winning game session, where no gameplay happens. Still the same state though.
-void new_game_win_session_from_game(GameState& gs)
-{
-	gs.win_state = true;
-}
 
 
 void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
@@ -135,8 +130,6 @@ void MenuState::entry_point(Game & g)
 	}
 }
 
-
-
 void GameState::init(GameState& gs, Game& g, float level_length)
 {
 	gs.next_bouncer_y = -1.f;
@@ -151,25 +144,28 @@ void GameState::init(GameState& gs, Game& g, float level_length)
 
 	gs.level_length = level_length;
 
-	gs.win_state = false;
-
-	
+	gs.state = GameState::State::Playing;
 }
 
 void GameState::entry_point(Game& g)
 {
 	GameState& gs = *this;
 
-	if (!gs.win_state)
+	switch (gs.state)
 	{
-		GameState::main_loop<true>(gs, g);
-	}
-	else {
-		GameState::main_loop<false>(gs, g);
+	case GameState::State::Playing:
+		GameState::main_loop<GameState::State::Playing>(gs, g);
+		break;
+	case GameState::State::Win:
+		GameState::main_loop<GameState::State::Win>(gs, g);
+		break;
+	case GameState::State::Lose:
+		GameState::main_loop<GameState::State::Lose>(gs, g);
+		break;
 	}
 }
 
-template <bool playing>
+template <GameState::State state>
 void GameState::main_loop(GameState& gs, Game& g)
 {
 	while (true)
@@ -187,39 +183,41 @@ void GameState::main_loop(GameState& gs, Game& g)
 			g.ge.player_to_right = !g.ge.player_to_left;
 		}
 
-		g.ge.exit_active_game_session = g.l.key_just_down(SDL_SCANCODE_P);
-		g.ge.exit_winning_game_state = g.l.key_just_down(SDL_SCANCODE_P)  || g.l.m_finger_just_down;
-
 		// logic
 
-		if constexpr (!playing) {
-			if (g.ge.exit_winning_game_state) {
+		if constexpr (state == GameState::State::Win || state == GameState::State::Lose) {
+			g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.m_finger_just_down || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
+			if (g.ge.exit_current_session) {
 				MenuState::new_menu_session(g);
 				return;
 			}
 		}
 
-		if constexpr (playing) {
-			if (g.ge.exit_active_game_session) {
+		if constexpr (state == GameState::State::Playing) {
+			g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
+			if (g.ge.exit_current_session) {
 				MenuState::new_menu_session(g);
 				return;
 			}
 
 			if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT) {
-				new_game_win_session_from_game(gs);
+				g.level_at++;
+				gs.state = GameState::State::Win;
+				return;
+			}
+
+			if (gs.death_y + Layer::HEIGHT < gs.c.y) {
+				gs.c.y_dif = 0.f;
+				gs.state = GameState::State::Lose;
 				return;
 			}
 
 			// increase the more far away the player is from the barrier
-			//death_y -= 1.4f * l.dt * std::max(1.f, 0.05f*std::pow(death_y-p.r.y, 2.f) );
+			gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 10.f), std::max(1.f, 0.05f*std::pow(gs.death_y-gs.p.r.y, 2.f) ));
 
 			// increase speed of death_y over time
-			gs.death_y -= 1.01f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
+			//gs.death_y -= 1.41f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
 			gs.p.logic(g);
-
-			for (auto& e : gs.bouncers) {
-				e.logic(g);
-			}
 
 			const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
 
@@ -235,10 +233,6 @@ void GameState::main_loop(GameState& gs, Game& g)
 					gs.coins.erase(gs.coins.begin() + i);
 				}
 			}
-		}
-		gs.ch.game_logic(gs.ch, g, gs.c);
-		if constexpr (playing)
-		{
 			// collision between bouncers and player
 			{
 				for (auto& e : gs.bouncers) {
@@ -271,7 +265,8 @@ void GameState::main_loop(GameState& gs, Game& g)
 			}
 
 			// where it is appropriate to spawn things of screen
-			const float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
+			float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
+			if (spawn_bound > gs.level_length) { spawn_bound = 1000000000000.f; }
 
 			// spawn bouncer
 			if (spawn_bound <= gs.next_bouncer_y) {
@@ -291,6 +286,8 @@ void GameState::main_loop(GameState& gs, Game& g)
 				gs.c.set_in_game(gs.p, -gs.level_length);
 			}
 		}
+		gs.ch.game_logic(gs.ch, g, gs.c);
+
 		// Drawing
 		g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer);
 
@@ -316,8 +313,11 @@ void GameState::main_loop(GameState& gs, Game& g)
 			g.d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
 		}
 
-		if constexpr (!playing) {
+		if constexpr (state == GameState::State::Win) {
 			g.d.draw_text("You really won the level huh!", { 1.f,1.f,1.f,1.f }, -Game::G_WIDTH, 0.f, 0.002f);
+		}
+		if constexpr (state == GameState::State::Lose) {
+			g.d.draw_text("You LOST? wow, incredible.", { 1.f,1.f,1.f,1.f }, -Game::G_WIDTH, 0.f, 0.002f);
 		}
 
 		end_func(g);

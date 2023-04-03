@@ -24,11 +24,9 @@ public:
 		// true when you want to enter a game from a menu
 		bool enter_game_session = false; // NOT USED
 
-		// when you want to exit a game session in the middle of it to menu
-		bool exit_active_game_session = false; 
+		// when you want to exit SOME session
+		bool exit_current_session = false; 
 
-		// when  you want to exit from a winning game state to menu
-		bool exit_winning_game_state = false;
 
 		// movement for bird, or Player
 		bool player_to_right = false;
@@ -45,6 +43,7 @@ public:
 
 	bool full_exit = false;
 
+	// pointer to a base type which has dynamic dispath to the current game loop. So only virtual calls VERY rarely basically.
 	BaseState* gs;
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities
