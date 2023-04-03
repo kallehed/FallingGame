@@ -55,7 +55,7 @@ public:
 
 	};
 
-	State state;
+	State game_state;
 
 	float death_y; // y coordinate of the death barrier
 	

@@ -144,14 +144,14 @@ void GameState::init(GameState& gs, Game& g, float level_length)
 
 	gs.level_length = level_length;
 
-	gs.state = GameState::State::Playing;
+	gs.game_state = GameState::State::Playing;
 }
 
 void GameState::entry_point(Game& g)
 {
 	GameState& gs = *this;
 
-	switch (gs.state)
+	switch (gs.game_state)
 	{
 	case GameState::State::Playing:
 		GameState::main_loop<GameState::State::Playing>(gs, g);
@@ -202,18 +202,20 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 			if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT) {
 				g.level_at++;
-				gs.state = GameState::State::Win;
+				gs.game_state = GameState::State::Win;
 				return;
 			}
 
-			if (gs.death_y + Layer::HEIGHT < gs.c.y) {
+			if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset/2.f < gs.p.r.y) {
 				gs.c.y_dif = 0.f;
-				gs.state = GameState::State::Lose;
+				gs.game_state = GameState::State::Lose;
 				return;
 			}
 
 			// increase the more far away the player is from the barrier
-			gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 10.f), std::max(1.f, 0.05f*std::pow(gs.death_y-gs.p.r.y, 2.f) ));
+			//gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 10.f), std::max(1.f, 0.05f*std::pow(gs.death_y-gs.p.r.y, 2.f) ));
+
+			gs.death_y -= 1.4f * g.l.dt * std::max(std::min(2.f, std::log(gs.timer / 10.f)), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
 
 			// increase speed of death_y over time
 			//gs.death_y -= 1.41f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
@@ -304,6 +306,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 		// draw death storm at death_y
 		{
 			g.d.draw_image(gs.c, TEX::storm, 0.f, gs.death_y + g.l.HEIGHT, g.l.WIDTH * 2.f, g.l.HEIGHT * 2.f, 0.f);
+			g.d.draw_rectangle(-g.l.WIDTH, gs.death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, {0.f,0.f,0.f,1.f});
 		}
 
 		// draw coin counter
