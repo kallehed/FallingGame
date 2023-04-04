@@ -64,8 +64,14 @@ void Game::set_new_state(BaseState* some_gs)
 {
 	if (this->new_gs != nullptr) {
 		SDL_LogError(0, "Seems that we set the game state twice in one frame?!?!?!?!");
+		//exit(1); // crash to notice, EXCEPT maybe don't crash if user tries to exit at the same time as a session change
 	}
 	else {
 		this->new_gs = some_gs;
 	}
+}
+
+bool Game::should_change_state()
+{
+	return this->new_gs != nullptr;
 }

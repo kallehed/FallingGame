@@ -53,7 +53,7 @@ public:
 	Player p;
 
 	enum class State : unsigned char {
-		Playing, Win, Lose, Exit
+		Playing, Win, Lose
 	};
 
 	State game_state;

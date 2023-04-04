@@ -211,10 +211,10 @@ bool Layer::start_frame()
 			break;
 		case SDL_KEYDOWN:
 			//if (e.key.keysym.scancode < TOTAL_KEYS) { // checks should not be needed when using all possible keys ever?
-				if (!key_down(e.key.keysym.scancode)) {
+				//if (!key_down(e.key.keysym.scancode)) {
 					m_keys_down[e.key.keysym.scancode] = true;
 					m_keys_just_down[e.key.keysym.scancode] = true;
-				}	
+				//}	
 				//SDL_Log("Just jmotioned!");
 			//}
 			break;

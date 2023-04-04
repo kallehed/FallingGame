@@ -7,15 +7,14 @@
 #include <cstdio>
 
 
-// true -> exit out of your loop
-static bool start_func(BaseState& gs, Game& g)
+// will change state of game if user wants to quit
+static void start_func(BaseState& gs, Game& g)
 {
 	gs.timer += g.l.dt;
 	if (g.l.start_frame()) {
 		g.full_exit = true;
-		return true;
+		g.set_new_state((BaseState*) 1); // make it not a nullptr. TODO: add a real END state session that can be changed to when all things end. 
 	}
-	return false; // close
 }
 
 static void end_func(Game& g)
@@ -31,7 +30,6 @@ static void new_game_session_from_menu(Game& g)
 {
 	g.set_new_state(new GameState{});
 }
-
 
 
 void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
@@ -94,8 +92,8 @@ void MenuState::init(Game& g)
 void MenuState::entry_point(Game & g)
 {
 	MenuState& gs = *this;
-	while (true) {
-		if (start_func(gs, g)) return;
+	while (!g.should_change_state()) {
+		start_func(gs, g);
 
 		glClearColor(1.0, 1.0, 1.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
@@ -211,10 +209,10 @@ static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 template <GameState::State STATE>
 void GameState::main_loop(GameState& gs, Game& g)
 {
-	while (gs.game_state == STATE)
+	while (!g.should_change_state() && gs.game_state == STATE)
 	{
 		//printf("new: %f",c.y);
-		if (start_func(gs, g)) return;
+		start_func(gs, g);
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 
@@ -229,7 +227,6 @@ void GameState::main_loop(GameState& gs, Game& g)
 			g.ge.exit_current_session |= g.l.m_finger_just_down;
 			if (g.ge.exit_current_session) {
 				MenuState::new_menu_session(g);
-				gs.game_state = GameState::State::Exit;
 			}
 
 			gs.c.y_dif = 0.f;
@@ -283,12 +280,12 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 			// where it is appropriate to spawn things of screen
 			float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
-			if (spawn_bound < gs.level_end) { spawn_bound = 1000000000.f; }
+			if (spawn_bound < gs.level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
 
 			// spawn bouncer
-			if (spawn_bound <= gs.next_bouncer_y) {
+			while (spawn_bound <= gs.next_bouncer_y) {
 				gs.bouncers.emplace_back(Game::G_WIDTH, gs.next_bouncer_y);
-				gs.next_bouncer_y -= (2.f * g.l.HEIGHT * (0.3f + 0.5f * rand_01()));
+				gs.next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
 			}
 
 			// spawn coin

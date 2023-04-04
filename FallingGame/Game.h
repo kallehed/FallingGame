@@ -20,7 +20,9 @@ private:
 public:
 	void start();
 
+	
 	void set_new_state(BaseState* some_gs);
+	bool should_change_state();
 
 	GameEvents ge;
 
