@@ -30,6 +30,8 @@ struct BaseState
 	virtual ~BaseState() = default;
 	// where game calls in for the state
 	virtual void entry_point(Game& g) = 0;
+	// inits the state
+	virtual void init(Game& g) = 0;
 };
 
 struct MenuState final : public BaseState
@@ -39,8 +41,8 @@ struct MenuState final : public BaseState
 
 	static void new_menu_session(Game& g);
 
-	static void init(MenuState& s, Game& g);
 	virtual void entry_point(Game& g) override;
+	virtual void init(Game& g) override;
 
 };
 
@@ -51,15 +53,15 @@ public:
 	Player p;
 
 	enum class State : unsigned char {
-		Playing, Win, Lose
-
+		Playing, Win, Lose, Exit
 	};
 
 	State game_state;
 
 	float death_y; // y coordinate of the death barrier
 	
-	float level_length;
+	// which y coordinate the level ends at
+	float level_end;
 
 	float next_bouncer_y;
 	float next_coin_y;
@@ -69,12 +71,14 @@ public:
 	CloudHandler ch;
 	std::vector<Coin> coins;
 
-	static void init(GameState& gs, Game& g, float level_length);
+	
 
 	virtual void entry_point(Game& g) override;
 
+	virtual void init(Game& g) override;
+
 	// playing decides if win has happened or not
-	template <GameState::State state>
+	template <GameState::State STATE>
 	static void main_loop(GameState& gs, Game& g);
 };
 

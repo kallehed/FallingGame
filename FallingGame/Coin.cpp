@@ -22,7 +22,7 @@ void Coin::draw(Game& g, Camera& c, BaseState& gs)
 	if (!picked_up) {
 		float sin_val = std::sin((gs.timer - time_offset) * 2.f);
 		float width = r.w * (std::pow(std::abs(sin_val), 0.9f)) * sign(sin_val);
-		g.d.draw_image(c, tex, r.x + r.w / 2, r.y + r.h / 2, width, r.h, 0.f);
+		g.d.draw_image(tex, r.x + r.w / 2, r.y + r.h / 2, width, r.h, 0.f);
 
 		r.draw(g.d, { 1.f,0.f,0.f,0.4f });
 	} 
@@ -35,7 +35,7 @@ void Coin::draw(Game& g, Camera& c, BaseState& gs)
 		width /= dec;
 		height /= dec;
 		
-		g.d.draw_image(c, tex, r.x + r.w / 2, r.y + r.h / 2, width, height, 0.f);
+		g.d.draw_image(tex, r.x + r.w / 2, r.y + r.h / 2, width, height, 0.f);
 
 		r.draw(g.d, { 1.f,0.f,0.f,0.4f });
 
@@ -43,7 +43,7 @@ void Coin::draw(Game& g, Camera& c, BaseState& gs)
 	}
 }
 
-void Coin::got_picked_up(Game& g)
+void Coin::got_picked_up()
 {
 	if (!picked_up) {
 		picked_up = true;

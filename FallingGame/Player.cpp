@@ -17,50 +17,50 @@ void Player::init()
 	coins = 0;
 }
 
-void Player::logic(Game& g)
+void Player::logic(GameEvents ge, float dt)
 {
 	// x movement
 	{
-		const float change = g.l.dt * 20.f;
-		if (g.ge.player_to_right) { x_vel += change; }
-		if (g.ge.player_to_left) { x_vel -= change; }
+		const float change = dt * 20.f;
+		if (ge.player_to_right) { x_vel += change; }
+		if (ge.player_to_left) { x_vel -= change; }
 
-		float x_dec = g.l.dt * 8.f * x_vel; // decrease in x_vel
+		float x_dec = dt * 8.f * x_vel; // decrease in x_vel
 		x_vel = decr_abs_val(x_vel, std::abs(x_dec));
 
 		// bounce_x_vel
 		{
-			float bounce_dec = g.l.dt * 2.f;
+			float bounce_dec = dt * 2.f;
 			bounce_x_vel = decr_abs_val(bounce_x_vel, std::abs(bounce_dec));
 		}
 
 		x_vel = std::clamp(x_vel, -MAX_X_VEL, MAX_X_VEL);
 
-		r.x += (x_vel + bounce_x_vel) * g.l.dt;
+		r.x += (x_vel + bounce_x_vel) * dt;
 
 		// limit x to borders of screen
-		r.x = std::clamp(r.x, -g.G_WIDTH, g.G_WIDTH - r.w);
+		r.x = std::clamp(r.x, -Game::G_WIDTH, Game::G_WIDTH - r.w);
 	}
 
 	// y movement
 	{
-		float y_dec = g.l.dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
+		float y_dec = dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
 		float new_y_vel = y_vel - y_dec;
 		y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL);
 		prev_y = r.y;
-		r.y += y_vel * g.l.dt;
+		r.y += y_vel * dt;
 	}
 
 	// rotation
 	{
 		// x vel rotation: HORIZONTAL MOVEMENT (SMALL)
-		rotation -= g.l.dt * (x_vel / 1.f);
+		rotation -= dt * (x_vel / 1.f);
 
 		if (y_vel > 0.f) { // Rotation when bouncing upwards
-			rotation += (y_vel / 0.15f) * g.l.dt;
+			rotation += (y_vel / 0.15f) * dt;
 		}
 		else {
-			rotation = decr_abs_val(rotation, std::abs(rotation) * 5.0f * g.l.dt);
+			rotation = decr_abs_val(rotation, std::abs(rotation) * 5.0f * dt);
 		}
 
 		while (rotation > pi) {
@@ -70,7 +70,7 @@ void Player::logic(Game& g)
 
 	// animation details: time since coin,
 	{
-		time_since_coin += g.l.dt;
+		time_since_coin += dt;
 	}
 }
 

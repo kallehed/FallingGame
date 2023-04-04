@@ -18,6 +18,20 @@ class Player;
 struct BaseState;
 class Camera;
 
+struct GameEvents {
+	// true when you want to enter a game from a menu
+	bool enter_game_session = false; // NOT USED
+
+	// when you want to exit SOME session
+	bool exit_current_session = false;
+
+
+	// movement for bird, or Player
+	bool player_to_right = false;
+	bool player_to_left = false;
+
+};
+
 struct Color {
 	float r;
 	float g;

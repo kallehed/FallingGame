@@ -29,7 +29,7 @@ public:
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
 	// draws middle of image at x,y. Offset by camera 
-	void draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation);
+	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation);
 
 	void draw_sky(Game& g, Camera& c);
 

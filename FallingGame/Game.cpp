@@ -11,6 +11,10 @@ void Game::init()
 	d.init(*this);
 
 	this->gs = nullptr;
+	this->new_gs = nullptr;
+
+	this->level_at = 0;
+	this->full_exit = false;
 
 	MenuState::new_menu_session(*this);
 
@@ -42,6 +46,26 @@ void Game::start()
 	*/
 
 	while (!full_exit) {
+		if (this->new_gs != nullptr) {
+			delete this->gs; // should be safe, even for nullptr
+			
+			// swap game states to new one
+			this->gs = this->new_gs;
+			this->new_gs = nullptr;
+
+			// init it the first time
+			this->gs->init(*this);
+		}
 		gs->entry_point(*this);
+	}
+}
+
+void Game::set_new_state(BaseState* some_gs)
+{
+	if (this->new_gs != nullptr) {
+		SDL_LogError(0, "Seems that we set the game state twice in one frame?!?!?!?!");
+	}
+	else {
+		this->new_gs = some_gs;
 	}
 }

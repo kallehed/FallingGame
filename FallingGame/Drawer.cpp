@@ -520,7 +520,7 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_image(Camera& c, TEX::_ tex, float x, float y, float w, float h, float rotation)
+void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation)
 {
 	glUseProgram(image_program);
 	glBindVertexArray(image_VAO);
