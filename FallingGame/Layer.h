@@ -24,7 +24,8 @@
 class Layer
 {
 public:
-	void init();
+	// if NOT 0 -> it failed and don't continue.
+	int init();
 	~Layer();
 
 	bool start_frame(); // true -> end program

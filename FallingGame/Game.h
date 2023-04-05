@@ -16,7 +16,8 @@
 class Game
 {
 private:
-	void init();
+	// if NOT 0 -> end application
+	int init();
 public:
 	void start();
 

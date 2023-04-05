@@ -5,9 +5,9 @@
 
 #include <cmath>
 
-void Game::init()
+int Game::init()
 {
-	l.init();
+	if (l.init()) return -1;
 	d.init(*this);
 
 	this->gs = nullptr;
@@ -19,11 +19,12 @@ void Game::init()
 	MenuState::new_menu_session(*this);
 
 	srand(336); //TODO add true randomness
+	return 0;
 }
 
 void Game::start()
 {
-	init();
+	if (init()) return;;
 
 	// template state:
 	/*

@@ -62,7 +62,7 @@ void APIENTRY glDebugOutput(GLenum source,
 }
 
 
-void Layer::init()
+int Layer::init()
 {
 	SDL_Log("KALLE SDL app started");
 	CHKSDL(SDL_Init(SDL_INIT_VIDEO));
@@ -98,6 +98,7 @@ void Layer::init()
 	CHKSDL(!m_window);
 	m_glcontext = SDL_GL_CreateContext(m_window);
 	CHKSDL(!m_glcontext);
+	if (!m_window || !m_glcontext) { return -1; }
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
 	// I changed the name of the load function in gladES file
@@ -166,6 +167,7 @@ void Layer::init()
 		window_width_screen_coordinates = w; // exclusively for mouse on desktop lol
 		window_height_screen_coordinates = h;
 	}
+	return 0;
 }
 
 Layer::~Layer()
