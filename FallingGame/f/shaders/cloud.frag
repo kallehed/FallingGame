@@ -25,7 +25,7 @@ void main()
             break;
     }
 
-#elif
+#else
     FragColor = texture(cloudTexs[tex_idx], f_texCoord);
 #endif
     // blur effect
