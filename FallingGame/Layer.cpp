@@ -475,7 +475,6 @@ unsigned int Layer::compile_shader_program(const char* vertexShaderSource, const
 	unsigned int global_index = glGetUniformBlockIndex(shaderProgram, Drawer::UBO_GLOBAL_NAME);
 	glUniformBlockBinding(shaderProgram, global_index, Drawer::UBO_GLOBAL_BIND);
 
-
 	return shaderProgram;
 }
 

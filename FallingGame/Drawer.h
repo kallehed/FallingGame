@@ -42,7 +42,7 @@ public:
 	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin);
 
 	// updates relevant global shader values
-	void before_draw(Game& g, float death_y, float cam_y, float timer);
+	void before_draw(Game& g, float death_y, float cam_y, float timer, Color col);
 
 	void draw_fps(float dt);
 

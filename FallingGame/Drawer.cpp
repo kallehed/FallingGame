@@ -647,7 +647,7 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer)
+void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color col)
 {
 	// bind unfiform buffer object: Globals
 	{
@@ -662,6 +662,8 @@ void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer)
 			load_all_programs();
 		}
 	}
+	glClearColor(col.r, col.g, col.b, col.a);
+	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 }
 
 void Drawer::draw_fps(float dt)

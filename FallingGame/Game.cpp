@@ -5,6 +5,10 @@
 
 #include <cmath>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 int Game::init()
 {
 	if (l.init()) return -1;
@@ -14,7 +18,6 @@ int Game::init()
 	this->new_gs = nullptr;
 
 	this->level_at = 0;
-	this->full_exit = false;
 
 	MenuState::new_menu_session(*this);
 
@@ -22,43 +25,68 @@ int Game::init()
 	return 0;
 }
 
+// will change state of game if user wants to quit
+static bool start_func(BaseState& gs, Game& g)
+{
+	gs.timer += g.l.dt;
+	if (g.l.start_frame()) {
+		return true;
+	}
+	return false;
+}
+
+static void end_func(Game& g)
+{
+	if constexpr (DEV_TOOLS) {
+		g.d.draw_fps(g.l.dt);
+	}
+	//stuff
+	g.l.end_frame();
+};
+
+#ifdef __EMSCRIPTEN__
+static void emscripten_main_loop_callback(void* arg)
+{
+	Game* g = (Game*)arg;
+	g.main_loop();
+
+}
+#endif
+
+bool Game::to_be_looped() {
+	if (this->new_gs != nullptr) {
+		delete this->gs; // should be safe, even for nullptr
+
+		// swap game states to new one
+		this->gs = this->new_gs;
+		this->new_gs = nullptr;
+
+		// init it the first time
+		this->gs->init(*this);
+	}
+
+	// increases timer, gets events, possibly exits
+	if (start_func(*gs, *this)) return false;
+
+	// this does NOT loop
+	gs->entry_point(*this);
+
+	// delays, swaps frame buffers
+	end_func(*this);
+	return true;
+}
+
 void Game::start()
 {
 	if (init()) return;;
 
-	// template state:
-	/*
-	case GAME_STATE::Game_End_Win_Screen:
-	{
-		while (!go_to_new_state)
-		{
-			start_func();
-
-			glClearColor(0.0, 0.0, 0.0, 1.0);
-			glClear(GL_COLOR_BUFFER_BIT)// | GL_DEPTH_BUFFER_BIT );
-
-			d.before_draw(*this);
-
-			end_func();
-
-		}
-		break;
-	}
-	*/
-
-	while (!full_exit) {
-		if (this->new_gs != nullptr) {
-			delete this->gs; // should be safe, even for nullptr
-			
-			// swap game states to new one
-			this->gs = this->new_gs;
-			this->new_gs = nullptr;
-
-			// init it the first time
-			this->gs->init(*this);
-		}
-		gs->entry_point(*this);
-	}
+	// this loop calls a virtual function EACH frame. This is the only loop
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop_arg(emscripten_main_loop_callback, (void*)this, 0, true);
+#else
+	while (to_be_looped());
+#endif
+	// TODO: possibly handle saving and stuff?
 }
 
 void Game::set_new_state(BaseState* some_gs)

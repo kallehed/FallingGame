@@ -18,8 +18,13 @@ class Game
 private:
 	// if NOT 0 -> end application
 	int init();
+	
 public:
+	// called from main.cpp
 	void start();
+
+	// false -> exit
+	bool to_be_looped();
 
 	
 	void set_new_state(BaseState* some_gs);
@@ -31,10 +36,6 @@ public:
 
 	Layer l;
 	Drawer d;
-
-	bool full_exit;
-
-	
 
 private:
 	// pointer to a base type which has dynamic dispath to the current game loop. So only virtual calls VERY rarely basically.
