@@ -27,15 +27,22 @@ if(BUILD_SHARED_LIBS)
 	add_library(main SHARED)
 	target_sources(main PRIVATE ${SOURCES})
 
-      include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
 	target_link_libraries(main SDL2 freetype)
 else()
-	find_package(SDL2 REQUIRED)
-	include_directories(${SDL2_INCLUDE_DIRS})
+	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+		set(USE_FLAGS "-s USE_SDL=2 -s USE_FREETYPE=1") 
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_FLAGS}")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -s FULL_ES3=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 --preload-file f --use-preload-plugins")
+		set(CMAKE_EXECUTABLE_SUFFIX .html)
+	else()
+		find_package(SDL2 REQUIRED)
+		include_directories(${SDL2_INCLUDE_DIRS})
 
-	find_package(Freetype REQUIRED)
-
+		find_package(Freetype REQUIRED)
+	endif()
 	# stuff like glad.h, khr, also SDL and freetype headers
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 

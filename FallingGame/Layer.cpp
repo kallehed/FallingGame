@@ -67,7 +67,7 @@ int Layer::init()
 	SDL_Log("KALLE SDL app started");
 	CHKSDL(SDL_Init(SDL_INIT_VIDEO));
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__)  && !defined(__EMSCRIPTEN__)
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE));
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4));
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3));
@@ -75,12 +75,14 @@ int Layer::init()
 #else
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES));
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3));
-	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2));
+	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0));
 
 #endif
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1));
 	//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+#ifndef __EMSCRIPTEN__
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
+#endif
 	
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
@@ -92,13 +94,22 @@ int Layer::init()
 
 	//CHKSDL(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1));
 	//CHKSDL(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1));
+	{
+		int v1, v2;
+		SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &v1);
+		SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &v2);
+		SDL_Log("OpenGL Version: %d, %d", v1, v2);
+	}
 
 	m_window = SDL_CreateWindow("Falling Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, int(WIDTH*START_LENGTH_CONST), int(HEIGHT*START_LENGTH_CONST),
 		SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
 	CHKSDL(!m_window);
 	m_glcontext = SDL_GL_CreateContext(m_window);
 	CHKSDL(!m_glcontext);
-	if (!m_window || !m_glcontext) { return -1; }
+	if (m_window == NULL || m_glcontext == NULL) { 
+		SDL_Log("KALLE SDL: It seems that you have something very wrong with your OpenGL ES 3.2 context, PROBABLY. Or something else is horribly wrong.");		
+		return -1;
+       	}
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
 	// I changed the name of the load function in gladES file
@@ -400,13 +411,13 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		}
 
 		static constexpr const char* SHADER_START_FOR_ALL =
-#ifndef __ANDROID__
+#if  !defined(__ANDROID__)  && !defined(__EMSCRIPTEN__)
 			"#version 430 core\n"
 #else
-			"#version 320 es\n"
+			"#version 300 es\n"
 			"precision highp float;\n"
 #endif
-			"layout(std140, binding = 0) uniform Globals\n"
+			"layout(std140) uniform Globals\n"
 			"{"
 			"	float g_death_y;"
 			"	float g_cam_y;"
@@ -460,6 +471,10 @@ unsigned int Layer::compile_shader_program(const char* vertexShaderSource, const
 	}
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+
+	unsigned int global_index = glGetUniformBlockIndex(shaderProgram, Drawer::UBO_GLOBAL_NAME);
+	glUniformBlockBinding(shaderProgram, global_index, Drawer::UBO_GLOBAL_BIND);
+
 
 	return shaderProgram;
 }

@@ -135,14 +135,14 @@ private:
 	// gl_Position will be modified after all vertex shaders
 	// 
 
-	private:
+	unsigned int ubo_globals; // BINDING 0.
+public:
 	static constexpr int UBO_GLOBAL_BIND = 0;
 	static constexpr const char* UBO_GLOBAL_NAME = "Globals"; // never used
 	static constexpr int UBO_GOBAL_FLOATS = 5;
 	static constexpr int UBO_GLOBAL_SIZE = UBO_GOBAL_FLOATS * sizeof(float);
-	unsigned int ubo_globals; // BINDING 0.
+	
 
-public:
 	std::array<unsigned int, TEX::TOTAL> texs;
 	std::array<std::array<int, 2>, TEX::TOTAL> tex_sizes;
 };
