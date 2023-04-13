@@ -24,8 +24,8 @@ void Drawer::init(Game& g)
 		};
 
 		glGenBuffers(1, &standard_rect_EBO);
-		glBindBuffer(GL_ARRAY_BUFFER, standard_rect_EBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	}
 
 	// load all programs
@@ -131,7 +131,7 @@ void Drawer::init(Game& g)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 			int x = PIX_OFFSET;
 
 			// exclude loading space by starting at 33.
@@ -572,6 +572,7 @@ void Drawer::draw_sides(Player& p)
 
 void Drawer::draw_clouds(CloudHandler& ch)
 {
+	return;
 	glUseProgram(cloud_program);
 	glBindVertexArray(cloud_VAO);
 
@@ -652,7 +653,7 @@ void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[UBO_GOBAL_FLOATS] = { death_y, cam_y, timer, Layer::WIDTH, Layer::HEIGHT};
+		float data[UBO_GLOBAL_FLOATS] = { death_y, cam_y, timer, Layer::WIDTH, Layer::HEIGHT};
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
 	}	
 

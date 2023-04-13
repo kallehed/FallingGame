@@ -48,7 +48,7 @@ static void end_func(Game& g)
 static void emscripten_main_loop_callback(void* arg)
 {
 	Game* g = (Game*)arg;
-	g.main_loop();
+	g->to_be_looped();
 
 }
 #endif

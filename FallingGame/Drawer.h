@@ -124,7 +124,8 @@ private:
 	* float g_death_y; // y where you die
 	* float g_cam_y; // canera y
 	* float g_timer; // time since level started
-	* float g_w; // how much bigger the width is to the height, CONSTANT = 1.6 probs = g.l.WIDTH
+	* float g_w; // the screen width, (maybe (CONSTANT)) = 1.6 probs = g.l.WIDTH
+	* float g_h; // the screen height
 	*/
 	// shader start text and stuff is in Layer.cpp::compile_shader_from_file
 
@@ -139,8 +140,10 @@ private:
 public:
 	static constexpr int UBO_GLOBAL_BIND = 0;
 	static constexpr const char* UBO_GLOBAL_NAME = "Globals"; // never used
-	static constexpr int UBO_GOBAL_FLOATS = 5;
-	static constexpr int UBO_GLOBAL_SIZE = UBO_GOBAL_FLOATS * sizeof(float);
+	// HAS TO BE A MULTIPLE OF 4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Actually 5 right now, but rounded up to 8.
+	static constexpr int UBO_GLOBAL_FLOATS = 8;
+	static constexpr int UBO_GLOBAL_SIZE = UBO_GLOBAL_FLOATS * sizeof(float);
 	
 
 	std::array<unsigned int, TEX::TOTAL> texs;

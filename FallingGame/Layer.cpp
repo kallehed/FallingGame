@@ -12,7 +12,7 @@
 #include "Drawer.h"
 
 
-
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 void APIENTRY glDebugOutput(GLenum source,
 	GLenum type,
 	unsigned int id,
@@ -60,7 +60,7 @@ void APIENTRY glDebugOutput(GLenum source,
 	} std::cout << std::endl;
 	std::cout << std::endl;
 }
-
+#endif
 
 int Layer::init()
 {
@@ -80,7 +80,7 @@ int Layer::init()
 #endif
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1));
 	//SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-#ifndef __EMSCRIPTEN__
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 	CHKSDL(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 #endif
 	
@@ -112,12 +112,13 @@ int Layer::init()
        	}
 	CHKSDL(SDL_GL_MakeCurrent(m_window, m_glcontext));
 
+
 	// I changed the name of the load function in gladES file
 	if (!gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress))
 		SDL_LogError(0, "Failed to initialize GLAD");
 
 	// debug mode	
-#if 1
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 	{
 		int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 		bool debug_on = flags & GL_CONTEXT_FLAG_DEBUG_BIT;
@@ -132,9 +133,11 @@ int Layer::init()
 	}
 #endif
 
+#ifndef __EMSCRIPTEN__
 	// 1 for vsync, which works for all platforms tested so far
 
 	CHKSDL(SDL_GL_SetSwapInterval(1));
+#endif
 
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_DEPTH_TEST);
@@ -331,6 +334,9 @@ bool Layer::start_frame()
 void Layer::end_frame()
 {
 	SDL_GL_SwapWindow(m_window);
+#ifdef __EMSCRIPTEN__
+	dt = 0.0166666666f; // always 60 fps for the web >:)
+#else
 	Uint64 end = SDL_GetPerformanceCounter();
 
 	// delay if framerate going too fast
@@ -339,9 +345,11 @@ void Layer::end_frame()
 	Uint32 delay = static_cast<Uint32>(std::max(0.f, 1000.f / MAX_FPS - milliSecElapsed));
 	dt = (milliSecElapsed + delay) / 1000.f;
 	dt = std::min(1.f / MIN_FPS, dt);
+
+	SDL_Delay(delay);
+#endif
 	// slow
 	//SDL_SetWindowTitle(m_window, std::to_string(1000.f / (milliSecElapsed + delay)).c_str());
-	SDL_Delay(delay);
 }
 
 bool Layer::key_down(SDL_Scancode key) const
