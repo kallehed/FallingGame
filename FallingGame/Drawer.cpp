@@ -367,11 +367,12 @@ void Drawer::init(Game& g)
 		glVertexAttribDivisor(1, 1);
 
 		// set samplers to right places
-		/*glUseProgram(cloud_program);
-		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex0"), 0);
-		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex1"), 1);
-		glUniform1i(glGetUniformLocation(cloud_program, "cloudTex2"), 2);
-		*/
+		glUseProgram(cloud_program);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[0]"), 0);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[1]"), 1);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[2]"), 2);
+		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[3]"), 3);
+	
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
 	}
 
@@ -572,7 +573,6 @@ void Drawer::draw_sides(Player& p)
 
 void Drawer::draw_clouds(CloudHandler& ch)
 {
-	return;
 	glUseProgram(cloud_program);
 	glBindVertexArray(cloud_VAO);
 
@@ -580,9 +580,9 @@ void Drawer::draw_clouds(CloudHandler& ch)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_1]);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_3]);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_2]);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_4]);
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_3]);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::cloud_4]);
 

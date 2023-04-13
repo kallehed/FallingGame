@@ -419,11 +419,16 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 		}
 
 		static constexpr const char* SHADER_START_FOR_ALL =
-#if  !defined(__ANDROID__)  && !defined(__EMSCRIPTEN__)
-			"#version 430 core\n"
-#else
-			"#version 300 es\n"
+#if defined(__ANDROID__) 
+			"#version 320 es\n"
+			"#define __ANDROID__\n"
 			"precision highp float;\n"
+#elif defined(__EMSCRIPTEN__)	
+			"#version 300 es\n"
+			"#define __EMSCRIPTEN__\n"
+			"precision highp float;\n"
+#else
+			"#version 430 core\n"
 #endif
 			"layout(std140) uniform Globals\n"
 			"{"
@@ -431,7 +436,7 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 			"	float g_cam_y;"
 			"	float g_timer;"
 			"	float g_w;"
-			"   float g_h;"
+			"       float g_h;"
 			"};\n";
 	
 		const char* strs[] = { SHADER_START_FOR_ALL, sh_start, str, sh_end};
