@@ -48,12 +48,11 @@ void CloudHandler::game_logic(CloudHandler& ch, Game& g, Camera& c)
 		}
 		e.y += (c.y_dif) * (1.f - e.z);
 		e.x += e.x_vel * g.l.dt * (1.f - e.z);
-	
 	}
 }
 
 void BouncerHandler::init() {
-	_next_bouncer_y = -1.f;
+	_next_bouncer_y = -0.5f;
 	_bouncer_index = 0;
 
 	for (auto& e : _bouncers) {
@@ -84,6 +83,7 @@ void BouncerHandler::logic(Player& p, Camera& c, float level_end)
 		if (_bouncer_index >= _MAX_BOUNCERS) { _bouncer_index = 0; }
 
 		_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
+		//_next_bouncer_y -= 0.05f;
 	}
 }
 
@@ -166,9 +166,9 @@ void MenuState::entry_point(Game & g)
 
 	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || gs._btn_start.just_pressed();
 
-	//logic
+	// logic
 	if (g.ge.enter_game_session) {
-		new_game_session_from_menu(g);
+		g.set_new_state(new LevelSelectorState{});
 	}
 
 	{
@@ -186,6 +186,46 @@ void MenuState::entry_point(Game & g)
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
 
+void LevelSelectorState::init(Game& g)
+{
+	int i = 0;
+
+	static std::array<const char *, 5> names = {
+			"Level 1",
+			"Level 2",
+			"Level 3",
+			"Level 4",
+			"COol",
+	};
+
+	for (auto& e : _btn_levels)
+	{
+		e.init(names[i], 0.001f, 0.f, -i * 0.3f, 0.5f, 0.2f);
+		++i;
+	}
+}
+
+void LevelSelectorState::entry_point(Game& g)
+{
+	LevelSelectorState& gs = *this;
+	//logic
+	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P);
+
+	if (g.ge.enter_game_session) {
+		new_game_session_from_menu(g);
+	}
+
+	for (auto& e : _btn_levels) { e.logic(g.l); }
+
+	//draw
+	g.d.before_draw(g, 5000000.f, 0.f, gs.timer, { 1.f,1.f,1.f,1.f });
+
+	for (auto& e : _btn_levels) { e.draw(g.d); }
+
+	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f, 0.004f);
+}
+
+
 void GameState::init(Game& g)
 {
 	GameState& gs = *this;
@@ -197,6 +237,7 @@ void GameState::init(Game& g)
 	gs.timer = 0.f;
 	gs.p.init();
 	gs.c.init();
+	gs.c.set_in_game(gs.p, -1000.f);
 
 	gs.ch.init_game(gs.ch, g.d);
 
@@ -238,8 +279,6 @@ static void set_exit_events(Game& g)
 	g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
 }
 
-
-
 static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 {
 	for (int i = (int)coins.size() - 1; i >= 0; --i) {
@@ -265,7 +304,6 @@ void GameState::main_loop(GameState& gs, Game& g)
 	set_exit_events(g);
 
 	// logic
-
 	if constexpr (STATE == GameState::State::Win || STATE == GameState::State::Lose)
 	{
 		g.ge.exit_current_session |= g.l.m_finger_just_down;
@@ -298,7 +336,11 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 		// increase speed of death_y over time
 		//gs.death_y -= 1.41f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
+
 		gs.p.logic(g.ge, g.l.dt);
+
+		// set CAMERA position
+		gs.c.set_in_game(gs.p, gs.level_end);
 
 		const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
 
@@ -308,7 +350,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 				gs.coins.erase(gs.coins.begin() + i);
 			}
 		}
-
+		//printf("Camera y: %f", gs.c.y);
 		gs._bh.logic(gs.p, gs.c, gs.level_end);
 			
 		handle_collisions_player_coins(gs.coins, gs.p);
@@ -317,18 +359,11 @@ void GameState::main_loop(GameState& gs, Game& g)
 		float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
 		if (spawn_bound < gs.level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
 
-		
-
 		// spawn coin
 		while (spawn_bound <= gs.next_coin_y)
 		{
 			gs.coins.emplace_back(g, gs.next_coin_y);
 			gs.next_coin_y -= (2.f * g.l.HEIGHT * (0.5f + 0.5f * rand_01()));
-		}
-
-		// set CAMERA position
-		{
-			gs.c.set_in_game(gs.p, gs.level_end);
 		}
 	}
 	gs.ch.game_logic(gs.ch, g, gs.c);
@@ -343,6 +378,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 	gs.p.draw(g, gs.c);
 	gs._bh.draw(g, gs.c);
+
 	// side background
 	g.d.draw_sides(gs.p);
 
@@ -365,9 +401,5 @@ void GameState::main_loop(GameState& gs, Game& g)
 	if constexpr (STATE == GameState::State::Lose) {
 		g.d.draw_text("You LOST? wow, incredible.", { 1.f,1.f,1.f,1.f }, -Game::G_WIDTH, 0.f, 0.002f);
 	}
-}
-
-void BaseState::init(Game& g)
-{
 }
 

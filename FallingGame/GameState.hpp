@@ -25,7 +25,7 @@ struct CloudHandler
 struct BouncerHandler
 {
 private:
-	static constexpr int _MAX_BOUNCERS = 10;
+	static constexpr int _MAX_BOUNCERS = 100;
 	std::array<Bouncer, _MAX_BOUNCERS> _bouncers;
 
 	// How it works:
@@ -66,7 +66,7 @@ public:
 	void logic(Layer& l);
 
 	void draw(Drawer& d);
-
+	 
 	// was the button just pressed?
 	bool just_pressed();
 };
@@ -84,15 +84,28 @@ struct BaseState
 
 struct MenuState final : public BaseState
 {
+private:
 	Camera c;
 	CloudHandler ch;
 
 	Button _btn_start;
-
+public:
 	static void new_menu_session(Game& g);
 
-	virtual void entry_point(Game& g) override;
 	virtual void init(Game& g) override;
+	virtual void entry_point(Game& g) override;
+	
+};
+
+struct LevelSelectorState final : public BaseState
+{
+private:
+
+	std::array<Button, 5> _btn_levels;
+
+public:
+	virtual void init(Game& g) override;
+	virtual void entry_point(Game& g) override;
 };
 
 struct GameState final : public BaseState
