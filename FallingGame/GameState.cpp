@@ -6,14 +6,10 @@
 #include <algorithm>
 #include <cstdio>
 
-
-
-
 static void new_game_session_from_menu(Game& g)
 {
 	g.set_new_state(new GameState{});
 }
-
 
 void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
 {
@@ -56,6 +52,88 @@ void CloudHandler::game_logic(CloudHandler& ch, Game& g, Camera& c)
 	}
 }
 
+void BouncerHandler::init() {
+	_next_bouncer_y = -1.f;
+	_bouncer_index = 0;
+
+	for (auto& e : _bouncers) {
+		e.init(0.f, 2.f*Layer::HEIGHT);
+	}
+}
+
+void BouncerHandler::logic(Player& p, Camera& c, float level_end)
+{
+	// Bounce Logic
+	if (p.y_vel < 0.0f) {
+		for (auto& e : _bouncers) {
+			// TODO: Maybe remove the branches from this if?
+			if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
+				//std::cout << "bounce << " << p.y_vel << "\n";
+				p.bounce_x_vel = std::min(1.f, -0.5f * p.y_vel) * 10.f * p.r.x_dist(e.h);
+				p.y_vel = std::clamp(-0.5f * p.y_vel, 0.75f, 1.5f);
+				e.bounced_on(p.bounce_x_vel);
+			}
+		}
+	}
+
+	// Spawn bouncers
+	float spawn_bound = c.y - Layer::HEIGHT * 1.25f;
+	while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > level_end - Layer::HEIGHT)
+	{
+		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y);
+		if (_bouncer_index >= _MAX_BOUNCERS) { _bouncer_index = 0; }
+
+		_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
+	}
+}
+
+void BouncerHandler::draw(Game& g, Camera& c)
+{
+	for (auto& e : _bouncers) { e.draw(g, c); }
+}
+
+
+void Button::init(const char* text, float text_size, float mid_x, float mid_y, float w, float h)
+{
+	_r.init(mid_x - w/2.f, mid_y - h/2.f, w, h);
+	_text = text;
+	_text_size = text_size;
+	_almost_pressed = false;
+	_just_pressed = false;
+}
+
+void Button::logic(Layer& l)
+{
+	_just_pressed = false;
+	if (!_almost_pressed)
+	{
+		if (l.m_finger_just_down && _r.intersect_point(l.m_finger_pos))
+		{
+			_almost_pressed = true;
+		}
+	}
+	else
+	{
+		if (l._finger_just_up) {
+			if (_r.intersect_point(l.m_finger_pos))
+			{
+				_just_pressed = true;
+			}
+			_almost_pressed = false;
+		}
+	}
+}
+
+void Button::draw(Drawer& d)
+{
+	Color c = (_almost_pressed || _just_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color { 1.f,1.f,0.f,1.f });
+	d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
+	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w/2.f, _r.y + _r.h/2.f, _text_size);
+}
+
+bool Button::just_pressed() { return _just_pressed; }
+
+
 void MenuState::new_menu_session(Game& g)
 {
 	g.set_new_state(new MenuState{});
@@ -70,39 +148,43 @@ void MenuState::init(Game& g)
 	gs.ch.init_menu(gs.ch, g.d);
 
 	gs.c.init();
+
+	gs._btn_start.init("Start", 0.0025f, 0.f, 0.f, 0.5f, 0.25f);
 }
 
 void MenuState::entry_point(Game & g)
 {
 	MenuState& gs = *this;
 
-	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.m_finger_just_down;
+	gs._btn_start.logic(g.l);
+
+	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || gs._btn_start.just_pressed();
 
 	//logic
 	if (g.ge.enter_game_session) {
 		new_game_session_from_menu(g);
-		//return;
 	}
 
 	{
 		float move = 1.1f * g.l.dt;
-		//p.r.y += move;
-		//gs.death_y += move;
+		gs.c.y += move;
 	}
 
 	gs.ch.menu_logic(gs.ch, g);
 
-	g.d.before_draw(g, 5.f, 0.f, gs.timer, {1.f,1.f,1.f,1.f});
-	g.d.draw_sky(g, gs.c);
+	g.d.before_draw(g, 5000000.f, 0.f, gs.timer, {1.f,1.f,1.f,1.f});
+	g.d.draw_sky(g, gs.c.y);
 	g.d.draw_clouds(gs.ch);
-	g.d.draw_text("Falling Game!", { 1,0,1,1 }, 0, 0, 0.002f);
+	gs._btn_start.draw(g.d);
+	g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
 
 void GameState::init(Game& g)
 {
 	GameState& gs = *this;
-	gs.next_bouncer_y = -1.f;
+	gs._bh.init();
+	
 	gs.next_coin_y = -1.5f;
 
 	gs.death_y = 3.f;
@@ -140,7 +222,7 @@ static void set_movement_events(Game& g)
 	g.ge.player_to_right = g.l.key_down(SDL_SCANCODE_D);
 	g.ge.player_to_left = g.l.key_down(SDL_SCANCODE_A);
 	if (g.l.m_finger_down) {
-		g.ge.player_to_left = g.l.m_finger_pos.x < 0.5f;
+		g.ge.player_to_left = g.l.m_finger_pos.x < 0.0f; // middle of screen
 		g.ge.player_to_right = !g.ge.player_to_left;
 	}
 }
@@ -150,19 +232,7 @@ static void set_exit_events(Game& g)
 	g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
 }
 
-static void handle_collisions_player_bouncers(std::vector<Bouncer>& bouncers, Player& p)
-{
-	for (auto& e : bouncers) {
-		if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
-			if (p.y_vel < 0.0f) {
-				//std::cout << "bounce << " << p.y_vel << "\n";
-				p.bounce_x_vel = std::min(1.f, -0.5f * p.y_vel) * 10.f * p.r.x_dist(e.h);
-				p.y_vel = std::clamp(-0.5f * p.y_vel, 0.75f, 1.5f);
-				e.bounced_on(p.bounce_x_vel);
-			}
-		}
-	}
-}
+
 
 static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 {
@@ -226,20 +296,14 @@ void GameState::main_loop(GameState& gs, Game& g)
 
 		const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
 
-		// delete bouncers that have gone too high
-		for (int i = (int)gs.bouncers.size() - 1; i >= 0; --i) {
-			if (gs.bouncers[i].h.y > remove_bound) { // should be removed
-				gs.bouncers.erase(gs.bouncers.begin() + i);
-			}
-		}
-
 		// delete coins that have gone too high
 		for (int i = (int)gs.coins.size() - 1; i >= 0; --i) { 
 			if (gs.coins[i].r.y > remove_bound) { // should be removed
 				gs.coins.erase(gs.coins.begin() + i);
 			}
 		}
-		handle_collisions_player_bouncers(gs.bouncers, gs.p);
+
+		gs._bh.logic(gs.p, gs.c, gs.level_end);
 			
 		handle_collisions_player_coins(gs.coins, gs.p);
 
@@ -247,11 +311,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 		float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
 		if (spawn_bound < gs.level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
 
-		// spawn bouncer
-		while (spawn_bound <= gs.next_bouncer_y) {
-			gs.bouncers.emplace_back(Game::G_WIDTH, gs.next_bouncer_y);
-			gs.next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
-		}
+		
 
 		// spawn coin
 		while (spawn_bound <= gs.next_coin_y)
@@ -270,13 +330,13 @@ void GameState::main_loop(GameState& gs, Game& g)
 	// Drawing
 	g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer, {0.f,0.f,0.f,1.f});
 
-	g.d.draw_sky(g, gs.c);
+	g.d.draw_sky(g, gs.c.y);
 
 	g.d.draw_clouds(gs.ch);
 	for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
 
 	gs.p.draw(g, gs.c);
-	for (auto& e : gs.bouncers) { e.draw(g, gs.c); }
+	gs._bh.draw(g, gs.c);
 	// side background
 	g.d.draw_sides(gs.p);
 
@@ -299,5 +359,9 @@ void GameState::main_loop(GameState& gs, Game& g)
 	if constexpr (STATE == GameState::State::Lose) {
 		g.d.draw_text("You LOST? wow, incredible.", { 1.f,1.f,1.f,1.f }, -Game::G_WIDTH, 0.f, 0.002f);
 	}
+}
+
+void BaseState::init(Game& g)
+{
 }
 

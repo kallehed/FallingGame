@@ -5,7 +5,7 @@
 class Bouncer
 {
 public:
-	Bouncer(float spawn_width, float y);
+	void init(float spawn_width, float y);
 
 	void draw(Game& g, Camera& c);
 

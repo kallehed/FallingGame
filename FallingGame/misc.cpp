@@ -4,12 +4,9 @@
 //#include <cstdlib>
 #include <cmath>
 
-Rect::Rect(float X, float Y, float W, float H) : x(X), y(Y), w(W), h(H)
+void Rect::init(float X, float Y, float W, float H) 
 {
-}
-
-Rect::Rect()
-{
+	x = X; y = Y; w = W; h = H;
 }
 
 void Rect::draw(Drawer& d, const Color& color)
@@ -24,13 +21,21 @@ bool Rect::intersect(Rect& e)
 	return ((x <= e.x + e.w) && (x + w >= e.x) && (y <= e.y + e.h) && (y + h >= e.y));
 }
 
+bool Rect::intersect_point(Pos p)
+{
+	return p.x >= x && p.x <= x + w && p.y >= y && p.y <= y + h;
+}
+
 float Rect::x_dist(HoLine& hl)
 {
 	return (x + w / 2.f) - (hl.x + hl .w / 2.f);
 }
 
-HoLine::HoLine(float _x, float _y, float _w) : x(_x), y(_y), w(_w)
+void HoLine::init(float _x, float _y, float _w) 
 {
+	x = _x;
+	y = _y;
+	w = _w;
 }
 
 void HoLine::draw(Drawer& d, const Color& color)

@@ -12,6 +12,7 @@ constexpr inline bool DRAW_HB = false; // draw hitboxes?s
 // R for hot reload.
 constexpr inline bool DEV_TOOLS = true; // allow development stuff
 
+class Layer;
 class Game;
 class Drawer;
 class Player;
@@ -51,10 +52,10 @@ class Rect // for hitboxes
 {
 public:
 	float x, y, w, h;
-	Rect(float, float, float, float); // x,y,w,h
-	Rect();
+	void init(float, float, float, float); // x,y,w,h
 	void draw(Drawer& d, const Color& color);
 	bool intersect(Rect& e);
+	bool intersect_point(Pos p);
 	float x_dist(HoLine&);
 };
 
@@ -62,7 +63,7 @@ class HoLine // a horizontal line, containing x,y,w. A hitbox
 {
 public:
 	float x, y, w;
-	HoLine(float, float, float); // x, y, w
+	void init(float, float, float); // x, y, w
 	void draw(Drawer& d, const Color& color);
 	float x_dist(HoLine& h); // distance in x to other holine
 };

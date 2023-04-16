@@ -199,7 +199,7 @@ bool Layer::start_frame()
 	//SDL_Log("KALLE SDL Start of frame");
 
 	m_keys_just_down = { false }; // reset before getting events
-	m_finger_just_down = false;
+	m_finger_just_down = false; _finger_just_up = false;
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
 	{
@@ -248,13 +248,13 @@ bool Layer::start_frame()
 			// * fallthrough *
 
 		case SDL_MOUSEMOTION:
-			m_finger_pos.x = float(e.motion.x) / float(window_width_screen_coordinates);
-			m_finger_pos.y = float(e.motion.y) / float(window_height_screen_coordinates);
+			m_finger_pos.x = WIDTH *2.f*((float(e.motion.x) / float(window_width_screen_coordinates )) - 0.5f);
+			m_finger_pos.y = -HEIGHT*2.f*((float(e.motion.y) / float(window_height_screen_coordinates)) - 0.5f);
 
 			break;
 		case SDL_MOUSEBUTTONUP:
 			m_finger_down = false;
-
+			_finger_just_up = true;
 			break;
 
 
@@ -265,16 +265,19 @@ bool Layer::start_frame()
 	
 		case SDL_FINGERMOTION:
 			m_finger_down = true;
-			m_finger_pos.x = e.tfinger.x;
-			m_finger_pos.y = e.tfinger.y;
+			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
+			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
 
 			break;
 		case SDL_FINGERUP:
 			m_finger_down = false;
+			_finger_just_up = true;
 
 			break;
 		}
 	}
+
+	//printf("Mouse coords, x: %f, y: %f\n", m_finger_pos.x, m_finger_pos.y);
 
 
 	if (key_just_down(SDL_SCANCODE_RETURN)) { // Switch fullscreen

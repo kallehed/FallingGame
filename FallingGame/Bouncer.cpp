@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-Bouncer::Bouncer(float spawn_width, float y) : h(0.f,0.f,0.f)
+void Bouncer::init(float spawn_width, float y)
 {
 	h.w = 0.3f + 0.1f*rand_uni();
 	h.x = (2.f * spawn_width + h.w) * rand_01() - (spawn_width + h.w);

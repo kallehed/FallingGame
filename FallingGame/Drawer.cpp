@@ -472,6 +472,7 @@ void Drawer::init(Game& g)
 	}*/
 }
 
+template <bool centered>
 void Drawer::draw_text(const char* text, Color color, float x, float y, float scale)
 {
 	glUseProgram(m_text_program);
@@ -488,7 +489,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 		SDL_assert(i < TEXT_MAX_CHARS_RENDER);
 		char c = text[i];
 		data[i][0] = (float)c;
-		data[i][1] = (float)char_x_offset;
+		data[i][1] = char_x_offset;
 
 		//advance is number of 1/64 pixels for some reason
 		char_x_offset += (m_characters[c].advance >> 6) * scale; //bitshift by 6 == * 2^6
@@ -498,11 +499,20 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	glBindBuffer(GL_ARRAY_BUFFER, m_text_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (size_t)nr_of_chars * TEXT_BYTES_PER, data);
 
+	if constexpr (centered) {
+		y -= m_characters[80].height * scale / 2.f; // height of P
+		x -= char_x_offset / 2.f;
+	}
+
 	glUniform3f(m_text_u_offset_scale, x, y, scale);
 	glUniform4f(m_text_u_color, color.r, color.g, color.b, color.a);
 
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, nr_of_chars);
 }
+
+// instantiate the two only viable versions of this function
+template void Drawer::draw_text<false>(const char* text, Color color, float x, float y, float scale);
+template void Drawer::draw_text<true>(const char* text, Color color, float x, float y, float scale);
 
 void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& color)
 {
@@ -547,13 +557,13 @@ void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float ro
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_sky(Game& g, Camera& c)
+void Drawer::draw_sky(Game& g, float camera_y)
 {
 	glUseProgram(sky_program);
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
-	float y = -c.y/5.f;
+	float y = -camera_y/5.f;
 	y -= (sky_height_per_sky) * std::floor(y / sky_height_per_sky);
 	
 	glUniform2f(sky_u_offset, 0.f, y);

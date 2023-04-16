@@ -23,6 +23,7 @@ class Drawer
 public:
 	void init(Game& g);
 
+	template <bool centered = false>
 	void draw_text(const char* text, Color color, float x, float y, float scale);
 
 	// draw a rectangle RELATIVE to the playeer.
@@ -31,7 +32,7 @@ public:
 	// draws middle of image at x,y. Offset by camera 
 	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation);
 
-	void draw_sky(Game& g, Camera& c);
+	void draw_sky(Game& g, float camera_y);
 
 	void draw_sides(Player& p);
 
