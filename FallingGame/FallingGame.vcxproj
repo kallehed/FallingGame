@@ -159,17 +159,17 @@
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bouncer.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Cloud.h" />
-    <ClInclude Include="Coin.h" />
-    <ClInclude Include="CoinParticle.h" />
-    <ClInclude Include="Drawer.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameState.h" />
-    <ClInclude Include="Layer.h" />
-    <ClInclude Include="misc.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="Bouncer.hpp" />
+    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Cloud.hpp" />
+    <ClInclude Include="Coin.hpp" />
+    <ClInclude Include="CoinParticle.hpp" />
+    <ClInclude Include="Drawer.hpp" />
+    <ClInclude Include="Game.hpp" />
+    <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="Layer.hpp" />
+    <ClInclude Include="misc.hpp" />
+    <ClInclude Include="Player.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>

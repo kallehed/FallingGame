@@ -56,6 +56,9 @@ private:
 
 	bool _just_pressed;
 
+	// Whether to draw the button pressed
+	bool _draw_pressed;
+
 public:
 	// midpoint for button
 	void init(const char * text, float text_size, float mid_x, float mid_y, float w, float h);

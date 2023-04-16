@@ -100,22 +100,28 @@ void Button::init(const char* text, float text_size, float mid_x, float mid_y, f
 	_text_size = text_size;
 	_almost_pressed = false;
 	_just_pressed = false;
+	_draw_pressed = false;
 }
 
 void Button::logic(Layer& l)
 {
 	_just_pressed = false;
+	_draw_pressed = false;
 	if (!_almost_pressed)
 	{
 		if (l.m_finger_just_down && _r.intersect_point(l.m_finger_pos))
 		{
 			_almost_pressed = true;
+			_draw_pressed = true;
 		}
 	}
 	else
 	{
-		if (l._finger_just_up) {
-			if (_r.intersect_point(l.m_finger_pos))
+		bool intersects = _r.intersect_point(l.m_finger_pos);
+		_draw_pressed = intersects;
+		if (l._finger_just_up)
+		{
+			if (intersects)
 			{
 				_just_pressed = true;
 			}
@@ -126,7 +132,7 @@ void Button::logic(Layer& l)
 
 void Button::draw(Drawer& d)
 {
-	Color c = (_almost_pressed || _just_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color { 1.f,1.f,0.f,1.f });
+	Color c = (_draw_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color { 1.f,1.f,0.f,1.f });
 	d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
 	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w/2.f, _r.y + _r.h/2.f, _text_size);
 }
