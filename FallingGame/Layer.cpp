@@ -199,7 +199,7 @@ bool Layer::start_frame()
 	//SDL_Log("KALLE SDL Start of frame");
 
 	m_keys_just_down = { false }; // reset before getting events
-	m_finger_just_down = false; _finger_just_up = false;
+	m_finger_just_down = false; _finger_just_up = false; m_finger_move = { 0.f, 0.f };
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
 	{
@@ -245,11 +245,16 @@ bool Layer::start_frame()
 			m_finger_just_down = true;
 			m_finger_down = true;
 
-			// * fallthrough *
+			m_finger_pos.x = WIDTH * 2.f * ((float(e.button.x) / float(window_width_screen_coordinates)) - 0.5f);
+			m_finger_pos.y = -HEIGHT * 2.f * ((float(e.button.y) / float(window_height_screen_coordinates)) - 0.5f);
 
-		case SDL_MOUSEMOTION:
-			m_finger_pos.x = WIDTH *2.f*((float(e.motion.x) / float(window_width_screen_coordinates )) - 0.5f);
+			break;
+		case SDL_MOUSEMOTION: 
+			m_finger_pos.x =  WIDTH* 2.f*((float(e.motion.x) / float(window_width_screen_coordinates )) - 0.5f);
 			m_finger_pos.y = -HEIGHT*2.f*((float(e.motion.y) / float(window_height_screen_coordinates)) - 0.5f);
+
+			m_finger_move.x = 2.f*WIDTH * float(e.motion.xrel) / float(window_width_screen_coordinates);
+			m_finger_move.y = 2.f*HEIGHT*float(e.motion.yrel) / float(window_height_screen_coordinates);
 
 			break;
 		case SDL_MOUSEBUTTONUP:
@@ -260,13 +265,19 @@ bool Layer::start_frame()
 
 		case SDL_FINGERDOWN: // will NOT be called on a computer
 			m_finger_just_down = true;
+
+			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
+			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
 			
-			// * fallthrough *
-	
+			break;
+
 		case SDL_FINGERMOTION:
 			m_finger_down = true;
 			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
+
+			m_finger_move.x = WIDTH * 2.f * e.tfinger.dx;
+			m_finger_move.y = HEIGHT * 2.f * e.tfinger.dy;
 
 			break;
 		case SDL_FINGERUP:

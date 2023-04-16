@@ -103,13 +103,15 @@ void Button::init(const char* text, float text_size, float mid_x, float mid_y, f
 	_draw_pressed = false;
 }
 
-void Button::logic(Layer& l)
+void Button::logic(Layer& l, float cam_y)
 {
 	_just_pressed = false;
 	_draw_pressed = false;
+	Pos finger = l.m_finger_pos;
+	finger.y += cam_y;
 	if (!_almost_pressed)
 	{
-		if (l.m_finger_just_down && _r.intersect_point(l.m_finger_pos))
+		if (l.m_finger_just_down && _r.intersect_point(finger))
 		{
 			_almost_pressed = true;
 			_draw_pressed = true;
@@ -117,7 +119,9 @@ void Button::logic(Layer& l)
 	}
 	else
 	{
-		bool intersects = _r.intersect_point(l.m_finger_pos);
+		static constexpr float BOUND = 0.01f;
+		if (fabs(l.m_finger_move.y) > BOUND || fabs(l.m_finger_move.x) > BOUND) { _almost_pressed = false; return; }
+		bool intersects = _r.intersect_point(finger);
 		_draw_pressed = intersects;
 		if (l._finger_just_up)
 		{
@@ -130,11 +134,11 @@ void Button::logic(Layer& l)
 	}
 }
 
-void Button::draw(Drawer& d)
+void Button::draw(Drawer& d, float cam_y)
 {
 	Color c = (_draw_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color { 1.f,1.f,0.f,1.f });
 	d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
-	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w/2.f, _r.y + _r.h/2.f, _text_size);
+	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w/2.f, _r.y + _r.h/2.f - cam_y, _text_size);
 }
 
 bool Button::just_pressed() { return _just_pressed; }
@@ -162,7 +166,7 @@ void MenuState::entry_point(Game & g)
 {
 	MenuState& gs = *this;
 
-	gs._btn_start.logic(g.l);
+	gs._btn_start.logic(g.l, 0.f);
 
 	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || gs._btn_start.just_pressed();
 
@@ -181,7 +185,7 @@ void MenuState::entry_point(Game & g)
 	g.d.before_draw(g, 5000000.f, 0.f, gs.timer, {1.f,1.f,1.f,1.f});
 	g.d.draw_sky(g, gs.c.y);
 	g.d.draw_clouds(gs.ch);
-	gs._btn_start.draw(g.d);
+	gs._btn_start.draw(g.d, 0.f);
 	g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
@@ -190,12 +194,16 @@ void LevelSelectorState::init(Game& g)
 {
 	int i = 0;
 
-	static std::array<const char *, 5> names = {
+	 static constexpr std::array<const char *, 9> names = {
 			"Level 1",
 			"Level 2",
 			"Level 3",
 			"Level 4",
-			"COol",
+			"Level 5",
+			"Level 6",
+			"Level 7",
+			"Level 8",
+			"Level 9",
 	};
 
 	for (auto& e : _btn_levels)
@@ -215,14 +223,34 @@ void LevelSelectorState::entry_point(Game& g)
 		new_game_session_from_menu(g);
 	}
 
-	for (auto& e : _btn_levels) { e.logic(g.l); }
+	if (g.l.m_finger_down) {
+		_scroll_y += g.l.m_finger_move.y;
+		_scroll_y = fmin(0.f, _scroll_y);
+		_scroll_y = fmax(-3.f, _scroll_y);
+	}
+	const float cam_y = _scroll_y;
+
+	{
+		int i = 0;
+		for (auto& e : _btn_levels) {
+			e.logic(g.l, cam_y);
+			if (e.just_pressed()) {
+				g.level_at = i;
+				g.set_new_state(new GameState{});
+			}
+			++i;
+		}
+	}
+
+	printf("finger rel y: %f\n", g.l.m_finger_move.y);
 
 	//draw
-	g.d.before_draw(g, 5000000.f, 0.f, gs.timer, { 1.f,1.f,1.f,1.f });
+	
+	g.d.before_draw(g, 5000000.f, cam_y, gs.timer, { 1.f,1.f,1.f,1.f });
+	g.d.draw_sky(g, gs.timer);
+	for (auto& e : _btn_levels) { e.draw(g.d, cam_y); }
 
-	for (auto& e : _btn_levels) { e.draw(g.d); }
-
-	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f, 0.004f);
+	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f - cam_y, 0.004f);
 }
 
 

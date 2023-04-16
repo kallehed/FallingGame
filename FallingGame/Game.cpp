@@ -99,8 +99,3 @@ void Game::set_new_state(BaseState* some_gs)
 		this->new_gs = some_gs;
 	}
 }
-
-bool Game::should_change_state()
-{
-	return this->new_gs != nullptr;
-}

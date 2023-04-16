@@ -63,9 +63,9 @@ public:
 	// midpoint for button
 	void init(const char * text, float text_size, float mid_x, float mid_y, float w, float h);
 
-	void logic(Layer& l);
+	void logic(Layer& l, float cam_y);
 
-	void draw(Drawer& d);
+	void draw(Drawer& d, float cam_y);
 	 
 	// was the button just pressed?
 	bool just_pressed();
@@ -101,7 +101,8 @@ struct LevelSelectorState final : public BaseState
 {
 private:
 
-	std::array<Button, 5> _btn_levels;
+	std::array<Button, 9> _btn_levels;
+	float _scroll_y;
 
 public:
 	virtual void init(Game& g) override;

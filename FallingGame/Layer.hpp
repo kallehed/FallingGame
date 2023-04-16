@@ -57,6 +57,8 @@ public:
 	bool _finger_just_up = false;
 	// x and y, in world space: 0,0 in middle, to Layer::WIDTH in both sides, and Layer::HEIGHT vertically
 	Pos m_finger_pos = { 0.f,0.f };
+	// x and y, in world space, relative movement of the finger
+	Pos m_finger_move = { 0.f, 0.f };
 
 private:
 	static unsigned int compile_shader_from_file(int type, const char* path, const char* error_msg);
