@@ -1,4 +1,4 @@
-#include "Layer.h"
+#include "Layer.hpp"
 #include <SDL/SDL_rwops.h>
 
 #include <iostream>
@@ -8,8 +8,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "misc.h"
-#include "Drawer.h"
+#include "misc.hpp"
+#include "Drawer.hpp"
 
 
 #if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)

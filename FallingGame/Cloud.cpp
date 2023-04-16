@@ -1,6 +1,6 @@
-#include "Cloud.h"
+#include "Cloud.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
 void Cloud::construct(Drawer& d, float depth)
 {

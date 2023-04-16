@@ -1,6 +1,6 @@
-#include "Coin.h"
+#include "Coin.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
 #include <cmath>
 

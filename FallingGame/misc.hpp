@@ -20,7 +20,7 @@ struct BaseState;
 class Camera;
 
 struct GameEvents {
-	// true when you want to enter a game from a menu
+	// true when you want to enter a game from a menu  
 	bool enter_game_session = false; // NOT USED
 
 	// when you want to exit SOME session

@@ -1,9 +1,9 @@
-#include "Player.h"
+#include "Player.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 #include <algorithm>
 #include <cmath>
-#include "misc.h"
+#include "misc.hpp"
 
 void Player::init()
 {

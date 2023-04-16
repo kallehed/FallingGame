@@ -1,11 +1,11 @@
 #pragma once
 
-#include "misc.h"
-#include "Camera.h"
-#include "Player.h"
-#include "Bouncer.h"
-#include "Cloud.h"
-#include "Coin.h"
+#include "misc.hpp"
+#include "Camera.hpp"
+#include "Player.hpp"
+#include "Bouncer.hpp"
+#include "Cloud.hpp"
+#include "Coin.hpp"
 #include <vector>
 #include <array>
 

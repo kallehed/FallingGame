@@ -1,33 +1,31 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.16)
 
-project(FallingGameCmake)
+project(FallingGameCmake C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCES
-	glad.c
-	GameState.cpp
-	Bouncer.cpp Bouncer.h Camera.cpp Camera.h Cloud.cpp Cloud.h Coin.cpp Coin.h CoinParticle.cpp CoinParticle.h Drawer.cpp Drawer.h Game.cpp Game.h Layer.cpp Layer.h main.cpp misc.cpp misc.h Player.cpp stb_image.h 
 
-Bouncer.h
-Camera.h
-Cloud.h
-Coin.h
-CoinParticle.h
-Drawer.h
-Game.h
-Layer.h
-misc.h
-Player.h
-GameState.h
-)
+set(HEADERS Bouncer.hpp Camera.hpp Cloud.hpp Coin.hpp CoinParticle.hpp Drawer.hpp Game.hpp Layer.hpp misc.hpp Player.hpp GameState.hpp)
 
+# just c or cpp files
+set(REAL_SOURCE_FILES
+	glad.c GameState.cpp Bouncer.cpp Camera.cpp Cloud.cpp Coin.cpp CoinParticle.cpp Drawer.cpp Game.cpp Layer.cpp main.cpp misc.cpp Player.cpp
+	)
+
+# all the files
+set(SOURCE_FILES
+	${HEADERS}
+	${REAL_SOURCE_FILES}
+	)
+
+
+# stuff like glad.h, khr, also SDL and freetype headers
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
 if(BUILD_SHARED_LIBS)
 	add_library(main SHARED)
-	target_sources(main PRIVATE ${SOURCES})
+	target_sources(main PRIVATE ${SOURCE_FILES})
 
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
 	target_link_libraries(main SDL2 freetype)
 else()
@@ -43,12 +41,9 @@ else()
 
 		find_package(Freetype REQUIRED)
 	endif()
-	# stuff like glad.h, khr, also SDL and freetype headers
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/include/)
 
 	set(default_build_type "Release")
 
-	add_executable(${PROJECT_NAME})
-	target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
+	add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 	target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${FREETYPE_LIBRARIES})
 endif()

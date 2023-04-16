@@ -3,14 +3,14 @@
 #include <vector>
 #include <array>
 
-#include "Layer.h"
-#include "Drawer.h"
-#include "Camera.h"
-#include "Player.h"
-#include "Bouncer.h"
-#include "Cloud.h"
-#include "Coin.h"
-#include "GameState.h"
+#include "Layer.hpp"
+#include "Drawer.hpp"
+#include "Camera.hpp"
+#include "Player.hpp"
+#include "Bouncer.hpp"
+#include "Cloud.hpp"
+#include "Coin.hpp"
+#include "GameState.hpp"
 
 
 class Game

@@ -1,8 +1,8 @@
-#include "Drawer.h"
+#include "Drawer.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
-#include "CoinParticle.h"
+#include "CoinParticle.hpp"
 
 #include <iostream>
 #include <tuple>

@@ -1,6 +1,6 @@
-#include "Bouncer.h"
+#include "Bouncer.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
 #include <cmath>
 

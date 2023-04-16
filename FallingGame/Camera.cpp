@@ -1,6 +1,6 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
 void Camera::init()
 {

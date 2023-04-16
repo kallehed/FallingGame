@@ -1,6 +1,6 @@
-#include "GameState.h"
+#include "GameState.hpp"
 
-#include "Game.h"
+#include "Game.hpp"
 
 #include <cmath>
 #include <algorithm>

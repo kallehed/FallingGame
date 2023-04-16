@@ -1,6 +1,6 @@
-#include "misc.h"
+#include "misc.hpp"
 
-#include "Drawer.h"
+#include "Drawer.hpp"
 //#include <cstdlib>
 #include <cmath>
 

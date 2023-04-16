@@ -1,6 +1,6 @@
 #pragma once
 
-#include "misc.h"
+#include "misc.hpp"
 
 //#ifndef __ANDROID__
 
@@ -21,7 +21,7 @@
 
 
 // Layer for SDL: window management, events, some opengl, some image loading ...
-class Layer
+class Layer 
 {
 public:
 	// if NOT 0 -> it failed and don't continue.
