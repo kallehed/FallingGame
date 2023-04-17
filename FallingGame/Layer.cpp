@@ -253,8 +253,8 @@ bool Layer::start_frame()
 			m_finger_pos.x =  WIDTH* 2.f*((float(e.motion.x) / float(window_width_screen_coordinates )) - 0.5f);
 			m_finger_pos.y = -HEIGHT*2.f*((float(e.motion.y) / float(window_height_screen_coordinates)) - 0.5f);
 
-			m_finger_move.x = 2.f*WIDTH * float(e.motion.xrel) / float(window_width_screen_coordinates);
-			m_finger_move.y = 2.f*HEIGHT*float(e.motion.yrel) / float(window_height_screen_coordinates);
+			//m_finger_move.x = 2.f*WIDTH * float(e.motion.xrel) / float(window_width_screen_coordinates);
+			//m_finger_move.y = 2.f * HEIGHT * float(e.motion.yrel)/900.f / float(window_height_screen_coordinates);
 
 			break;
 		case SDL_MOUSEBUTTONUP:
@@ -286,6 +286,13 @@ bool Layer::start_frame()
 
 			break;
 		}
+	}
+
+	{
+		int x, y;
+		SDL_GetRelativeMouseState(&x, &y);
+		m_finger_move.x = 2.f * WIDTH * float(x) / float(window_width_screen_coordinates);
+		m_finger_move.y = 2.f * HEIGHT * float(y) / float(window_height_screen_coordinates);
 	}
 
 	//printf("Mouse coords, x: %f, y: %f\n", m_finger_pos.x, m_finger_pos.y);

@@ -208,7 +208,7 @@ void LevelSelectorState::init(Game& g)
 
 	for (auto& e : _btn_levels)
 	{
-		e.init(names[i], 0.001f, 0.f, -i * 0.3f, 0.5f, 0.2f);
+		e.init(names[i], 0.00175f, 0.4f * sinf(float(i) / 1.75f), -i * 0.3f, 0.5f, 0.2f);
 		++i;
 	}
 }
@@ -242,7 +242,7 @@ void LevelSelectorState::entry_point(Game& g)
 		}
 	}
 
-	printf("finger rel y: %f\n", g.l.m_finger_move.y);
+	//printf("finger rel y: %f\n", g.l.m_finger_move.y);
 
 	//draw
 	
