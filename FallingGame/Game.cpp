@@ -17,6 +17,8 @@ int Game::init()
 	this->gs = nullptr;
 	this->new_gs = nullptr;
 
+	this->should_quit = false;
+
 	this->level_at = 0;
 
 	MenuState::new_menu_session(*this);
@@ -29,9 +31,14 @@ int Game::init()
 static bool start_func(BaseState& gs, Game& g)
 {
 	gs.timer += g.l.dt;
-	if (g.l.start_frame()) {
+	if (g.l.start_frame() || g.should_quit) {
 		return true;
 	}
+	
+	// set most basic events
+	g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
+	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_O);
+
 	return false;
 }
 

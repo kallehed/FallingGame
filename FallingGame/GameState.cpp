@@ -166,9 +166,13 @@ void MenuState::entry_point(Game & g)
 {
 	MenuState& gs = *this;
 
+	if (g.ge.exit_current_session) {
+		g.should_quit = true;
+	}
+
 	gs._btn_start.logic(g.l, 0.f);
 
-	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P) || gs._btn_start.just_pressed();
+	g.ge.enter_game_session |= gs._btn_start.just_pressed();
 
 	// logic
 	if (g.ge.enter_game_session) {
@@ -189,6 +193,7 @@ void MenuState::entry_point(Game & g)
 	g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
+
 
 void LevelSelectorState::init(Game& g)
 {
@@ -217,14 +222,13 @@ void LevelSelectorState::entry_point(Game& g)
 {
 	LevelSelectorState& gs = *this;
 	//logic
-	g.ge.enter_game_session = g.l.key_just_down(SDL_SCANCODE_P);
 
-	if (g.ge.enter_game_session) {
-		new_game_session_from_menu(g);
+	if (g.ge.exit_current_session) {
+		g.set_new_state(new MenuState{});
 	}
 
-	if (g.l.m_finger_down) {
-		_scroll_y += g.l.m_finger_move.y;
+	/*if (g.l.m_finger_down)*/ {
+		_scroll_y += g.l._finger_scroll.y;
 		_scroll_y = fmin(0.f, _scroll_y);
 		_scroll_y = fmax(-3.f, _scroll_y);
 	}
@@ -302,10 +306,6 @@ static void set_movement_events(Game& g)
 	}
 }
 
-static void set_exit_events(Game& g)
-{
-	g.ge.exit_current_session = g.l.key_just_down(SDL_SCANCODE_P) || g.l.key_just_down(SDL_SCANCODE_AC_BACK);
-}
 
 static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 {
@@ -329,7 +329,6 @@ void GameState::main_loop(GameState& gs, Game& g)
 {
 	// events
 	set_movement_events(g);
-	set_exit_events(g);
 
 	// logic
 	if constexpr (STATE == GameState::State::Win || STATE == GameState::State::Lose)

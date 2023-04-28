@@ -262,7 +262,6 @@ bool Layer::start_frame()
 			_finger_just_up = true;
 			break;
 
-
 		case SDL_FINGERDOWN: // will NOT be called on a computer
 			m_finger_just_down = true;
 
@@ -286,12 +285,21 @@ bool Layer::start_frame()
 		}
 	}
 
-	// Set finger movement, which somehow works on PC + phone
+	// Set finger relative movement, which somehow works on PC + phone
 	{
 		int x, y;
 		SDL_GetRelativeMouseState(&x, &y);
 		m_finger_move.x = 2.f * WIDTH * float(x) / float(window_width_screen_coordinates);
 		m_finger_move.y = 2.f * HEIGHT * float(y) / float(window_height_screen_coordinates);
+		
+		if (m_finger_down) {
+			_finger_scroll = m_finger_move;
+		}
+		else {
+			auto decr = 0.91f - 2.f * dt;
+			_finger_scroll.x *= decr;
+			_finger_scroll.y *= decr;
+		}
 	}
 
 	//printf("Mouse coords, x: %f, y: %f\n", m_finger_pos.x, m_finger_pos.y);

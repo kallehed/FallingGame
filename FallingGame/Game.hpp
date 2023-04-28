@@ -25,11 +25,13 @@ public:
 
 	// false -> exit
 	bool to_be_looped();
-
 	
 	void set_new_state(BaseState* some_gs);
 
 	GameEvents ge;
+	
+	// should be set to true when a game session wants to end the whole game (Probably just the menu that wants to set this)
+	bool should_quit;
 
 	int level_at;
 
