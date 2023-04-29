@@ -13,12 +13,6 @@ using json = nlohmann::json;
 #include <emscripten.h>
 #endif
 
-/*NLOHMANN_JSON_SERIALIZE_ENUM(LevelState, {
-	{Locked, nullptr},
-	{Unlocked, "stopped"},
-	{Done, "running"},
-})*/
-
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState::LevelInfo, state)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState, level_info)
 
@@ -27,7 +21,7 @@ static void save_game (SaveState& s)
 	json j = s;
 	auto d = j.dump(2);
 
-	SDL_Log(d.c_str());
+	std::cout << d.c_str() << "\n";
 
 	SDL_RWops* w = SDL_RWFromFile("save.json", "w");
 
@@ -70,6 +64,17 @@ static void load_game(Game& g)
 	}
 }
 
+static int event_filterer(void* userdata, SDL_Event* e)
+{
+    if (e->type == SDL_APP_WILLENTERBACKGROUND) {	
+		Game& g = *((Game*)userdata);
+		save_game(g._save_state);
+		SDL_Log("KALLE SDL APP AHHHHHHHHHHHHHHHHHHH WE WERE SO BACKGROUND RIGHT NOW IT IS SO HORRIBLEEEEEEEEEEEEEEEEEEEEEEEEE\nAAAAAAAAAAA\nAAAAAAAAAA\nAAAAAA");
+		return 0;
+	}
+	return 1;	
+}
+
 int Game::init()
 {
 	if (l.init()) return -1;
@@ -81,6 +86,12 @@ int Game::init()
 	load_game(*this);
 
 	this->should_quit = false;
+
+
+	// set up filter to check for quit events, specific for android, as it will close your application with little notice
+	{
+		SDL_SetEventFilter(event_filterer,(void*)this);
+	}
 
 	MenuState::new_menu_session(*this);
 
