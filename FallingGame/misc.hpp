@@ -37,10 +37,12 @@ struct GameEvents {
 
 // what is the state of this level? done or not, available?
 enum class LevelState : signed char {
-	Locked,
-	Unlocked,
-	Done,
+	Locked = 0,
+	Unlocked = 1,
+	Done = 2,
 };
+
+
 
 // The state that is relevant between game sessions; stuff like levels done
 struct SaveState {

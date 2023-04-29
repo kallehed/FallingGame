@@ -5,9 +5,70 @@
 
 #include <cmath>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
+
+/*NLOHMANN_JSON_SERIALIZE_ENUM(LevelState, {
+	{Locked, nullptr},
+	{Unlocked, "stopped"},
+	{Done, "running"},
+})*/
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState::LevelInfo, state)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState, level_info)
+
+static void save_game (SaveState& s) 
+{
+	json j = s;
+	auto d = j.dump(2);
+
+	SDL_Log(d.c_str());
+
+	SDL_RWops* w = SDL_RWFromFile("save.json", "w");
+
+	w->write(w, d.c_str(), 1, d.size());
+
+	w->close(w);
+}
+
+static void load_game(Game& g)
+{
+	SDL_RWops* r = SDL_RWFromFile("save.json", "r");
+	if (r == NULL) {
+		// no file found
+
+		int i = 0;
+		for (auto& e : g._save_state.level_info) {
+			if (i == 0) {
+				e.state = LevelState::Unlocked;
+			}
+			else {
+				e.state = LevelState::Locked;
+			}
+			++i;
+		}
+	}
+	else {
+		auto size = r->size(r);
+		auto buffer = new unsigned char[size + 1];
+		r->read(r, buffer, 1, size);
+		r->close(r);
+
+		buffer[size] = '\0';
+
+		json data = json::parse(buffer);
+
+		SaveState save_state = data.get<SaveState>();
+		g._save_state = save_state;
+
+		delete[] buffer;
+	}
+}
 
 int Game::init()
 {
@@ -17,16 +78,7 @@ int Game::init()
 	this->gs = nullptr;
 	this->new_gs = nullptr;
 
-	int i = 0;
-	for (auto& e : this->_save_state.level_info) {
-		if (i == 0) {
-			e.state = LevelState::Unlocked;
-		}
-		else {
-			e.state = LevelState::Locked;
-		}
-		++i;
-	}
+	load_game(*this);
 
 	this->should_quit = false;
 
@@ -103,6 +155,7 @@ void Game::start()
 	while (to_be_looped());
 #endif
 	// TODO: possibly handle saving and stuff?
+	save_game(_save_state);
 }
 
 void Game::set_new_state(BaseState* some_gs)
