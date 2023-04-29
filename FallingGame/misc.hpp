@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 // set this if on computer and wanting to develop for mobile
 #if defined __ANDROID__  || true
 // make game for vertical playing
@@ -31,6 +33,24 @@ struct GameEvents {
 	bool player_to_right = false;
 	bool player_to_left = false;
 
+};
+
+// what is the state of this level? done or not, available?
+enum class LevelState : signed char {
+	Locked,
+	Unlocked,
+	Done,
+};
+
+// The state that is relevant between game sessions; stuff like levels done
+struct SaveState {
+
+	struct LevelInfo {
+		LevelState state;
+	};
+	static constexpr int TOTAL_LEVELS = 9;
+	std::array<LevelInfo, TOTAL_LEVELS> level_info;
+	// the next level you are allowed to play
 };
 
 struct Color {

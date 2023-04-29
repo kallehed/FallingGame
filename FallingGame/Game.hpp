@@ -13,6 +13,7 @@
 #include "GameState.hpp"
 
 
+
 class Game
 {
 private:
@@ -29,11 +30,11 @@ public:
 	void set_new_state(BaseState* some_gs);
 
 	GameEvents ge;
+
+	SaveState _save_state;
 	
 	// should be set to true when a game session wants to end the whole game (Probably just the menu that wants to set this)
 	bool should_quit;
-
-	int level_at;
 
 	Layer l;
 	Drawer d;

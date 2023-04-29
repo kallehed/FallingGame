@@ -17,9 +17,18 @@ int Game::init()
 	this->gs = nullptr;
 	this->new_gs = nullptr;
 
-	this->should_quit = false;
+	int i = 0;
+	for (auto& e : this->_save_state.level_info) {
+		if (i == 0) {
+			e.state = LevelState::Unlocked;
+		}
+		else {
+			e.state = LevelState::Locked;
+		}
+		++i;
+	}
 
-	this->level_at = 0;
+	this->should_quit = false;
 
 	MenuState::new_menu_session(*this);
 

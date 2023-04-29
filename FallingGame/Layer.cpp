@@ -296,7 +296,7 @@ bool Layer::start_frame()
 			_finger_scroll = m_finger_move;
 		}
 		else {
-			auto decr = 0.91f - 2.f * dt;
+			auto decr = 0.95f - 2.f * dt;
 			_finger_scroll.x *= decr;
 			_finger_scroll.y *= decr;
 		}

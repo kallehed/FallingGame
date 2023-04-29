@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <cstdio>
 
-static void new_game_session_from_menu(Game& g)
-{
-	g.set_new_state(new GameState{});
-}
 
 void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
 {
@@ -103,10 +99,14 @@ void Button::init(const char* text, float text_size, float mid_x, float mid_y, f
 	_draw_pressed = false;
 }
 
-void Button::logic(Layer& l, float cam_y)
+void Button::logic(Layer& l, float cam_y, float timer, bool move)
 {
 	_just_pressed = false;
 	_draw_pressed = false;
+
+	if (move)
+		_r.x += 0.0010f * cosf(timer);
+
 	Pos finger = l.m_finger_pos;
 	finger.y += cam_y;
 	if (!_almost_pressed)
@@ -134,11 +134,29 @@ void Button::logic(Layer& l, float cam_y)
 	}
 }
 
-void Button::draw(Drawer& d, float cam_y)
+void Button::draw_start(Drawer& d, float cam_y)
 {
 	Color c = (_draw_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color { 1.f,1.f,0.f,1.f });
 	d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
 	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w/2.f, _r.y + _r.h/2.f - cam_y, _text_size);
+}
+
+void Button::draw_level(Drawer& d, float cam_y, LevelState ls)
+{
+	Color c;
+	switch (ls) {
+	case LevelState::Locked:
+		c = Color{ 0.5f,0.5f,0.f,0.5f };
+		break;
+	case LevelState::Unlocked:
+		c = (_draw_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color{ 1.f,1.f,0.f,1.f });
+		break;
+	case LevelState::Done:
+		c = (_draw_pressed) ? (Color{ 0.5f,0.5f,0.f,1.f }) : (Color{ 0.35f,0.95f,0.1f,1.f });
+		break;
+	}
+	d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
+	d.draw_text<true>(_text, { 0.f,0.f,0.f,1.f }, _r.x + _r.w / 2.f, _r.y + _r.h / 2.f - cam_y, _text_size);
 }
 
 bool Button::just_pressed() { return _just_pressed; }
@@ -170,7 +188,7 @@ void MenuState::entry_point(Game & g)
 		g.should_quit = true;
 	}
 
-	gs._btn_start.logic(g.l, 0.f);
+	gs._btn_start.logic(g.l, 0.f, 0.f, false);
 
 	g.ge.enter_game_session |= gs._btn_start.just_pressed();
 
@@ -189,7 +207,7 @@ void MenuState::entry_point(Game & g)
 	g.d.before_draw(g, 5000000.f, 0.f, gs.timer, {1.f,1.f,1.f,1.f});
 	g.d.draw_sky(g, gs.c.y);
 	g.d.draw_clouds(gs.ch);
-	gs._btn_start.draw(g.d, 0.f);
+	gs._btn_start.draw_start(g.d, 0.f);
 	g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
@@ -237,10 +255,9 @@ void LevelSelectorState::entry_point(Game& g)
 	{
 		int i = 0;
 		for (auto& e : _btn_levels) {
-			e.logic(g.l, cam_y);
-			if (e.just_pressed()) {
-				g.level_at = i;
-				g.set_new_state(new GameState{});
+			e.logic(g.l, cam_y, 2.f* gs.timer + 0.7f * float(i), true);
+			if (e.just_pressed() && g._save_state.level_info[i].state != LevelState::Locked) {
+				g.set_new_state(new GameState{i});
 			}
 			++i;
 		}
@@ -252,11 +269,16 @@ void LevelSelectorState::entry_point(Game& g)
 	
 	g.d.before_draw(g, 5000000.f, cam_y, gs.timer, { 1.f,1.f,1.f,1.f });
 	g.d.draw_sky(g, gs.timer);
-	for (auto& e : _btn_levels) { e.draw(g.d, cam_y); }
+	int i = 0;
+	for (auto& e : _btn_levels) { e.draw_level(g.d, cam_y, g._save_state.level_info[i].state); ++i; }
 
 	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f - cam_y, 0.004f);
 }
 
+GameState::GameState(int level)
+{
+	this->_level = level;
+}
 
 void GameState::init(Game& g)
 {
@@ -271,9 +293,9 @@ void GameState::init(Game& g)
 	gs.c.init();
 	gs.c.set_in_game(gs.p, -1000.f);
 
-	gs.ch.init_game(gs.ch, g.d);
+	this->level_end = -6.f * _level * _level;
 
-	gs.level_end = -6.f * g.level_at * g.level_at;
+	gs.ch.init_game(gs.ch, g.d);
 
 	gs.game_state = GameState::State::Playing;
 }
@@ -347,8 +369,13 @@ void GameState::main_loop(GameState& gs, Game& g)
 	{
 		// Win
 		if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT) {
-			g.level_at++;
 			gs.game_state = GameState::State::Win;
+			g._save_state.level_info[gs._level].state = LevelState::Done;
+			if (gs._level + 1 < SaveState::TOTAL_LEVELS) {
+				if (g._save_state.level_info[gs._level + 1].state != LevelState::Done) {
+					g._save_state.level_info[gs._level + 1].state = LevelState::Unlocked;
+				}
+			}
 		}
 
 		// Lose

@@ -63,9 +63,13 @@ public:
 	// midpoint for button
 	void init(const char * text, float text_size, float mid_x, float mid_y, float w, float h);
 
-	void logic(Layer& l, float cam_y);
+	void logic(Layer& l, float cam_y, float timer, bool move);
 
-	void draw(Drawer& d, float cam_y);
+	// for the start button
+	void draw_start(Drawer& d, float cam_y);
+
+	// for level buttons
+	void draw_level(Drawer& d, float cam_y, LevelState ls);
 	 
 	// was the button just pressed?
 	bool just_pressed();
@@ -121,17 +125,20 @@ public:
 
 	State game_state;
 
+	int _level;
+
 	float death_y; // y coordinate of the death barrier
 	
 	// which y coordinate the level ends at
 	float level_end;
-
 	
 	float next_coin_y;
 	
 	CloudHandler ch;
 	BouncerHandler _bh;
 	std::vector<Coin> coins;
+
+	GameState(int level);
 
 	virtual void entry_point(Game& g) override;
 
