@@ -229,7 +229,7 @@ void LevelSelectorState::init(Game& g)
 {
 	int i = 0;
 
-	 static constexpr std::array<const char *, 9> names = {
+	 static constexpr std::array<const char *, SaveState::TOTAL_LEVELS> names = {
 			"Level 1",
 			"Level 2",
 			"Level 3",
@@ -237,8 +237,8 @@ void LevelSelectorState::init(Game& g)
 			"Level 5",
 			"Level 6",
 			"Level 7",
-			"Level 8",
-			"Level 9",
+			"Level 6",
+			"Level 7",
 	};
 
 	for (auto& e : _btn_levels)

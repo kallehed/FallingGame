@@ -13,8 +13,8 @@ using json = nlohmann::json;
 #include <emscripten.h>
 #endif
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState::LevelInfo, state)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SaveState, level_info)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SaveState::LevelInfo, state)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SaveState, level_info)
 
 static void save_game (SaveState& s) 
 {
@@ -57,8 +57,14 @@ static void load_game(Game& g)
 
 		json data = json::parse(buffer);
 
-		SaveState save_state = data.get<SaveState>();
-		g._save_state = save_state;
+		auto levels = data["level_info"].get<std::vector<SaveState::LevelInfo>>();
+		int i = 0;
+		for (auto& e : levels) {
+			if (i >= g._save_state.level_info.size()) break;
+			g._save_state.level_info[i] = e;
+			++i;
+		}
+		//g._save_state = save_state;
 
 		delete[] buffer;
 	}
@@ -66,10 +72,10 @@ static void load_game(Game& g)
 
 static int event_filterer(void* userdata, SDL_Event* e)
 {
-    if (e->type == SDL_APP_WILLENTERBACKGROUND) {	
+    if (e->type == SDL_APP_WILLENTERBACKGROUND) {
 		Game& g = *((Game*)userdata);
 		save_game(g._save_state);
-		SDL_Log("KALLE SDL APP AHHHHHHHHHHHHHHHHHHH WE WERE SO BACKGROUND RIGHT NOW IT IS SO HORRIBLEEEEEEEEEEEEEEEEEEEEEEEEE\nAAAAAAAAAAA\nAAAAAAAAAA\nAAAAAA");
+		SDL_Log("KALLE SDL APP AHHHHHHHHHHHHHHHHHHH WE WERE SO BACKGROUND/TERMINATE RIGHT NOW IT IS SO HORRIBLEEEEEEEEEEEEEEEEEEEEEEEEE\nAAAAAAAAAAA\nAAAAAAAAAA\nAAAAAA");
 		return 0;
 	}
 	return 1;	

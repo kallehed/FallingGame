@@ -107,7 +107,7 @@ struct LevelSelectorState final : public BaseState
 {
 private:
 
-	std::array<Button, 9> _btn_levels;
+	std::array<Button, SaveState::TOTAL_LEVELS> _btn_levels;
 	float _scroll_y;
 
 public:
