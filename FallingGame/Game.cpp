@@ -32,10 +32,8 @@ static void save_game (SaveState& s)
 
 static void load_game(Game& g)
 {
-	SDL_RWops* r = SDL_RWFromFile("save.json", "r");
-	if (r == NULL) {
-		// no file found
-
+	// will initialize everything as if never played game before
+	auto no_save_file = [&g]() {
 		int i = 0;
 		for (auto& e : g._save_state.level_info) {
 			if (i == 0) {
@@ -46,6 +44,13 @@ static void load_game(Game& g)
 			}
 			++i;
 		}
+	};
+
+	SDL_RWops* r = SDL_RWFromFile("save.json", "r");
+	if (r == NULL) {
+		// no file found
+		no_save_file();
+		
 	}
 	else {
 		auto size = r->size(r);
@@ -55,16 +60,23 @@ static void load_game(Game& g)
 
 		buffer[size] = '\0';
 
-		json data = json::parse(buffer);
+		try {
 
-		auto levels = data["level_info"].get<std::vector<SaveState::LevelInfo>>();
-		int i = 0;
-		for (auto& e : levels) {
-			if (i >= g._save_state.level_info.size()) break;
-			g._save_state.level_info[i] = e;
-			++i;
+			json data = json::parse(buffer);
+
+			auto levels = data["level_info"].get<std::vector<SaveState::LevelInfo>>();
+			int i = 0;
+			for (auto& e : levels) {
+				if (i >= g._save_state.level_info.size()) break;
+				g._save_state.level_info[i] = e;
+				++i;
+			}
+			//g._save_state = save_state;
 		}
-		//g._save_state = save_state;
+		catch (const std::exception& e) {
+			SDL_LogError(0, "Exception at deserializing save data: %s\n", e.what());
+			no_save_file();
+		}
 
 		delete[] buffer;
 	}

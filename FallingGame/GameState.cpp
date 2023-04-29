@@ -295,7 +295,7 @@ GameState::GameState(int level)
 void GameState::init(Game& g)
 {
 	GameState& gs = *this;
-	gs._bh.init(0.f);
+	gs._bh.init(0.5f);
 	
 	gs.next_coin_y = -1.5f;
 
