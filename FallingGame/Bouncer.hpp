@@ -5,7 +5,11 @@
 class Bouncer
 {
 public:
-	void init(float spawn_width, float y);
+	enum class Type : signed char {
+		Normal,
+		Moves,
+	};
+	void init(float spawn_width, float y, Type type);
 
 	void draw(Game& g, Camera& c);
 
@@ -13,5 +17,7 @@ public:
 
 	HoLine h;
 	float bounce_timer = 0.f;
+	Type _type;
+
 };
 

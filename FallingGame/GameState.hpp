@@ -36,10 +36,12 @@ private:
 	// which bouncer to move next. When it reaches `_MAX_BOUNCERS` it resets to 0
 	int _bouncer_index;
 
-public:
-	void init();
+	float _percent_move;
 
-	void logic(Player& p, Camera& c, float level_end);
+public:
+	void init(float percent_move);
+
+	void logic(Player& p, Camera& c, float level_end, float timer);
 
 	void draw(Game& g, Camera& c);
 };

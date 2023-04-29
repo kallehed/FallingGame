@@ -47,20 +47,23 @@ void CloudHandler::game_logic(CloudHandler& ch, Game& g, Camera& c)
 	}
 }
 
-void BouncerHandler::init() {
+void BouncerHandler::init(float percent_move) {
 	_next_bouncer_y = -0.5f;
 	_bouncer_index = 0;
+	_percent_move = percent_move;
 
 	for (auto& e : _bouncers) {
-		e.init(0.f, 2.f*Layer::HEIGHT);
+		e.init(0.f, 2.f*Layer::HEIGHT, Bouncer::Type::Normal);
 	}
 }
 
-void BouncerHandler::logic(Player& p, Camera& c, float level_end)
+void BouncerHandler::logic(Player& p, Camera& c, float level_end, float timer)
 {
 	// Bounce Logic
-	if (p.y_vel < 0.0f) {
-		for (auto& e : _bouncers) {
+	const bool can_bounce_player = p.y_vel < 0.0f;
+	
+	for (auto& e : _bouncers) {
+		if (can_bounce_player) {
 			// TODO: Maybe remove the branches from this if?
 			if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
 				//std::cout << "bounce << " << p.y_vel << "\n";
@@ -69,13 +72,22 @@ void BouncerHandler::logic(Player& p, Camera& c, float level_end)
 				e.bounced_on(p.bounce_x_vel);
 			}
 		}
+
+		switch (e._type) {
+		case Bouncer::Type::Moves:
+			e.h.x += 0.01f * sinf(timer);
+			break;
+		default:
+			break;
+		}
 	}
 
 	// Spawn bouncers
 	float spawn_bound = c.y - Layer::HEIGHT * 1.25f;
 	while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > level_end - Layer::HEIGHT)
 	{
-		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y);
+		auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
+		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y, type);
 		if (_bouncer_index >= _MAX_BOUNCERS) { _bouncer_index = 0; }
 
 		_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
@@ -283,7 +295,7 @@ GameState::GameState(int level)
 void GameState::init(Game& g)
 {
 	GameState& gs = *this;
-	gs._bh.init();
+	gs._bh.init(0.f);
 	
 	gs.next_coin_y = -1.5f;
 
@@ -405,7 +417,7 @@ void GameState::main_loop(GameState& gs, Game& g)
 			}
 		}
 		//printf("Camera y: %f", gs.c.y);
-		gs._bh.logic(gs.p, gs.c, gs.level_end);
+		gs._bh.logic(gs.p, gs.c, gs.level_end, gs.timer);
 			
 		handle_collisions_player_coins(gs.coins, gs.p);
 

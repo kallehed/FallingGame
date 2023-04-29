@@ -4,11 +4,12 @@
 
 #include <cmath>
 
-void Bouncer::init(float spawn_width, float y)
+void Bouncer::init(float spawn_width, float y, Type type)
 {
 	h.w = 0.3f + 0.1f*rand_uni();
 	h.x = (2.f * spawn_width + h.w) * rand_01() - (spawn_width + h.w);
 	h.y = y;
+	_type = type;
 }
 
 
