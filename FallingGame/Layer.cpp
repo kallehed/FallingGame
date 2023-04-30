@@ -440,6 +440,7 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 				"    FragColor.b *= x + y * abs(1.0*cos(t * 0.11));"
 				"    FragColor.g *= x + y * abs(1.0*cos(t * 0.12));"
 				"    FragColor.r *= x + y * abs(1.0*cos(t * 0.13));"
+				"	 FragColor.a *= 0.1;"
 				"}}\n";
 			break;
 		default:

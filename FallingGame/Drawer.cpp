@@ -674,7 +674,7 @@ void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color
 		}
 	}
 	glClearColor(col.r, col.g, col.b, col.a);
-	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
+	//glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
 }
 
 void Drawer::draw_fps(float dt)
