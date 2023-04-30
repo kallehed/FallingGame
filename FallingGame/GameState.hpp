@@ -48,8 +48,8 @@ public:
 
 struct Button
 {
-private:
 	Rect _r;
+private:
 	const char* _text;
 	float _text_size;
 	
@@ -140,6 +140,9 @@ public:
 	BouncerHandler _bh;
 	std::vector<Coin> coins;
 
+	float _time_when_playing_ended;
+	std::array<Button, 3> _buttons;
+
 	GameState(int level);
 
 	virtual void entry_point(Game& g) override;
@@ -147,7 +150,9 @@ public:
 	virtual void init(Game& g) override;
 
 	// playing decides if win has happened or not
+	static void main_loop_playing (GameState& gs, Game& g);
+
 	template <GameState::State STATE>
-	static void main_loop(GameState& gs, Game& g);
+	static void main_loop_not_playing (GameState& gs, Game& g);
 };
 
