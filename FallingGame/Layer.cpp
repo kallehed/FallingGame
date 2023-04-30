@@ -275,6 +275,8 @@ bool Layer::start_frame()
 			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
 
+			SDL_Log("Finger. timestamp: %d, touchID: %lld, fingerID: %lld, pressure: %f", e.tfinger.timestamp, e.tfinger.touchId, e.tfinger.fingerId, e.tfinger.pressure);
+
 			break;
 
 		case SDL_FINGERUP:
@@ -440,7 +442,6 @@ unsigned int Layer::compile_shader_from_file(int type, const char* path, const c
 				"    FragColor.b *= x + y * abs(1.0*cos(t * 0.11));"
 				"    FragColor.g *= x + y * abs(1.0*cos(t * 0.12));"
 				"    FragColor.r *= x + y * abs(1.0*cos(t * 0.13));"
-				"	 FragColor.a *= 0.1;"
 				"}}\n";
 			break;
 		default:

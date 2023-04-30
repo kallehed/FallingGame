@@ -41,7 +41,7 @@ private:
 public:
 	void init(float percent_move);
 
-	void logic(Player& p, Camera& c, float level_end, float timer);
+	void logic(Player& p, Camera& c, float _level_end, float timer, float dt);
 
 	void draw(Game& g, Camera& c);
 };
@@ -132,7 +132,7 @@ public:
 	float death_y; // y coordinate of the death barrier
 	
 	// which y coordinate the level ends at
-	float level_end;
+	float _level_end;
 	
 	float next_coin_y;
 	

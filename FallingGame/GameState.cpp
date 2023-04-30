@@ -53,11 +53,11 @@ void BouncerHandler::init(float percent_move) {
 	_percent_move = percent_move;
 
 	for (auto& e : _bouncers) {
-		e.init(0.f, 2.f*Layer::HEIGHT, Bouncer::Type::Normal);
+		e.init(0.f, 2.f*Layer::HEIGHT, Bouncer::Type::Normal, 0.f);
 	}
 }
 
-void BouncerHandler::logic(Player& p, Camera& c, float level_end, float timer)
+void BouncerHandler::logic(Player& p, Camera& c, float _level_end, float timer, float dt)
 {
 	// Bounce Logic
 	const bool can_bounce_player = p.y_vel < 0.0f;
@@ -72,10 +72,20 @@ void BouncerHandler::logic(Player& p, Camera& c, float level_end, float timer)
 				e.bounced_on(p.bounce_x_vel);
 			}
 		}
-
+		
 		switch (e._type) {
 		case Bouncer::Type::Moves:
-			e.h.x += 0.01f * sinf(timer);
+			
+			e._x_vel += dt * (sinf(0.8f + 2.f * std::fabsf(e.h.x) + timer + 381.345f * e._init_time));
+
+			e.h.x += dt * e._x_vel;
+
+			if (e.h.x < -Game::G_WIDTH) {
+				e._x_vel = std::fabsf(e._x_vel);
+			} 
+			else if (e.h.x > Game::G_WIDTH) {
+				e._x_vel = -std::fabsf(e._x_vel);
+			}
 			break;
 		default:
 			break;
@@ -83,11 +93,11 @@ void BouncerHandler::logic(Player& p, Camera& c, float level_end, float timer)
 	}
 
 	// Spawn bouncers
-	float spawn_bound = c.y - Layer::HEIGHT * 1.25f;
-	while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > level_end - Layer::HEIGHT)
+	float spawn_bound = c.y - Layer::HEIGHT * 2.25f;
+	while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > _level_end - Layer::HEIGHT)
 	{
-		auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
-		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y, type);
+		const auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
+		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y, type, timer);
 		if (_bouncer_index >= _MAX_BOUNCERS) { _bouncer_index = 0; }
 
 		_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
@@ -295,7 +305,7 @@ GameState::GameState(int level)
 void GameState::init(Game& g)
 {
 	GameState& gs = *this;
-	gs._bh.init(0.5f);
+	
 	
 	gs.next_coin_y = -1.5f;
 
@@ -305,7 +315,44 @@ void GameState::init(Game& g)
 	gs.c.init();
 	gs.c.set_in_game(gs.p, -1000.f);
 
-	this->level_end = -6.f * _level * _level;
+	_level_end = -6.f * _level * _level;
+	float percent_move = 0.f;
+
+	switch (_level) {
+	case 0:
+		_level_end = 0.f;
+		break;
+	case 1:
+		_level_end = -5.f;
+		break;
+	case 2:
+		_level_end = -25.f;
+		break;
+	case 3:
+		_level_end = 0.f;
+		percent_move = 1.f;
+		break;
+	case 4:
+		_level_end = -7.f;
+		percent_move = 0.5f;
+		break;
+	case 5:
+		_level_end = -49.f;
+		percent_move = 0.75f;
+		break;
+	case 6:
+		break;
+	case 7:
+		break;
+	case 8:
+		break;
+	case 9:
+		break;
+	default:
+		break;
+	}
+
+	gs._bh.init(percent_move);
 
 	gs.ch.init_game(gs.ch, g.d);
 
@@ -423,7 +470,7 @@ void GameState::main_loop_playing(GameState& gs, Game& g)
 		gs.p.logic(g.ge, g.l.dt);
 
 		// set CAMERA position
-		gs.c.set_in_game(gs.p, gs.level_end);
+		gs.c.set_in_game(gs.p, gs._level_end);
 
 		const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
 
@@ -434,13 +481,13 @@ void GameState::main_loop_playing(GameState& gs, Game& g)
 			}
 		}
 		//printf("Camera y: %f", gs.c.y);
-		gs._bh.logic(gs.p, gs.c, gs.level_end, gs.timer);
+		gs._bh.logic(gs.p, gs.c, gs._level_end, gs.timer, g.l.dt);
 			
 		handle_collisions_player_coins(gs.coins, gs.p);
 
 		// where it is appropriate to spawn things of screen
 		float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
-		if (spawn_bound < gs.level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
+		if (spawn_bound < gs._level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
 
 		// spawn coin
 		while (spawn_bound <= gs.next_coin_y)
