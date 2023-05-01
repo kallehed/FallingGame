@@ -76,15 +76,15 @@ void BouncerHandler::logic(Player& p, Camera& c, float _level_end, float timer, 
 		switch (e._type) {
 		case Bouncer::Type::Moves:
 			
-			e._x_vel += dt * (sinf(0.8f + 2.f * std::fabsf(e.h.x) + timer + 381.345f * e._init_time));
+			e._x_vel += dt * (sinf(0.8f + 2.f * std::fabs(e.h.x) + timer + 381.345f * e._init_time));
 
 			e.h.x += dt * e._x_vel;
 
 			if (e.h.x < -Game::G_WIDTH) {
-				e._x_vel = std::fabsf(e._x_vel);
+				e._x_vel = std::fabs(e._x_vel);
 			} 
 			else if (e.h.x > Game::G_WIDTH) {
-				e._x_vel = -std::fabsf(e._x_vel);
+				e._x_vel = -std::fabs(e._x_vel);
 			}
 			break;
 		default:
@@ -525,7 +525,7 @@ void GameState::main_loop_not_playing(GameState& gs, Game& g)
 	static constexpr float menu_h = 1.f, menu_w = 1.f;
 	const float time_passed = gs.timer - gs._time_when_playing_ended;
 	const float time_passed_limited = std::min(1.f, time_passed);
-	const float menu_x_offset = std::powf(1.5f*Layer::WIDTH*time_passed_limited - 1.5f*Layer::WIDTH, 2.f);
+	const float menu_x_offset = std::pow(1.5f*Layer::WIDTH*time_passed_limited - 1.5f*Layer::WIDTH, 2.f);
 
 	gs._buttons[0]._r.x = menu_x_offset - menu_w/2.f + 0.1f;
 	gs._buttons[0].logic(g.l, gs.c.y, 0.f, false);

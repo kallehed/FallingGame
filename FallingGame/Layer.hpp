@@ -53,6 +53,8 @@ public:
 	// SHOULD NOT BE CHANGED OUTSIDE CLASS
 	bool m_finger_just_down = false;
 	bool m_finger_down = false;
+private:
+public:
 	// SHOULD NOT BE CHANGED OUTSIDE CLASS
 	bool _finger_just_up = false;
 	// x and y, in world space: 0,0 in middle, to Layer::WIDTH in both sides, and Layer::HEIGHT vertically

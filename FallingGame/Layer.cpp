@@ -250,6 +250,9 @@ bool Layer::start_frame()
 			m_finger_pos.x = WIDTH * 2.f * ((float(e.button.x) / float(window_width_screen_coordinates)) - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * ((float(e.button.y) / float(window_height_screen_coordinates)) - 0.5f);
 
+			SDL_Log("MOUSE DOWN. which: %lu clicks: %u, button: %u ", e.button.which, e.button.clicks, e.button.button);
+
+
 			break;
 
 		case SDL_MOUSEMOTION: 
@@ -261,31 +264,37 @@ bool Layer::start_frame()
 			m_finger_down = false;
 			_finger_just_up = true;
 			break;
-
+			// Finger events will be routed to mouse events, therefore all the finger logic is unnecessary.
+/*
+			
 		case SDL_FINGERDOWN: // will NOT be called on a computer
+			++_fingers_down;
 			m_finger_just_down = true;
 
 			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
 			
+			SDL_Log("Finger DOWN. touchID: %lld, fingerID: %lld, pressure: %f", e.tfinger.touchId, e.tfinger.fingerId, e.tfinger.pressure);
 			break;
 
 		case SDL_FINGERMOTION:
-			m_finger_down = true;
 			m_finger_pos.x = WIDTH * 2.f * (e.tfinger.x - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * (e.tfinger.y - 0.5f);
 
-			SDL_Log("Finger. timestamp: %d, touchID: %lld, fingerID: %lld, pressure: %f", e.tfinger.timestamp, e.tfinger.touchId, e.tfinger.fingerId, e.tfinger.pressure);
+			SDL_Log("Finger Move. touchID: %lld, fingerID: %lld, pressure: %f", e.tfinger.touchId, e.tfinger.fingerId, e.tfinger.pressure);
 
 			break;
 
 		case SDL_FINGERUP:
-			m_finger_down = false;
+			--_fingers_down;
 			_finger_just_up = true;
 
+			SDL_Log("Finger Up. touchID: %lld, fingerID: %lld, pressure: %f", e.tfinger.touchId, e.tfinger.fingerId, e.tfinger.pressure);
 			break;
+			*/
 		}
 	}
+	//m_finger_down = (_fingers_down != 0);
 
 	// Set finger relative movement, which somehow works on PC + phone
 	{
