@@ -115,6 +115,23 @@ public:
 	virtual void entry_point(Game& g) override;
 };
 
+namespace LEVEL {
+	enum _ : signed char {
+		Tutorial,
+		W1_0,
+		W1_1,
+		W1_2,
+		W1_3,
+		W1_4,
+		W1_5,
+		W1_6,
+		W1_7,
+		W1_8,
+		TOTAL,
+	};
+}
+
+template <typename ObstacleHandler>
 struct GameState final : public BaseState
 {
 public:
@@ -137,13 +154,15 @@ public:
 	float next_coin_y;
 	
 	CloudHandler ch;
-	BouncerHandler _bh;
+	ObstacleHandler _oh;
 	std::vector<Coin> coins;
 
 	float _time_when_playing_ended;
 	std::array<Button, 3> _buttons;
 
 	GameState(int level);
+
+	
 
 	virtual void entry_point(Game& g) override;
 
@@ -156,3 +175,5 @@ public:
 	static void main_loop_not_playing (GameState& gs, Game& g);
 };
 
+template <typename A>
+using GenState = GameState<A>;

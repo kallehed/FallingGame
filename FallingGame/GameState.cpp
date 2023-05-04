@@ -279,7 +279,7 @@ void LevelSelectorState::entry_point(Game& g)
 		for (auto& e : _btn_levels) {
 			e.logic(g.l, cam_y, 2.f* gs.timer + 0.7f * float(i), true);
 			if (e.just_pressed() && g._save_state.level_info[i].state != LevelState::Locked) {
-				g.set_new_state(new GameState{i});
+				create_new_game_state(g, i);
 			}
 			++i;
 		}
@@ -297,12 +297,59 @@ void LevelSelectorState::entry_point(Game& g)
 	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f - cam_y, 0.004f);
 }
 
-GameState::GameState(int level)
+template <typename ObstacleHandler>
+GameState<ObstacleHandler>::GameState<ObstacleHandler>(int level)
 {
 	this->_level = level;
 }
 
-void GameState::init(Game& g)
+
+
+
+
+void create_new_game_state(Game& g, int level)
+{
+	float _level_end = -6.f * level * level;
+	float percent_move = 0.f;
+
+	switch (level) {
+	case LEVEL::Tutorial:
+		_level_end = 20.f;
+		break;
+	case LEVEL::W1_0:
+		_level_end = 0.f;
+		break;
+	case LEVEL::W1_1:
+		_level_end = -5.f;
+		break;
+	case LEVEL::W1_2:
+		_level_end = -25.f;
+		break;
+	case LEVEL::W1_3:
+		_level_end = 0.f;
+		percent_move = 1.f;
+		break;
+	case LEVEL::W1_4:
+		_level_end = -7.f;
+		percent_move = 0.5f;
+		break;
+	case LEVEL::W1_5:
+		_level_end = -49.f;
+		percent_move = 0.75f;
+		break;
+	case LEVEL::W1_6:
+		break;
+	case LEVEL::W1_7:
+		break;
+	case LEVEL::W1_8:
+		break;
+	default:
+		break;
+	}
+}
+
+template <typename ObstacleHandler>
+void GameState<ObstacleHandler>::init(Game& g)
 {
 	GameState& gs = *this;
 	
@@ -315,42 +362,10 @@ void GameState::init(Game& g)
 	gs.c.init();
 	gs.c.set_in_game(gs.p, -1000.f);
 
-	_level_end = -6.f * _level * _level;
-	float percent_move = 0.f;
+	
+	
 
-	switch (_level) {
-	case 0:
-		_level_end = 0.f;
-		break;
-	case 1:
-		_level_end = -5.f;
-		break;
-	case 2:
-		_level_end = -25.f;
-		break;
-	case 3:
-		_level_end = 0.f;
-		percent_move = 1.f;
-		break;
-	case 4:
-		_level_end = -7.f;
-		percent_move = 0.5f;
-		break;
-	case 5:
-		_level_end = -49.f;
-		percent_move = 0.75f;
-		break;
-	case 6:
-		break;
-	case 7:
-		break;
-	case 8:
-		break;
-	case 9:
-		break;
-	default:
-		break;
-	}
+	
 
 	gs._bh.init(percent_move);
 
@@ -359,7 +374,8 @@ void GameState::init(Game& g)
 	gs.game_state = GameState::State::Playing;
 }
 
-void GameState::entry_point(Game& g)
+template <typename ObstacleHandler>
+void GameState<ObstacleHandler>::entry_point(Game& g)
 {
 	GameState& gs = *this;
 
@@ -376,6 +392,7 @@ void GameState::entry_point(Game& g)
 		break;
 	}
 }
+
 
 static void set_movement_events(Game& g)
 {
@@ -406,7 +423,7 @@ static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 }
 
 // draw coin counter
-static void draw_coins_counter(GameState& gs, Game& g)
+static void draw_coins_counter(GenState &gs, Game& g)
 {
 	char buf[10];
 	snprintf(buf, 10, "Coins: %d", gs.p.coins);
@@ -420,7 +437,8 @@ static void draw_death_storm(float death_y, Game& g)
 	g.d.draw_rectangle(-g.l.WIDTH, death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, { 0.f,0.f,0.f,1.f });
 }
 
-void GameState::main_loop_playing(GameState& gs, Game& g)
+template <typename A>
+void GameState::main_loop_playing(GameState<A>& gs, Game& g)
 {
 	// events
 	set_movement_events(g);

@@ -183,7 +183,7 @@ void Game::start()
 #else
 	while (to_be_looped());
 #endif
-	// TODO: possibly handle saving and stuff?
+
 	save_game(_save_state);
 }
 
