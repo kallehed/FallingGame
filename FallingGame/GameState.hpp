@@ -84,8 +84,6 @@ struct BaseState
 	virtual ~BaseState() = default;
 	// where game calls in for the state
 	virtual void entry_point(Game& g) = 0;
-	// inits the state
-	virtual void init(Game& g) = 0;
 };
 
 struct MenuState final : public BaseState
@@ -96,9 +94,7 @@ private:
 
 	Button _btn_start;
 public:
-	static void new_menu_session(Game& g);
-
-	virtual void init(Game& g) override;
+	MenuState(Game& g);
 	virtual void entry_point(Game& g) override;
 	
 };
@@ -111,9 +107,12 @@ private:
 	float _scroll_y;
 
 public:
-	virtual void init(Game& g) override;
+	LevelSelectorState(Game& g);
 	virtual void entry_point(Game& g) override;
 };
+
+BaseState* create_new_session(Game& g, SessionToChangeTo asd, int level);
+
 
 namespace LEVEL {
 	enum _ : signed char {
@@ -130,50 +129,3 @@ namespace LEVEL {
 		TOTAL,
 	};
 }
-
-template <typename ObstacleHandler>
-struct GameState final : public BaseState
-{
-public:
-	Camera c;
-	Player p;
-
-	enum class State : unsigned char {
-		Playing, Win, Lose
-	};
-
-	State game_state;
-
-	int _level;
-
-	float death_y; // y coordinate of the death barrier
-	
-	// which y coordinate the level ends at
-	float _level_end;
-	
-	float next_coin_y;
-	
-	CloudHandler ch;
-	ObstacleHandler _oh;
-	std::vector<Coin> coins;
-
-	float _time_when_playing_ended;
-	std::array<Button, 3> _buttons;
-
-	GameState(int level);
-
-	
-
-	virtual void entry_point(Game& g) override;
-
-	virtual void init(Game& g) override;
-
-	// playing decides if win has happened or not
-	static void main_loop_playing (GameState& gs, Game& g);
-
-	template <GameState::State STATE>
-	static void main_loop_not_playing (GameState& gs, Game& g);
-};
-
-template <typename A>
-using GenState = GameState<A>;

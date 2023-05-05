@@ -55,6 +55,14 @@ struct SaveState {
 	// the next level you are allowed to play
 };
 
+// For Game
+enum class SessionToChangeTo {
+	DontChange,
+	Menu,
+	LevelSelector,
+	Game,
+};
+
 struct Color {
 	float r;
 	float g;

@@ -27,7 +27,7 @@ public:
 	// false -> exit
 	bool to_be_looped();
 	
-	void set_new_state(BaseState* some_gs);
+	void set_new_state(SessionToChangeTo session, int metadata_new_level);
 
 	GameEvents ge;
 
@@ -43,8 +43,12 @@ private:
 	// pointer to a base type which has dynamic dispath to the current game loop. So only virtual calls VERY rarely basically.
 	BaseState* gs;
 
-	// should be set when changing game scene, then gs will be set to it automatically, and it will be set to null again. + old gs deleted
-	BaseState* new_gs;
+	
+	SessionToChangeTo _new_session;
+	// metadata for new session
+		// for game
+		int _metadata_new_level;
+
 public:
 
 	static constexpr float G_WIDTH = 0.8f; // zone for game entities

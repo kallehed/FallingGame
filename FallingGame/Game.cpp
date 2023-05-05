@@ -99,7 +99,8 @@ int Game::init()
 	d.init(*this);
 
 	this->gs = nullptr;
-	this->new_gs = nullptr;
+
+	_new_session = SessionToChangeTo::Menu;
 
 	load_game(*this);
 
@@ -110,8 +111,6 @@ int Game::init()
 	{
 		SDL_SetEventFilter(event_filterer,(void*)this);
 	}
-
-	MenuState::new_menu_session(*this);
 
 	srand(336); //TODO add true randomness
 	return 0;
@@ -151,15 +150,11 @@ static void emscripten_main_loop_callback(void* arg)
 #endif
 
 bool Game::to_be_looped() {
-	if (this->new_gs != nullptr) {
+	if (_new_session != SessionToChangeTo::DontChange) {
 		delete this->gs; // should be safe, even for nullptr
 
-		// swap game states to new one
-		this->gs = this->new_gs;
-		this->new_gs = nullptr;
-
-		// init it the first time
-		this->gs->init(*this);
+		this->gs = create_new_session(*this, _new_session, _metadata_new_level);
+		_new_session = SessionToChangeTo::DontChange;
 	}
 
 	// increases timer, gets events, possibly exits
@@ -187,13 +182,11 @@ void Game::start()
 	save_game(_save_state);
 }
 
-void Game::set_new_state(BaseState* some_gs)
+void Game::set_new_state(SessionToChangeTo session, int metadata_new_level)
 {
-	if (this->new_gs != nullptr) {
-		SDL_LogError(0, "Seems that we set the game state twice in one frame?!?!?!?!");
-		//exit(1); // crash to notice, EXCEPT maybe don't crash if user tries to exit at the same time as a session change
+	if (_new_session != SessionToChangeTo::DontChange) {
+		SDL_LogError(0, "HMM it seems we made 2 game session changes in one frame..? BAD!");
 	}
-	else {
-		this->new_gs = some_gs;
-	}
+	_new_session = session;
+	_metadata_new_level = metadata_new_level;
 }

@@ -184,13 +184,7 @@ void Button::draw_level(Drawer& d, float cam_y, LevelState ls)
 bool Button::just_pressed() { return _just_pressed; }
 
 
-void MenuState::new_menu_session(Game& g)
-{
-	g.set_new_state(new MenuState{});
-}
-
-
-void MenuState::init(Game& g)
+MenuState::MenuState(Game& g)
 {
 	MenuState& gs = *this;
 	gs.timer = 0.f;
@@ -216,7 +210,7 @@ void MenuState::entry_point(Game & g)
 
 	// logic
 	if (g.ge.enter_game_session) {
-		g.set_new_state(new LevelSelectorState{});
+		g.set_new_state(SessionToChangeTo::LevelSelector, -1);
 	}
 
 	{
@@ -235,11 +229,11 @@ void MenuState::entry_point(Game & g)
 }
 
 
-void LevelSelectorState::init(Game& g)
+LevelSelectorState::LevelSelectorState(Game& g)
 {
 	int i = 0;
 
-	 static constexpr std::array<const char *, SaveState::TOTAL_LEVELS> names = {
+	static constexpr std::array<const char *, SaveState::TOTAL_LEVELS> names = {
 			"Level 1",
 			"Level 2",
 			"Level 3",
@@ -256,7 +250,11 @@ void LevelSelectorState::init(Game& g)
 		e.init(names[i], 0.00175f, 0.4f * sinf(float(i) / 1.75f), -i * 0.3f, 0.5f, 0.2f);
 		++i;
 	}
+	timer = 0.f;
+	_scroll_y = 0.f;
 }
+
+
 
 void LevelSelectorState::entry_point(Game& g)
 {
@@ -264,7 +262,7 @@ void LevelSelectorState::entry_point(Game& g)
 	//logic
 
 	if (g.ge.exit_current_session) {
-		g.set_new_state(new MenuState{});
+		g.set_new_state(SessionToChangeTo::Menu, -1);
 	}
 
 	/*if (g.l.m_finger_down)*/ {
@@ -279,7 +277,7 @@ void LevelSelectorState::entry_point(Game& g)
 		for (auto& e : _btn_levels) {
 			e.logic(g.l, cam_y, 2.f* gs.timer + 0.7f * float(i), true);
 			if (e.just_pressed() && g._save_state.level_info[i].state != LevelState::Locked) {
-				create_new_game_state(g, i);
+				g.set_new_state(SessionToChangeTo::Game, i);
 			}
 			++i;
 		}
@@ -297,44 +295,326 @@ void LevelSelectorState::entry_point(Game& g)
 	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f - cam_y, 0.004f);
 }
 
-template <typename ObstacleHandler>
-GameState<ObstacleHandler>::GameState<ObstacleHandler>(int level)
+
+
+
+
+static void set_movement_events(Game& g)
 {
-	this->_level = level;
+	g.ge.player_to_right = g.l.key_down(SDL_SCANCODE_D);
+	g.ge.player_to_left = g.l.key_down(SDL_SCANCODE_A);
+	if (g.l.m_finger_down) {
+		g.ge.player_to_left = g.l.m_finger_pos.x < 0.0f; // middle of screen
+		g.ge.player_to_right = !g.ge.player_to_left;
+	}
 }
 
 
-
-
-
-void create_new_game_state(Game& g, int level)
+template <typename ObstacleHandler>
+struct GameState final : public BaseState
 {
-	float _level_end = -6.f * level * level;
+public:
+	Camera c;
+	Player p;
+
+	enum class State : unsigned char {
+		Playing, Win, Lose
+	};
+
+	State game_state;
+
+	int _level;
+
+	float death_y; // y coordinate of the death barrier
+
+	// which y coordinate the level ends at
+	float _level_end;
+
+	float next_coin_y;
+
+	CloudHandler ch;
+	ObstacleHandler _oh;
+	std::vector<Coin> coins;
+
+	float _time_when_playing_ended;
+	std::array<Button, 3> _buttons;
+	
+	virtual void entry_point(Game& g) override
+	{
+		GameState& gs = *this;
+
+		switch (gs.game_state)
+		{
+		case GameState::State::Playing:
+			GameState::main_loop_playing(gs, g);
+			break;
+		case GameState::State::Win:
+			GameState::main_loop_not_playing<GameState::State::Win>(gs, g);
+			break;
+		case GameState::State::Lose:
+			GameState::main_loop_not_playing<GameState::State::Lose>(gs, g);
+			break;
+		}
+	}
+
+	GameState(Game& g, int level, float level_end)
+	{
+		GameState& gs = *this;
+
+		gs._level = level;
+		gs._level_end = level_end;
+
+		gs.next_coin_y = -1.5f;
+
+		gs.death_y = 3.f;
+		gs.timer = 0.f;
+		gs.p.init();
+		gs.c.init();
+		gs.c.set_in_game(gs.p, -1000.f);
+
+		gs.ch.init_game(gs.ch, g.d);
+
+		gs.game_state = GameState::State::Playing;
+	}
+
+	// draw coin counter
+	static void draw_coins_counter(GameState& gs, Game& g)
+	{
+		char buf[10];
+		snprintf(buf, 10, "Coins: %d", gs.p.coins);
+		g.d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
+	}
+
+	// playing decides if win has happened or not
+	static void main_loop_playing(GameState& gs, Game& g)
+	{
+		// events
+		set_movement_events(g);
+
+		// Exit
+		if (g.ge.exit_current_session) {
+			g.set_new_state(SessionToChangeTo::Menu, -1);
+		}
+
+		{
+			// Win
+			if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT)
+			{
+				gs.game_state = GameState::State::Win;
+				g._save_state.level_info[gs._level].state = LevelState::Done;
+				if (gs._level + 1 < SaveState::TOTAL_LEVELS) {
+					if (g._save_state.level_info[gs._level + 1].state != LevelState::Done) {
+						g._save_state.level_info[gs._level + 1].state = LevelState::Unlocked;
+					}
+				}
+
+				// init things
+
+			}
+			// Lose
+			else  if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset / 2.f < gs.p.r.y) {
+				gs.game_state = GameState::State::Lose;
+			}
+
+			// if not playing anymore after this frame
+			if (gs.game_state != GameState::State::Playing) {
+				gs._time_when_playing_ended = gs.timer;
+
+				gs._buttons[0].init("Main menu", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
+				gs._buttons[1].init("Next level", 0.001f, 0.f, -0.3f + gs.c.y, 0.3f, 0.1f);
+				gs._buttons[2].init("Retry", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
+			}
+
+			// increase the more far away the player is from the barrier
+			gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
+
+			//gs.death_y -= 1.4f * g.l.dt * std::max(std::min(1.8f, std::log(gs.timer / 10.f)), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
+
+			// increase speed of death_y over time
+			//gs.death_y -= 1.41f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
+
+			gs.p.logic(g.ge, g.l.dt);
+
+			// set CAMERA position
+			gs.c.set_in_game(gs.p, gs._level_end);
+
+			const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
+
+			// delete coins that have gone too high
+			for (int i = (int)gs.coins.size() - 1; i >= 0; --i) {
+				if (gs.coins[i].r.y > remove_bound) { // should be removed
+					gs.coins.erase(gs.coins.begin() + i);
+				}
+			}
+			//printf("Camera y: %f", gs.c.y);
+			gs._oh.logic(gs.p, gs.c, gs._level_end, gs.timer, g.l.dt);
+
+			handle_collisions_player_coins(gs.coins, gs.p);
+
+			// where it is appropriate to spawn things of screen
+			float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
+			if (spawn_bound < gs._level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
+
+			// spawn coin
+			while (spawn_bound <= gs.next_coin_y)
+			{
+				gs.coins.emplace_back(g, gs.next_coin_y);
+				gs.next_coin_y -= (2.f * g.l.HEIGHT * (0.5f + 0.5f * rand_01()));
+			}
+		}
+		gs.ch.game_logic(gs.ch, g, gs.c);
+
+		// Drawing
+		g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer, { 0.f,0.f,0.f,1.f });
+
+		g.d.draw_sky(g, gs.c.y);
+
+		g.d.draw_clouds(gs.ch);
+		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
+
+		gs.p.draw(g, gs.c);
+		gs._oh.draw(g, gs.c);
+
+		// side background
+		g.d.draw_sides(gs.p);
+
+		draw_death_storm(gs.death_y, g);
+		draw_coins_counter(gs, g);
+	}
+
+
+	template <State STATE>
+	static void main_loop_not_playing(GameState& gs, Game& g)
+	{
+		// logic
+		gs.c.y_dif = 0.f;
+		static constexpr float menu_h = 1.f, menu_w = 1.f;
+		const float time_passed = gs.timer - gs._time_when_playing_ended;
+		const float time_passed_limited = std::min(1.f, time_passed);
+		const float menu_x_offset = std::pow(1.5f * Layer::WIDTH * time_passed_limited - 1.5f * Layer::WIDTH, 2.f);
+
+		gs._buttons[0]._r.x = menu_x_offset - menu_w / 2.f + 0.1f;
+		gs._buttons[0].logic(g.l, gs.c.y, 0.f, false);
+
+		gs._buttons[1]._r.x = menu_x_offset - 0.2f;
+		gs._buttons[1].logic(g.l, gs.c.y, 0.f, false);
+
+		gs._buttons[2]._r.x = menu_x_offset + menu_w / 2.f - 0.4f;
+		gs._buttons[2].logic(g.l, gs.c.y, 0.f, false);
+
+		g.ge.exit_current_session |= gs._buttons[0].just_pressed();
+
+		if (gs._buttons[1].just_pressed()) {
+			if constexpr (STATE == GameState::State::Win)
+			{
+				g.set_new_state(SessionToChangeTo::Game, gs._level + 1);
+
+			}
+			else if constexpr (STATE == GameState::State::Lose)
+			{
+			}
+		}
+
+		if (gs._buttons[2].just_pressed())
+		{
+			g.set_new_state(SessionToChangeTo::Game, gs._level);
+		}
+
+		// Exit
+		if (g.ge.exit_current_session) {
+			g.set_new_state(SessionToChangeTo::Menu, -1);
+		}
+
+		gs.ch.game_logic(gs.ch, g, gs.c);
+
+		//////////////////////////////////
+
+		// Drawing
+		g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer, { 0.f,0.f,0.f,1.f });
+
+		g.d.draw_sky(g, gs.c.y);
+
+		g.d.draw_clouds(gs.ch);
+		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
+
+		gs.p.draw(g, gs.c);
+		gs._oh.draw(g, gs.c);
+
+		// side background
+		g.d.draw_sides(gs.p);
+
+		draw_death_storm(gs.death_y, g);
+
+		draw_coins_counter(gs, g);
+
+		g.d.draw_rectangle(menu_x_offset - menu_w / 2.f, -menu_h / 2.f + gs.c.y, menu_w, menu_h, { 0.73f,0.88f,0.88f,0.7f });
+
+		gs._buttons[0].draw_start(g.d, gs.c.y);
+		gs._buttons[2].draw_start(g.d, gs.c.y);
+		if constexpr (STATE == GameState::State::Win)
+		{
+			gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Unlocked);
+		}
+		else if constexpr (STATE == GameState::State::Lose)
+		{
+			gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Locked);
+		}
+
+
+		const char* title_text;
+		if constexpr (STATE == GameState::State::Win)
+		{
+			title_text = "You won!";
+
+
+		}
+		if constexpr (STATE == GameState::State::Lose)
+		{
+			title_text = "You lost :(";
+		}
+
+		g.d.draw_text<true>(title_text, { 0.93f,1.f,0.f,1.f }, menu_x_offset, 0.4f, 0.002f);
+	}
+};
+
+struct EmptyHandler
+{
+	void logic(Player& p, Camera& c, float _level_end, float timer, float dt) {};
+
+	void draw(Game& g, Camera& c) {};
+};
+
+[[nodiscard]] BaseState* create_new_game_session(Game& g, int level)
+{
+	float level_end = -6.f * level * level;
 	float percent_move = 0.f;
 
 	switch (level) {
 	case LEVEL::Tutorial:
-		_level_end = 20.f;
+	{
+		auto gs = new GameState<EmptyHandler>{ g, level, -20.f };
+		return gs;
+	}
 		break;
 	case LEVEL::W1_0:
-		_level_end = 0.f;
+		level_end = 0.f;
 		break;
 	case LEVEL::W1_1:
-		_level_end = -5.f;
+		level_end = -5.f;
 		break;
 	case LEVEL::W1_2:
-		_level_end = -25.f;
+		level_end = -25.f;
 		break;
 	case LEVEL::W1_3:
-		_level_end = 0.f;
+		level_end = 0.f;
 		percent_move = 1.f;
 		break;
 	case LEVEL::W1_4:
-		_level_end = -7.f;
+		level_end = -7.f;
 		percent_move = 0.5f;
 		break;
 	case LEVEL::W1_5:
-		_level_end = -49.f;
+		level_end = -49.f;
 		percent_move = 0.75f;
 		break;
 	case LEVEL::W1_6:
@@ -346,62 +626,27 @@ void create_new_game_state(Game& g, int level)
 	default:
 		break;
 	}
+
+	auto gs = new GameState<BouncerHandler>{g, level, level_end};
+	gs->_oh.init(percent_move);
+
+	return gs;
 }
 
-template <typename ObstacleHandler>
-void GameState<ObstacleHandler>::init(Game& g)
+[[nodiscard]] BaseState* create_new_session(Game& g, SessionToChangeTo session, int level)
 {
-	GameState& gs = *this;
-	
-	
-	gs.next_coin_y = -1.5f;
-
-	gs.death_y = 3.f;
-	gs.timer = 0.f;
-	gs.p.init();
-	gs.c.init();
-	gs.c.set_in_game(gs.p, -1000.f);
-
-	
-	
-
-	
-
-	gs._bh.init(percent_move);
-
-	gs.ch.init_game(gs.ch, g.d);
-
-	gs.game_state = GameState::State::Playing;
-}
-
-template <typename ObstacleHandler>
-void GameState<ObstacleHandler>::entry_point(Game& g)
-{
-	GameState& gs = *this;
-
-	switch (gs.game_state)
-	{
-	case GameState::State::Playing:
-		GameState::main_loop_playing(gs, g);
+	switch (session) {
+	case SessionToChangeTo::Game:
+		return create_new_game_session(g, level);
 		break;
-	case GameState::State::Win:
-		GameState::main_loop_not_playing<GameState::State::Win>(gs, g);
+	case SessionToChangeTo::Menu:
+		return new MenuState{g};
 		break;
-	case GameState::State::Lose:
-		GameState::main_loop_not_playing<GameState::State::Lose>(gs, g);
+	case SessionToChangeTo::LevelSelector:
+		return new LevelSelectorState{g};
 		break;
 	}
-}
 
-
-static void set_movement_events(Game& g)
-{
-	g.ge.player_to_right = g.l.key_down(SDL_SCANCODE_D);
-	g.ge.player_to_left = g.l.key_down(SDL_SCANCODE_A);
-	if (g.l.m_finger_down) {
-		g.ge.player_to_left = g.l.m_finger_pos.x < 0.0f; // middle of screen
-		g.ge.player_to_right = !g.ge.player_to_left;
-	}
 }
 
 
@@ -422,13 +667,7 @@ static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
 	}
 }
 
-// draw coin counter
-static void draw_coins_counter(GenState &gs, Game& g)
-{
-	char buf[10];
-	snprintf(buf, 10, "Coins: %d", gs.p.coins);
-	g.d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
-}
+
 
 // draw death storm at death_y
 static void draw_death_storm(float death_y, Game& g)
@@ -437,193 +676,4 @@ static void draw_death_storm(float death_y, Game& g)
 	g.d.draw_rectangle(-g.l.WIDTH, death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, { 0.f,0.f,0.f,1.f });
 }
 
-template <typename A>
-void GameState::main_loop_playing(GameState<A>& gs, Game& g)
-{
-	// events
-	set_movement_events(g);
-
-	// Exit
-	if (g.ge.exit_current_session) {
-		MenuState::new_menu_session(g);
-	}
-
-	{
-		// Win
-		if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT)
-		{
-			gs.game_state = GameState::State::Win;
-			g._save_state.level_info[gs._level].state = LevelState::Done;
-			if (gs._level + 1 < SaveState::TOTAL_LEVELS) {
-				if (g._save_state.level_info[gs._level + 1].state != LevelState::Done) {
-					g._save_state.level_info[gs._level + 1].state = LevelState::Unlocked;
-				}
-			}
-
-			// init things
-			
-		}
-		// Lose
-		else  if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset/2.f < gs.p.r.y) {
-			gs.game_state = GameState::State::Lose;
-		}
-
-		// if not playing anymore after this frame
-		if (gs.game_state != GameState::State::Playing) {
-			gs._time_when_playing_ended = gs.timer;
-
-			gs._buttons[0].init("Main menu", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
-			gs._buttons[1].init("Next level", 0.001f, 0.f, -0.3f + gs.c.y, 0.3f, 0.1f);
-			gs._buttons[2].init("Retry", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
-		}
-
-		// increase the more far away the player is from the barrier
-		gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f*std::pow(gs.death_y-gs.p.r.y, 2.f) ));
-
-		//gs.death_y -= 1.4f * g.l.dt * std::max(std::min(1.8f, std::log(gs.timer / 10.f)), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
-
-		// increase speed of death_y over time
-		//gs.death_y -= 1.41f * g.l.dt * std::max(1.f, std::log(gs.timer / 10.f));
-
-		gs.p.logic(g.ge, g.l.dt);
-
-		// set CAMERA position
-		gs.c.set_in_game(gs.p, gs._level_end);
-
-		const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
-
-		// delete coins that have gone too high
-		for (int i = (int)gs.coins.size() - 1; i >= 0; --i) { 
-			if (gs.coins[i].r.y > remove_bound) { // should be removed
-				gs.coins.erase(gs.coins.begin() + i);
-			}
-		}
-		//printf("Camera y: %f", gs.c.y);
-		gs._bh.logic(gs.p, gs.c, gs._level_end, gs.timer, g.l.dt);
-			
-		handle_collisions_player_coins(gs.coins, gs.p);
-
-		// where it is appropriate to spawn things of screen
-		float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
-		if (spawn_bound < gs._level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
-
-		// spawn coin
-		while (spawn_bound <= gs.next_coin_y)
-		{
-			gs.coins.emplace_back(g, gs.next_coin_y);
-			gs.next_coin_y -= (2.f * g.l.HEIGHT * (0.5f + 0.5f * rand_01()));
-		}
-	}
-	gs.ch.game_logic(gs.ch, g, gs.c);
-
-	// Drawing
-	g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer, {0.f,0.f,0.f,1.f});
-
-	g.d.draw_sky(g, gs.c.y);
-
-	g.d.draw_clouds(gs.ch);
-	for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
-
-	gs.p.draw(g, gs.c);
-	gs._bh.draw(g, gs.c);
-
-	// side background
-	g.d.draw_sides(gs.p);
-
-	draw_death_storm(gs.death_y, g);
-	draw_coins_counter(gs, g);
-}
-
-
-template <GameState::State STATE>
-void GameState::main_loop_not_playing(GameState& gs, Game& g)
-{
-	// logic
-	gs.c.y_dif = 0.f;
-	static constexpr float menu_h = 1.f, menu_w = 1.f;
-	const float time_passed = gs.timer - gs._time_when_playing_ended;
-	const float time_passed_limited = std::min(1.f, time_passed);
-	const float menu_x_offset = std::pow(1.5f*Layer::WIDTH*time_passed_limited - 1.5f*Layer::WIDTH, 2.f);
-
-	gs._buttons[0]._r.x = menu_x_offset - menu_w/2.f + 0.1f;
-	gs._buttons[0].logic(g.l, gs.c.y, 0.f, false);
-
-	gs._buttons[1]._r.x = menu_x_offset - 0.2f;
-	gs._buttons[1].logic(g.l, gs.c.y, 0.f, false);
-
-	gs._buttons[2]._r.x = menu_x_offset + menu_w/2.f - 0.4f;
-	gs._buttons[2].logic(g.l, gs.c.y, 0.f, false);
-
-	g.ge.exit_current_session |= gs._buttons[0].just_pressed();
-
-	if (gs._buttons[1].just_pressed()) {
-		if constexpr (STATE == GameState::State::Win)
-		{
-			g.set_new_state(new GameState{ gs._level + 1 });
-		}
-		else if constexpr (STATE == GameState::State::Lose)
-		{
-		}
-	}
-
-	if (gs._buttons[2].just_pressed())
-	{
-		g.set_new_state(new GameState{ gs._level });
-	}
-
-	// Exit
-	if (g.ge.exit_current_session) {
-		MenuState::new_menu_session(g);
-	}
-
-	gs.ch.game_logic(gs.ch, g, gs.c);
-
-	//////////////////////////////////
-
-	// Drawing
-	g.d.before_draw(g, gs.death_y, gs.c.y, gs.timer, { 0.f,0.f,0.f,1.f });
-
-	g.d.draw_sky(g, gs.c.y);
-
-	g.d.draw_clouds(gs.ch);
-	for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
-
-	gs.p.draw(g, gs.c);
-	gs._bh.draw(g, gs.c);
-
-	// side background
-	g.d.draw_sides(gs.p);
-
-	draw_death_storm(gs.death_y, g);
-
-	draw_coins_counter(gs, g);
-
-	g.d.draw_rectangle(menu_x_offset - menu_w / 2.f, -menu_h / 2.f + gs.c.y, menu_w, menu_h, { 0.73f,0.88f,0.88f,0.7f });
-
-	gs._buttons[0].draw_start(g.d, gs.c.y);
-	gs._buttons[2].draw_start(g.d, gs.c.y);
-	if constexpr (STATE == GameState::State::Win)
-	{
-		gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Unlocked);
-	}
-	else if constexpr (STATE == GameState::State::Lose)
-	{
-		gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Locked);
-	}
-	
-
-	const char* title_text;
-	if constexpr (STATE == GameState::State::Win)
-	{	
-		title_text = "You won!";
-
-		
-	}
-	if constexpr (STATE == GameState::State::Lose)
-	{
-		title_text = "You lost :(";
-	}
-
-	g.d.draw_text<true>(title_text, { 0.93f,1.f,0.f,1.f }, menu_x_offset, 0.4f, 0.002f);
-}
 
