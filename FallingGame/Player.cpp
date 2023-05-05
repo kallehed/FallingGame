@@ -44,9 +44,10 @@ void Player::logic(GameEvents ge, float dt)
 
 	// y movement
 	{
-		float y_dec = dt * (y_vel < 0.f ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
+		float y_dec = dt * ((y_vel < 0.f) ? (1.f / (1.f + std::pow(std::abs(y_vel), 3.f))) : 1.f);
+		y_dec = std::fmaxf(y_dec, 0.001f); // limit too low increase of y vel
 		float new_y_vel = y_vel - y_dec;
-		y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL);
+		y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL); // probably never reached
 		prev_y = r.y;
 		r.y += y_vel * dt;
 	}

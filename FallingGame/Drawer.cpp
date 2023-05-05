@@ -443,8 +443,16 @@ void Drawer::init(Game& g)
 			{"f/images/cloud_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/cloud_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/coin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE}
-			
+			{"f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/feather.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_bar.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_0.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_5.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/fire_6.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {

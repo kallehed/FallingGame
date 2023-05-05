@@ -138,6 +138,16 @@ namespace TEX
 		cloud_4,
 		coin,
 		coin_blurred,
+		feather,
+
+		fire_bar,
+		fire_0,
+		fire_1,
+		fire_2,
+		fire_3,
+		fire_4,
+		fire_5,
+		fire_6,
 
 		TOTAL
 	};

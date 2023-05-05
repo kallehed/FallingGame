@@ -22,29 +22,7 @@ struct CloudHandler
 	static void game_logic(CloudHandler& ch, Game& g, Camera& c);
 };
 
-struct BouncerHandler
-{
-private:
-	static constexpr int _MAX_BOUNCERS = 100;
-	std::array<Bouncer, _MAX_BOUNCERS> _bouncers;
 
-	// How it works:
-	// We have a `_next_bouncer_y` that we place bouncers at when the camera is sufficiently close to it.
-	// We place the bouncer at `_bouncer_index`, which hopefully has already gone through the player scene, and is stranded up
-	// This works as long as we don't spawn too many bouncers at once, then `_MAX_BOUNCERS` will have to be increased
-	float _next_bouncer_y;
-	// which bouncer to move next. When it reaches `_MAX_BOUNCERS` it resets to 0
-	int _bouncer_index;
-
-	float _percent_move;
-
-public:
-	void init(float percent_move);
-
-	void logic(Player& p, Camera& c, float _level_end, float timer, float dt);
-
-	void draw(Game& g, Camera& c);
-};
 
 struct Button
 {

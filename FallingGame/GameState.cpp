@@ -47,22 +47,12 @@ void CloudHandler::game_logic(CloudHandler& ch, Game& g, Camera& c)
 	}
 }
 
-void BouncerHandler::init(float percent_move) {
-	_next_bouncer_y = -0.5f;
-	_bouncer_index = 0;
-	_percent_move = percent_move;
-
-	for (auto& e : _bouncers) {
-		e.init(0.f, 2.f*Layer::HEIGHT, Bouncer::Type::Normal, 0.f);
-	}
-}
-
-void BouncerHandler::logic(Player& p, Camera& c, float _level_end, float timer, float dt)
+template <int BOUNCERS>
+void bouncers_logic(std::array<Bouncer, BOUNCERS> bouncers, Player& p, float timer, float dt)
 {
-	// Bounce Logic
 	const bool can_bounce_player = p.y_vel < 0.0f;
-	
-	for (auto& e : _bouncers) {
+
+	for (auto& e : bouncers) {
 		if (can_bounce_player) {
 			// TODO: Maybe remove the branches from this if?
 			if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
@@ -72,17 +62,17 @@ void BouncerHandler::logic(Player& p, Camera& c, float _level_end, float timer, 
 				e.bounced_on(p.bounce_x_vel);
 			}
 		}
-		
+
 		switch (e._type) {
 		case Bouncer::Type::Moves:
-			
+
 			e._x_vel += dt * (sinf(0.8f + 2.f * std::fabs(e.h.x) + timer + 381.345f * e._init_time));
 
 			e.h.x += dt * e._x_vel;
 
 			if (e.h.x < -Game::G_WIDTH) {
 				e._x_vel = std::fabs(e._x_vel);
-			} 
+			}
 			else if (e.h.x > Game::G_WIDTH) {
 				e._x_vel = -std::fabs(e._x_vel);
 			}
@@ -91,24 +81,159 @@ void BouncerHandler::logic(Player& p, Camera& c, float _level_end, float timer, 
 			break;
 		}
 	}
-
-	// Spawn bouncers
-	float spawn_bound = c.y - Layer::HEIGHT * 2.25f;
-	while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > _level_end - Layer::HEIGHT)
-	{
-		const auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
-		_bouncers[_bouncer_index++].init( Game::G_WIDTH, _next_bouncer_y, type, timer);
-		if (_bouncer_index >= _MAX_BOUNCERS) { _bouncer_index = 0; }
-
-		_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
-		//_next_bouncer_y -= 0.05f;
-	}
 }
 
-void BouncerHandler::draw(Game& g, Camera& c)
+struct BouncerHandler
 {
-	for (auto& e : _bouncers) { e.draw(g, c); }
-}
+private:
+	static constexpr int _MAX_BOUNCERS = 100;
+	std::array<Bouncer, _MAX_BOUNCERS> _bouncers;
+
+	// How it works:
+	// We have a `_next_bouncer_y` that we place bouncers at when the camera is sufficiently close to it.
+	// We place the bouncer at `_bouncer_index`, which hopefully has already gone through the player scene, and is stranded up
+	// This works as long as we don't spawn too many bouncers at once, then `_MAX_BOUNCERS` will have to be increased
+	float _next_bouncer_y;
+	// which bouncer to move next. When it reaches `_MAX_BOUNCERS` it resets to 0
+	int _bouncer_index;
+
+	float _percent_move;
+
+public:
+	void init(float percent_move) {
+		_next_bouncer_y = -0.5f;
+		_bouncer_index = 0;
+		_percent_move = percent_move;
+
+		for (auto& e : _bouncers) {
+			e.init(0.f, 2.f * Layer::HEIGHT, Bouncer::Type::Normal, 0.f);
+		}
+	}
+
+	void logic(Player & p, Camera & c, float _level_end, float timer, float dt)
+	{
+		// Bounce Logic
+		bouncers_logic<>(_bouncers, p, timer, dt);
+
+		// Spawn bouncers
+		float spawn_bound = c.y - Layer::HEIGHT * 2.25f;
+		while (spawn_bound <= _next_bouncer_y && _next_bouncer_y > _level_end - Layer::HEIGHT)
+		{
+			const auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
+			_bouncers[_bouncer_index++].init(Game::G_WIDTH, _next_bouncer_y, type, timer);
+			if (_bouncer_index >= _MAX_BOUNCERS)
+				_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
+			//_next_bouncer_y -= 0.05f;
+		}
+	}
+
+	void draw(Game& g, Camera& c, float timer)
+	{
+		for (auto& e : _bouncers) { e.draw(g, c); }
+	}
+};
+
+
+struct Feather {
+	Rect _r;
+	bool _picked_up;
+	float _time_offset;
+
+	void init(float x, float y, float time_offset) {
+		_r.x = x;
+		_r.y = y;
+		_r.w = 0.3f;
+		_r.h = 0.3f;
+		_picked_up = 0.f;
+		_time_offset = time_offset;
+	}
+
+	void draw(Game& g, Camera& c, float timer) {
+		if (!_picked_up) {
+			float sin_val = std::sin((timer - _time_offset) * 2.f);
+			float width = _r.w * (std::pow(std::abs(sin_val), 0.9f)) * sign(sin_val);
+			g.d.draw_image(TEX::feather, _r.x + _r.w / 2, _r.y + _r.h / 2, width, _r.h, 0.f);
+
+			_r.draw(g.d, { 1.f,0.f,0.f,0.4f });
+		}
+		else // spin away animation
+		{
+			float sin_val = std::sin(timer * 20.f);
+			float width = _r.w * (std::pow(std::abs(sin_val), 0.9f)) * sign(sin_val);
+			float height = _r.h;
+			float dec = (1.f + 50.f * _time_offset * _time_offset * _time_offset);
+			width /= dec;
+			height /= dec;
+
+			g.d.draw_image(TEX::feather, _r.x + _r.w / 2, _r.y + _r.h / 2, width, height, 0.f);
+
+			_r.draw(g.d, { 1.f,0.f,0.f,0.4f });
+
+			_time_offset += g.l.dt;
+		}
+	}
+	void got_picked_up() {
+		if (!_picked_up) {
+			_picked_up = true;
+			_time_offset = 0.f;
+		}
+	}
+};
+
+struct TutorialBouncerHandler
+{
+	static constexpr int _MAX_BOUNCERS = 16;
+	std::array<Bouncer, _MAX_BOUNCERS> _bouncers;
+
+	static constexpr int _MAX_FEATHERS = 5;
+	std::array<Feather, _MAX_FEATHERS> _feathers;
+
+	TutorialBouncerHandler()
+	{
+		// bouncers
+		{
+			int bi = 0;
+			for (int i = 0; i < 7; ++i) {
+				_bouncers[bi].init(0.1f, -5.f, Bouncer::Type::Normal, 0.f);
+				_bouncers[bi].h.x = 0.15f * (float)i - 0.4f;
+				++bi;
+			}
+
+			for (int i = 0; i < 8; ++i) {
+				_bouncers[bi].init(0.1f, -10.f, Bouncer::Type::Normal, 0.f);
+				_bouncers[bi].h.x = -0.175f * (float)i + 0.2f;
+				++bi;
+			}
+
+			_bouncers[bi].init(0.f, -17.5f, Bouncer::Type::Normal, 0.f);
+			_bouncers[bi].h.w = Game::G_WIDTH * 2.f;
+			_bouncers[bi].h.x = -Game::G_WIDTH;
+			++bi;
+		}
+
+		{
+			int i = 0;
+			for (auto& e : _feathers) {
+				e.init(-0.5f + 0.2f * i, -17.3f, (float)i);
+				++i;
+			}
+		}
+	}
+
+	void logic(Player& p, Camera& c, float _level_end, float timer, float dt) {
+		bouncers_logic<>(_bouncers, p, timer, dt);
+	};
+
+	void draw(Game& g, Camera& c, float timer) {
+		for (auto& e : _bouncers) { e.draw(g, c); }
+
+		for (auto& e : _feathers) { e.draw(g, c, timer); }
+
+		g.d.draw_text<true>("<--|-->", { 0.f,0.f,0.f,1.f }, 0.f, -4.6f - c.y, 0.012f);
+
+		g.d.draw_text<true>("<--|-->", { 0.f,0.f,0.f,1.f }, 0.f, -9.6f - c.y, 0.012f);
+	};
+};
 
 
 void Button::init(const char* text, float text_size, float mid_x, float mid_y, float w, float h)
@@ -295,10 +420,6 @@ void LevelSelectorState::entry_point(Game& g)
 	g.d.draw_text<true>("Level Selector", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT * 0.5f - cam_y, 0.004f);
 }
 
-
-
-
-
 static void set_movement_events(Game& g)
 {
 	g.ge.player_to_right = g.l.key_down(SDL_SCANCODE_D);
@@ -309,8 +430,13 @@ static void set_movement_events(Game& g)
 	}
 }
 
+static void draw_fire_bar(Game& g, float filled)
+{
+	g.d.draw_image(TEX::fire_bar, 0.f, 0.f, 1.f, 0.5f, 0.f);
 
-template <typename ObstacleHandler>
+}
+
+template <typename ObstacleHandler, bool DEATH_STORM_ACTIVE>
 struct GameState final : public BaseState
 {
 public:
@@ -420,13 +546,15 @@ public:
 			if (gs.game_state != GameState::State::Playing) {
 				gs._time_when_playing_ended = gs.timer;
 
-				gs._buttons[0].init("Main menu", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
+				gs._buttons[0].init("Back", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
 				gs._buttons[1].init("Next level", 0.001f, 0.f, -0.3f + gs.c.y, 0.3f, 0.1f);
 				gs._buttons[2].init("Retry", 0.001f, 0.f, 0.f + gs.c.y, 0.3f, 0.1f);
 			}
 
-			// increase the more far away the player is from the barrier
-			gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
+			if constexpr (DEATH_STORM_ACTIVE) {
+				// increase the more far away the player is from the barrier
+				gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
+			}
 
 			//gs.death_y -= 1.4f * g.l.dt * std::max(std::min(1.8f, std::log(gs.timer / 10.f)), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
 
@@ -473,15 +601,17 @@ public:
 		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
 
 		gs.p.draw(g, gs.c);
-		gs._oh.draw(g, gs.c);
+		gs._oh.draw(g, gs.c, gs.timer);
 
 		// side background
 		g.d.draw_sides(gs.p);
 
 		draw_death_storm(gs.death_y, g);
+
+		draw_fire_bar(g, 0.f);
+
 		draw_coins_counter(gs, g);
 	}
-
 
 	template <State STATE>
 	static void main_loop_not_playing(GameState& gs, Game& g)
@@ -522,7 +652,7 @@ public:
 
 		// Exit
 		if (g.ge.exit_current_session) {
-			g.set_new_state(SessionToChangeTo::Menu, -1);
+			g.set_new_state(SessionToChangeTo::LevelSelector, -1);
 		}
 
 		gs.ch.game_logic(gs.ch, g, gs.c);
@@ -538,7 +668,7 @@ public:
 		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
 
 		gs.p.draw(g, gs.c);
-		gs._oh.draw(g, gs.c);
+		gs._oh.draw(g, gs.c, gs.timer);
 
 		// side background
 		g.d.draw_sides(gs.p);
@@ -577,13 +707,6 @@ public:
 	}
 };
 
-struct EmptyHandler
-{
-	void logic(Player& p, Camera& c, float _level_end, float timer, float dt) {};
-
-	void draw(Game& g, Camera& c) {};
-};
-
 [[nodiscard]] BaseState* create_new_game_session(Game& g, int level)
 {
 	float level_end = -6.f * level * level;
@@ -592,7 +715,8 @@ struct EmptyHandler
 	switch (level) {
 	case LEVEL::Tutorial:
 	{
-		auto gs = new GameState<EmptyHandler>{ g, level, -20.f };
+		auto gs = new GameState<TutorialBouncerHandler, false>{ g, level, -20.f };
+		gs->death_y = 10.f;
 		return gs;
 	}
 		break;
@@ -627,7 +751,7 @@ struct EmptyHandler
 		break;
 	}
 
-	auto gs = new GameState<BouncerHandler>{g, level, level_end};
+	auto gs = new GameState<BouncerHandler, true>{g, level, level_end};
 	gs->_oh.init(percent_move);
 
 	return gs;
