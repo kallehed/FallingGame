@@ -67,7 +67,7 @@ static void load_game(Game& g)
 			auto levels = data["level_info"].get<std::vector<SaveState::LevelInfo>>();
 			int i = 0;
 			for (auto& e : levels) {
-				if (i >= g._save_state.level_info.size()) break;
+				if (i >= (int)g._save_state.level_info.size()) break;
 				g._save_state.level_info[i] = e;
 				++i;
 			}

@@ -74,7 +74,6 @@ private:
 
 	SDL_Window* m_window = NULL;
 	SDL_GLContext m_glcontext = NULL;
-	bool m_fullscreen = false;
 	Uint64 m_start = 0; // time when frame started, used for FPS calculation
 
 	// if you lower the total keys, things might crash when pressing out of bounds keys in the array

@@ -250,7 +250,7 @@ bool Layer::start_frame()
 			m_finger_pos.x = WIDTH * 2.f * ((float(e.button.x) / float(window_width_screen_coordinates)) - 0.5f);
 			m_finger_pos.y = -HEIGHT * 2.f * ((float(e.button.y) / float(window_height_screen_coordinates)) - 0.5f);
 
-			SDL_Log("MOUSE DOWN. which: %lu clicks: %u, button: %u ", e.button.which, e.button.clicks, e.button.button);
+			SDL_Log("MOUSE DOWN. which: %u clicks: %u, button: %u ", e.button.which, e.button.clicks, e.button.button);
 
 
 			break;

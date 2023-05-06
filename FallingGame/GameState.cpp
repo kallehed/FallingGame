@@ -9,7 +9,7 @@
 
 void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
 {
-	for (int i = 0; i < ch.clouds.size(); ++i) {
+	for (int i = 0; i < (int)ch.clouds.size(); ++i) {
 		ch.clouds[i].construct(d, (float)((int)ch.clouds.size() - i) / (float)ch.clouds.size());
 		ch.clouds[i].x_vel += rand_uni();
 	}
@@ -17,7 +17,7 @@ void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
 
 void CloudHandler::init_game(CloudHandler& ch, Drawer& d)
 {
-	for (int i = 0; i < ch.clouds.size(); ++i) {
+	for (int i = 0; i < (int)ch.clouds.size(); ++i) {
 		ch.clouds[i].construct(d, (float)((int)ch.clouds.size() - i) / (float)ch.clouds.size());
 	}
 }
@@ -113,7 +113,7 @@ public:
 	void logic(Player & p, Camera & c, float _level_end, float timer, float dt)
 	{
 		// Bounce Logic
-		bouncers_logic<>(_bouncers, p, timer, dt);
+		bouncers_logic<_MAX_BOUNCERS>(_bouncers, p, timer, dt);
 
 		// Spawn bouncers
 		float spawn_bound = c.y - Layer::HEIGHT * 2.25f;
@@ -121,8 +121,9 @@ public:
 		{
 			const auto type = (rand_01() > _percent_move) ? Bouncer::Type::Normal : Bouncer::Type::Moves;
 			_bouncers[_bouncer_index++].init(Game::G_WIDTH, _next_bouncer_y, type, timer);
-			if (_bouncer_index >= _MAX_BOUNCERS)
-				_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
+			if (_bouncer_index >= _MAX_BOUNCERS) {_bouncer_index = 0;}
+				
+			_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
 			//_next_bouncer_y -= 0.05f;
 		}
 	}
@@ -221,7 +222,7 @@ struct TutorialBouncerHandler
 	}
 
 	void logic(Player& p, Camera& c, float _level_end, float timer, float dt) {
-		bouncers_logic<>(_bouncers, p, timer, dt);
+		bouncers_logic<_MAX_BOUNCERS>(_bouncers, p, timer, dt);
 	};
 
 	void draw(Game& g, Camera& c, float timer) {
@@ -429,6 +430,33 @@ static void set_movement_events(Game& g)
 		g.ge.player_to_right = !g.ge.player_to_left;
 	}
 }
+
+
+static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
+{
+	for (int i = (int)coins.size() - 1; i >= 0; --i) {
+		auto& e = coins[i];
+		if (p.r.intersect(e.r)) {
+			//std::cout << "COIN \n";
+			if (!e.picked_up) {
+				// make bird shiny
+				p.time_since_coin = 0.f;
+				++p.coins;
+			}
+			//coins.erase(coins.begin() + i);
+			e.got_picked_up();
+		}
+	}
+}
+
+
+// draw death storm at death_y
+static void draw_death_storm(float death_y, Game& g)
+{
+	g.d.draw_image(TEX::storm, 0.f, death_y + g.l.HEIGHT, g.l.WIDTH * 2.f, g.l.HEIGHT * 2.f, 0.f);
+	g.d.draw_rectangle(-g.l.WIDTH, death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, { 0.f,0.f,0.f,1.f });
+}
+
 
 static void draw_fire_bar(Game& g, float filled)
 {
@@ -690,7 +718,6 @@ public:
 			gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Locked);
 		}
 
-
 		const char* title_text;
 		if constexpr (STATE == GameState::State::Win)
 		{
@@ -711,6 +738,8 @@ public:
 {
 	float level_end = -6.f * level * level;
 	float percent_move = 0.f;
+
+	SDL_Log("Starting level: %d", level);
 
 	switch (level) {
 	case LEVEL::Tutorial:
@@ -769,35 +798,11 @@ public:
 	case SessionToChangeTo::LevelSelector:
 		return new LevelSelectorState{g};
 		break;
+	default:
+		return nullptr;
 	}
 
 }
 
-
-static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
-{
-	for (int i = (int)coins.size() - 1; i >= 0; --i) {
-		auto& e = coins[i];
-		if (p.r.intersect(e.r)) {
-			//std::cout << "COIN \n";
-			if (!e.picked_up) {
-				// make bird shiny
-				p.time_since_coin = 0.f;
-				++p.coins;
-			}
-			//coins.erase(coins.begin() + i);
-			e.got_picked_up();
-		}
-	}
-}
-
-
-
-// draw death storm at death_y
-static void draw_death_storm(float death_y, Game& g)
-{
-	g.d.draw_image(TEX::storm, 0.f, death_y + g.l.HEIGHT, g.l.WIDTH * 2.f, g.l.HEIGHT * 2.f, 0.f);
-	g.d.draw_rectangle(-g.l.WIDTH, death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, { 0.f,0.f,0.f,1.f });
-}
 
 
