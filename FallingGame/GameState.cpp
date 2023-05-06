@@ -547,7 +547,7 @@ public:
 
 		// Exit
 		if (g.ge.exit_current_session) {
-			g.set_new_state(SessionToChangeTo::Menu, -1);
+			g.set_new_state(SessionToChangeTo::LevelSelector, -1);
 		}
 
 		{
