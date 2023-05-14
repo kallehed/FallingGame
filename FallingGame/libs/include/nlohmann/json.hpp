@@ -6741,8 +6741,8 @@ class json_sax_dom_parser
                        parsing
     @param[in] allow_exceptions_  whether parse errors yield exceptions
     */
-    explicit json_sax_dom_parser(BasicJsonType& r, const bool allow_exceptions_ = true)
-        : root(r), allow_exceptions(allow_exceptions_)
+    explicit json_sax_dom_parser(BasicJsonType& _r, const bool allow_exceptions_ = true)
+        : root(_r), allow_exceptions(allow_exceptions_)
     {}
 
     // make class move-only
@@ -6921,10 +6921,10 @@ class json_sax_dom_callback_parser
     using parser_callback_t = typename BasicJsonType::parser_callback_t;
     using parse_event_t = typename BasicJsonType::parse_event_t;
 
-    json_sax_dom_callback_parser(BasicJsonType& r,
+    json_sax_dom_callback_parser(BasicJsonType& _r,
                                  const parser_callback_t cb,
                                  const bool allow_exceptions_ = true)
-        : root(r), callback(cb), allow_exceptions(allow_exceptions_)
+        : root(_r), callback(cb), allow_exceptions(allow_exceptions_)
     {
         keep_stack.push_back(true);
     }
@@ -17438,7 +17438,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         //      pow10 = 10^(n-1) <= p1 < 10^n
         //
         const std::uint32_t d = p1 / pow10;  // d = p1 div 10^(n-1)
-        const std::uint32_t r = p1 % pow10;  // r = p1 mod 10^(n-1)
+        const std::uint32_t _r = p1 % pow10;  // r = p1 mod 10^(n-1)
         //
         //      M+ = buffer * 10^n + (d * 10^(n-1) + r) + p2 * 2^e
         //         = (buffer * 10 + d) * 10^(n-1) + (r + p2 * 2^e)
@@ -17448,7 +17448,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         //
         //      M+ = buffer * 10^(n-1) + (r + p2 * 2^e)
         //
-        p1 = r;
+        p1 = _r;
         n--;
         //
         //      M+ = buffer * 10^n + (p1 + p2 * 2^e)
@@ -17544,7 +17544,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         JSON_ASSERT(p2 <= (std::numeric_limits<std::uint64_t>::max)() / 10);
         p2 *= 10;
         const std::uint64_t d = p2 >> -one.e;     // d = (10 * p2) div 2^-e
-        const std::uint64_t r = p2 & (one.f - 1); // r = (10 * p2) mod 2^-e
+        const std::uint64_t _r = p2 & (one.f - 1); // r = (10 * p2) mod 2^-e
         //
         //      M+ = buffer * 10^-m + 10^-m * (1/10 * (d * 2^-e + r) * 2^e
         //         = buffer * 10^-m + 10^-m * (1/10 * (d + r * 2^e))
@@ -17555,7 +17555,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
         //
         //      M+ = buffer * 10^(-m-1) + 10^(-m-1) * r * 2^e
         //
-        p2 = r;
+        p2 = _r;
         m++;
         //
         //      M+ = buffer * 10^-m + 10^-m * p2 * 2^e

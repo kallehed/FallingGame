@@ -107,18 +107,18 @@ typedef struct SDL_FRect
 /**
  * Returns true if point resides inside a rectangle.
  */
-SDL_FORCE_INLINE SDL_bool SDL_PointInRect(const SDL_Point *p, const SDL_Rect *r)
+SDL_FORCE_INLINE SDL_bool SDL_PointInRect(const SDL_Point *p, const SDL_Rect *_r)
 {
-    return ( (p->x >= r->x) && (p->x < (r->x + r->w)) &&
-             (p->y >= r->y) && (p->y < (r->y + r->h)) ) ? SDL_TRUE : SDL_FALSE;
+    return ( (p->x >= _r->x) && (p->x < (_r->x + _r->w)) &&
+             (p->y >= _r->y) && (p->y < (_r->y + _r->h)) ) ? SDL_TRUE : SDL_FALSE;
 }
 
 /**
  * Returns true if the rectangle has no area.
  */
-SDL_FORCE_INLINE SDL_bool SDL_RectEmpty(const SDL_Rect *r)
+SDL_FORCE_INLINE SDL_bool SDL_RectEmpty(const SDL_Rect *_r)
 {
-    return ((!r) || (r->w <= 0) || (r->h <= 0)) ? SDL_TRUE : SDL_FALSE;
+    return ((!_r) || (_r->w <= 0) || (_r->h <= 0)) ? SDL_TRUE : SDL_FALSE;
 }
 
 /**
@@ -230,18 +230,18 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
 /**
  * Returns true if point resides inside a rectangle.
  */
-SDL_FORCE_INLINE SDL_bool SDL_PointInFRect(const SDL_FPoint *p, const SDL_FRect *r)
+SDL_FORCE_INLINE SDL_bool SDL_PointInFRect(const SDL_FPoint *p, const SDL_FRect *_r)
 {
-    return ( (p->x >= r->x) && (p->x < (r->x + r->w)) &&
-             (p->y >= r->y) && (p->y < (r->y + r->h)) ) ? SDL_TRUE : SDL_FALSE;
+    return ( (p->x >= _r->x) && (p->x < (_r->x + _r->w)) &&
+             (p->y >= _r->y) && (p->y < (_r->y + _r->h)) ) ? SDL_TRUE : SDL_FALSE;
 }
 
 /**
  * Returns true if the rectangle has no area.
  */
-SDL_FORCE_INLINE SDL_bool SDL_FRectEmpty(const SDL_FRect *r)
+SDL_FORCE_INLINE SDL_bool SDL_FRectEmpty(const SDL_FRect *_r)
 {
-    return ((!r) || (r->w <= 0.0f) || (r->h <= 0.0f)) ? SDL_TRUE : SDL_FALSE;
+    return ((!_r) || (_r->w <= 0.0f) || (_r->h <= 0.0f)) ? SDL_TRUE : SDL_FALSE;
 }
 
 /**

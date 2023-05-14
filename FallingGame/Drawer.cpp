@@ -262,7 +262,7 @@ void Drawer::init(Game& g)
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		m_image_u_offset = glGetUniformLocation(image_program, "u_offset");
+		m_image_u_offset_and_to_cam = glGetUniformLocation(image_program, "u_offset_and_to_cam");
 		m_image_u_rotation = glGetUniformLocation(image_program, "u_rotation");
 	}
 
@@ -453,6 +453,7 @@ void Drawer::init(Game& g)
 			{"f/images/fire_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/fire_5.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 			{"f/images/fire_6.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+			{"f/images/title_screen.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {
@@ -513,7 +514,7 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 	}
 
 	glUniform3f(m_text_u_offset_scale, x, y, scale);
-	glUniform4f(m_text_u_color, color.r, color.g, color.b, color.a);
+	glUniform4f(m_text_u_color, color._r, color.g, color.b, color.a);
 
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, nr_of_chars);
 }
@@ -534,12 +535,12 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	};
 	glBindBuffer(GL_ARRAY_BUFFER, rectangle_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glUniform4f(m_rectangle_u_color, color.r, color.g, color.b, color.a);
+	glUniform4f(m_rectangle_u_color, color._r, color.g, color.b, color.a);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation)
+void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float _rotation, bool offset_by_cam)
 {
 	glUseProgram(image_program);
 	glBindVertexArray(image_VAO);
@@ -557,9 +558,9 @@ void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float ro
 	glBindBuffer(GL_ARRAY_BUFFER, image_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
 
-	{		glUniform2f(m_image_u_offset, x, y);
+	{		glUniform3f(m_image_u_offset_and_to_cam, x, y, (float)offset_by_cam);
 	}
-	glUniform1f(m_image_u_rotation, rotation);
+	glUniform1f(m_image_u_rotation, _rotation);
 	//glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -640,7 +641,7 @@ void Drawer::draw_coin_particle(CoinParticle& c)
 	
 	float u_pos_and_vel_and_time[COIN_PARTICLE_FLOATS_IN_ARRAY] =
 	{
-		c.start_x, c.start_y, c.x_vel, c.y_vel, c.start_time
+		c.start_x, c.start_y, c._x_vel, c._y_vel, c.start_time
 	};
 
 	glUniform1fv(glGetUniformLocation(coin_particle_program, "u_pos_and_vel_and_time"), COIN_PARTICLE_FLOATS_IN_ARRAY, u_pos_and_vel_and_time);
@@ -648,7 +649,7 @@ void Drawer::draw_coin_particle(CoinParticle& c)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin)
+void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float _rotation, float width, float height, float _time_since_coin)
 {
 	glUseProgram(bird_program);
 	glBindVertexArray(bird_VAO);
@@ -656,8 +657,8 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotat
 	glBindTexture(GL_TEXTURE_2D, texs[bird_tex]);
 
 	glUniform2f(m_bird_u_offset, x, y);
-	glUniform3f(m_bird_u_rotation_width_height, rotation, width, height);
-	glUniform1f(m_bird_u_time_since_coin, time_since_coin);
+	glUniform3f(m_bird_u_rotation_width_height, _rotation, width, height);
+	glUniform1f(m_bird_u_time_since_coin, _time_since_coin);
 
 	{
 		glUniform2f(m_bird_u_offset, x,  y);
@@ -681,7 +682,7 @@ void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color
 			load_all_programs();
 		}
 	}
-	glClearColor(col.r, col.g, col.b, col.a);
+	glClearColor(col._r, col.g, col.b, col.a);
 	// THE COLOR BUFFER WILL **ALWAYS** BE CLEARED ON ANDROID PHONES; 
 	// THERFORE, DO NOT REMOVE THIS LINE. (preserves cross-compatibility)
 	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);

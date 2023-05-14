@@ -33,6 +33,9 @@ struct GameEvents {
 	bool player_to_right = false;
 	bool player_to_left = false;
 
+	// whether the player should active a special powerup or something
+	bool player_activate_special = false;
+
 };
 
 // what is the state of this level? done or not, available?
@@ -64,7 +67,7 @@ enum class SessionToChangeTo {
 };
 
 struct Color {
-	float r;
+	float _r;
 	float g;
 	float b;
 	float a;
@@ -148,6 +151,8 @@ namespace TEX
 		fire_4,
 		fire_5,
 		fire_6,
+
+		title_screen,
 
 		TOTAL
 	};

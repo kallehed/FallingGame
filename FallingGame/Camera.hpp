@@ -13,7 +13,7 @@ public:
 	// where the player(bird) usually is offset from the top of the screen
 	float player_screen_top_offset;
 private:
-	float prev_y;
+	float _prev_y;
 public:
 	float y_dif;
 };

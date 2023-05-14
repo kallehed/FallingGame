@@ -67,7 +67,7 @@ typedef struct
  */
 typedef struct
 {
-    Uint8 r, g, b;
+    Uint8 _r, g, b;
 } SDL_MessageBoxColor;
 
 typedef enum

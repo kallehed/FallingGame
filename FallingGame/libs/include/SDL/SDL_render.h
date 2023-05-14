@@ -412,7 +412,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_Texture * texture,
  * \sa SDL_SetTextureAlphaMod
  */
 extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_Texture * texture,
-                                                   Uint8 r, Uint8 g, Uint8 b);
+                                                   Uint8 _r, Uint8 g, Uint8 b);
 
 
 /**
@@ -431,7 +431,7 @@ extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_Texture * texture,
  * \sa SDL_SetTextureColorMod
  */
 extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_Texture * texture,
-                                                   Uint8 * r, Uint8 * g,
+                                                   Uint8 * _r, Uint8 * g,
                                                    Uint8 * b);
 
 /**
@@ -1077,7 +1077,7 @@ extern DECLSPEC void SDLCALL SDL_RenderLogicalToWindow(SDL_Renderer * renderer,
  * \sa SDL_RenderFillRects
  */
 extern DECLSPEC int SDLCALL SDL_SetRenderDrawColor(SDL_Renderer * renderer,
-                                           Uint8 r, Uint8 g, Uint8 b,
+                                           Uint8 _r, Uint8 g, Uint8 b,
                                            Uint8 a);
 
 /**
@@ -1100,7 +1100,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawColor(SDL_Renderer * renderer,
  * \sa SDL_SetRenderDrawColor
  */
 extern DECLSPEC int SDLCALL SDL_GetRenderDrawColor(SDL_Renderer * renderer,
-                                           Uint8 * r, Uint8 * g, Uint8 * b,
+                                           Uint8 * _r, Uint8 * g, Uint8 * b,
                                            Uint8 * a);
 
 /**

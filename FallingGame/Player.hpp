@@ -11,14 +11,25 @@ public:
 	void logic(GameEvents ge, float dt);
 	void draw(Game& g, Camera& c);
 
-	Rect r; // for hitbox
-	float prev_y;
-	float y_vel;
-	float x_vel;
-	float bounce_x_vel;
-	float rotation;
-	float time_since_coin;
-	int coins;
+	void get_feather(int feathers_received);
+	
+	// returns from 0.f to 1.f how powerup is filled
+	float powerup_filled();
+
+	Rect _r; // for hitbox
+	float _prev_y;
+	float _y_vel;
+	float _x_vel;
+	float _bounce_x_vel;
+	float _rotation;
+	float _time_since_coin;
+	int _coins;
+	int _feathers;
+	int _feathers_needed_for_powerup;
+	int _max_feathers;
+
+	// PUBLIC to read. Says whether the powerup is active or not.
+	bool _powerup_active;
 
 	static constexpr float WIDTH = 0.23f;
 	static constexpr float HEIGHT = WIDTH * 1.16386555f;

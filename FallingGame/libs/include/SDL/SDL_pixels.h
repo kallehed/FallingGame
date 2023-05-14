@@ -308,7 +308,7 @@ typedef enum
  */
 typedef struct SDL_Color
 {
-    Uint8 r;
+    Uint8 _r;
     Uint8 g;
     Uint8 b;
     Uint8 a;
@@ -527,7 +527,7 @@ extern DECLSPEC void SDLCALL SDL_FreePalette(SDL_Palette * palette);
  * \sa SDL_MapRGBA
  */
 extern DECLSPEC Uint32 SDLCALL SDL_MapRGB(const SDL_PixelFormat * format,
-                                          Uint8 r, Uint8 g, Uint8 b);
+                                          Uint8 _r, Uint8 g, Uint8 b);
 
 /**
  * Map an RGBA quadruple to a pixel value for a given pixel format.
@@ -562,7 +562,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_MapRGB(const SDL_PixelFormat * format,
  * \sa SDL_MapRGB
  */
 extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(const SDL_PixelFormat * format,
-                                           Uint8 r, Uint8 g, Uint8 b,
+                                           Uint8 _r, Uint8 g, Uint8 b,
                                            Uint8 a);
 
 /**
@@ -588,7 +588,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(const SDL_PixelFormat * format,
  */
 extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
                                         const SDL_PixelFormat * format,
-                                        Uint8 * r, Uint8 * g, Uint8 * b);
+                                        Uint8 * _r, Uint8 * g, Uint8 * b);
 
 /**
  * Get RGBA values from a pixel in the specified format.
@@ -617,7 +617,7 @@ extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
  */
 extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel,
                                          const SDL_PixelFormat * format,
-                                         Uint8 * r, Uint8 * g, Uint8 * b,
+                                         Uint8 * _r, Uint8 * g, Uint8 * b,
                                          Uint8 * a);
 
 /**

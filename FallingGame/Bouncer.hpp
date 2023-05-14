@@ -21,6 +21,8 @@ public:
 	float bounce_timer = 0.f;
 	float _x_vel;
 	Type _type;
+	// Whether it has been destroyed permanently by player or not (when player has powerup)
+	bool _destroyed;
 
 };
 

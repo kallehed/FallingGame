@@ -21,7 +21,7 @@ void Cloud::init(Drawer& d)
 	w = scale * d.tex_sizes[TEX::cloud_1][0] * (1.f-z);
 	h = scale * d.tex_sizes[TEX::cloud_1][1] * (1-z);
 
-	x_vel = 0.1f;//rand_uni();
+	_x_vel = 0.1f;//rand_uni();
 
 	y = ((rand_01() * 4.f) - 6.f) * Layer::HEIGHT;
 	if (y + h < -Layer::HEIGHT) {

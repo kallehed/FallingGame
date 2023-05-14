@@ -11,7 +11,7 @@ void CloudHandler::init_menu(CloudHandler& ch, Drawer& d)
 {
 	for (int i = 0; i < (int)ch.clouds.size(); ++i) {
 		ch.clouds[i].construct(d, (float)((int)ch.clouds.size() - i) / (float)ch.clouds.size());
-		ch.clouds[i].x_vel += rand_uni();
+		ch.clouds[i]._x_vel += rand_uni();
 	}
 }
 
@@ -29,9 +29,9 @@ void CloudHandler::menu_logic(CloudHandler& ch, Game& g)
 		if ((e.x + e.w) < -Layer::WIDTH || (e.x - e.w) > Layer::WIDTH || (e.y - e.h) > Layer::HEIGHT) {
 			e.tex = (TEX::_)(TEX::cloud_1 + rand_int(0, 4));
 
-			e.x_vel *= -1.f;
+			e._x_vel *= -1.f;
 		}
-		e.x += e.x_vel * g.l.dt * (1.f - e.z);
+		e.x += e._x_vel * g.l.dt * (1.f - e.z);
 	}
 }
 
@@ -43,45 +43,108 @@ void CloudHandler::game_logic(CloudHandler& ch, Game& g, Camera& c)
 			e.init(g.d);
 		}
 		e.y += (c.y_dif) * (1.f - e.z);
-		e.x += e.x_vel * g.l.dt * (1.f - e.z);
+		e.x += e._x_vel * g.l.dt * (1.f - e.z);
 	}
 }
 
 template <int BOUNCERS>
-void bouncers_logic(std::array<Bouncer, BOUNCERS> bouncers, Player& p, float timer, float dt)
+static void bouncers_logic(std::array<Bouncer, BOUNCERS>& bouncers, Player& p, float timer, float dt)
 {
-	const bool can_bounce_player = p.y_vel < 0.0f;
+	const bool can_bounce_player = p._y_vel < 0.0f;
 
 	for (auto& e : bouncers) {
-		if (can_bounce_player) {
-			// TODO: Maybe remove the branches from this if?
-			if (e.h.y < p.prev_y && e.h.y > p.r.y && p.r.x < e.h.x + e.h.w && p.r.x + p.r.w > e.h.x) {
-				//std::cout << "bounce << " << p.y_vel << "\n";
-				p.bounce_x_vel = std::min(1.f, -0.5f * p.y_vel) * 10.f * p.r.x_dist(e.h);
-				p.y_vel = std::clamp(-0.5f * p.y_vel, 0.75f, 1.5f);
-				e.bounced_on(p.bounce_x_vel);
+		if (!e._destroyed) {
+			if (can_bounce_player) {
+				// TODO: Maybe remove the branches from this if?
+				if (e.h.y < p._prev_y && e.h.y > p._r.y && p._r.x < e.h.x + e.h.w && p._r.x + p._r.w > e.h.x) {
+					if (!p._powerup_active) {
+						p._bounce_x_vel = std::min(1.f, -0.5f * p._y_vel) * 10.f * p._r.x_dist(e.h);
+						p._y_vel = std::clamp(-0.5f * p._y_vel, 0.75f, 1.5f);
+						e.bounced_on(p._bounce_x_vel);
+					}
+					else {
+						e._destroyed = true;
+					}
+				}
+			}
+
+			switch (e._type) {
+			case Bouncer::Type::Moves:
+
+				e._x_vel += dt * (sinf(0.8f + 2.f * std::fabs(e.h.x) + timer + 381.345f * e._init_time));
+
+				e.h.x += dt * e._x_vel;
+
+				if (e.h.x < -Game::G_WIDTH) {
+					e._x_vel = std::fabs(e._x_vel);
+				}
+				else if (e.h.x > Game::G_WIDTH) {
+					e._x_vel = -std::fabs(e._x_vel);
+				}
+				break;
+			default:
+				break;
 			}
 		}
+		else {
 
-		switch (e._type) {
-		case Bouncer::Type::Moves:
-
-			e._x_vel += dt * (sinf(0.8f + 2.f * std::fabs(e.h.x) + timer + 381.345f * e._init_time));
-
-			e.h.x += dt * e._x_vel;
-
-			if (e.h.x < -Game::G_WIDTH) {
-				e._x_vel = std::fabs(e._x_vel);
-			}
-			else if (e.h.x > Game::G_WIDTH) {
-				e._x_vel = -std::fabs(e._x_vel);
-			}
-			break;
-		default:
-			break;
 		}
 	}
 }
+
+struct CoinHandler
+{
+	std::vector<Coin> _coins;
+
+	float _next_coin_y;
+
+	void init() {
+		_next_coin_y = -1.5f;
+	}
+
+
+	void logic(Game& g, Camera& c, Player& p) {
+		const float remove_bound = c.y + 2.f * g.l.HEIGHT;
+
+		// delete coins that have gone too high
+		for (int i = (int)_coins.size() - 1; i >= 0; --i) {
+			if (_coins[i]._r.y > remove_bound) { // should be removed
+				_coins.erase(_coins.begin() + i);
+			}
+		}
+
+		handle_collisions_player_coins(p);
+
+		float spawn_bound = c.y - g.l.HEIGHT * 2.f;
+
+		// spawn coin
+		while (spawn_bound <= _next_coin_y)
+		{
+			_coins.emplace_back(g, _next_coin_y);
+			_next_coin_y -= (2.f * g.l.HEIGHT * (0.5f + 0.5f * rand_01()));
+		}
+	}
+
+	void handle_collisions_player_coins(Player& p)
+	{
+		for (int i = (int)_coins.size() - 1; i >= 0; --i) {
+			auto& e = _coins[i];
+			if (p._r.intersect(e._r)) {
+				//std::cout << "COIN \n";
+				if (!e.picked_up) {
+					// make bird shiny
+					p._time_since_coin = 0.f;
+					++p._coins;
+				}
+				//coins.erase(coins.begin() + i);
+				e.got_picked_up();
+			}
+		}
+	}
+	void draw(Game& g, Camera& c, float timer) {
+		for (auto& e : _coins) { e.draw(g, c, timer); }
+	}
+};
 
 struct BouncerHandler
 {
@@ -99,8 +162,11 @@ private:
 
 	float _percent_move;
 
+	CoinHandler _coinh;
+	
 public:
-	void init(float percent_move) {
+	void init(float percent_move)
+	{
 		_next_bouncer_y = -0.5f;
 		_bouncer_index = 0;
 		_percent_move = percent_move;
@@ -108,9 +174,11 @@ public:
 		for (auto& e : _bouncers) {
 			e.init(0.f, 2.f * Layer::HEIGHT, Bouncer::Type::Normal, 0.f);
 		}
+
+		_coinh.init();
 	}
 
-	void logic(Player & p, Camera & c, float _level_end, float timer, float dt)
+	void logic(Game& g, Player & p, Camera & c, float _level_end, float timer, float dt)
 	{
 		// Bounce Logic
 		bouncers_logic<_MAX_BOUNCERS>(_bouncers, p, timer, dt);
@@ -124,13 +192,15 @@ public:
 			if (_bouncer_index >= _MAX_BOUNCERS) {_bouncer_index = 0;}
 				
 			_next_bouncer_y -= (2.8f * (0.3f + 0.5f * rand_01()));
-			//_next_bouncer_y -= 0.05f;
 		}
+
+		_coinh.logic(g, c, p);
 	}
 
 	void draw(Game& g, Camera& c, float timer)
 	{
 		for (auto& e : _bouncers) { e.draw(g, c); }
+		_coinh.draw(g, c, timer);
 	}
 };
 
@@ -145,7 +215,7 @@ struct Feather {
 		_r.y = y;
 		_r.w = 0.3f;
 		_r.h = 0.3f;
-		_picked_up = 0.f;
+		_picked_up = false;
 		_time_offset = time_offset;
 	}
 
@@ -180,6 +250,25 @@ struct Feather {
 		}
 	}
 };
+
+struct FeatherHandler {
+	static constexpr int _MAX_FEATHERS = 5;
+	std::array<Feather, _MAX_FEATHERS> _feathers;
+};
+
+template <int N>
+static void handle_feather_collisions(std::array<Feather, N>& feathers, Player& p)
+{
+	for (auto& e : feathers) {
+		if (p._r.intersect(e._r)) {
+			if (!e._picked_up) {
+				// make bird shiny
+				p.get_feather(1);
+			}
+			e.got_picked_up();
+		}
+	}
+}
 
 struct TutorialBouncerHandler
 {
@@ -221,8 +310,9 @@ struct TutorialBouncerHandler
 		}
 	}
 
-	void logic(Player& p, Camera& c, float _level_end, float timer, float dt) {
+	void logic(Game& g, Player& p, Camera& c, float _level_end, float timer, float dt) {
 		bouncers_logic<_MAX_BOUNCERS>(_bouncers, p, timer, dt);
+		handle_feather_collisions<_MAX_FEATHERS>(_feathers, p);
 	};
 
 	void draw(Game& g, Camera& c, float timer) {
@@ -350,7 +440,15 @@ void MenuState::entry_point(Game & g)
 	g.d.draw_sky(g, gs.c.y);
 	g.d.draw_clouds(gs.ch);
 	gs._btn_start.draw_start(g.d, 0.f);
-	g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
+	//g.d.draw_text<true>("Down-Fall", { 0.5f,0.f,0.5f,1.f }, 0.00f, Layer::HEIGHT*0.5f, 0.004f);
+	{
+		static constexpr float size = 0.002f;
+		const float w = g.d.tex_sizes[TEX::title_screen][0] * size;
+		const float h = g.d.tex_sizes[TEX::title_screen][1] * size;
+		const float x_offset = sinf(gs.timer) * 0.1f;
+		const float rotation = sinf(gs.timer * 1.5f) * 0.6f;
+		g.d.draw_image(TEX::title_screen, 0.f + x_offset, Layer::HEIGHT * 0.5f, w, h, rotation);
+	}
 	//d.draw_rectangle(-Layer::WIDTH, -Layer::HEIGHT, Layer::WIDTH*2.f, Layer::HEIGHT*2.f, {1.f,1.f,1.f,1.f});
 }
 
@@ -429,24 +527,8 @@ static void set_movement_events(Game& g)
 		g.ge.player_to_left = g.l.m_finger_pos.x < 0.0f; // middle of screen
 		g.ge.player_to_right = !g.ge.player_to_left;
 	}
-}
 
-
-static void handle_collisions_player_coins(std::vector<Coin>& coins, Player& p)
-{
-	for (int i = (int)coins.size() - 1; i >= 0; --i) {
-		auto& e = coins[i];
-		if (p.r.intersect(e.r)) {
-			//std::cout << "COIN \n";
-			if (!e.picked_up) {
-				// make bird shiny
-				p.time_since_coin = 0.f;
-				++p.coins;
-			}
-			//coins.erase(coins.begin() + i);
-			e.got_picked_up();
-		}
-	}
+	g.ge.player_activate_special = g.l.key_down(SDL_SCANCODE_L);
 }
 
 
@@ -457,11 +539,33 @@ static void draw_death_storm(float death_y, Game& g)
 	g.d.draw_rectangle(-g.l.WIDTH, death_y + 2.f * g.l.HEIGHT, 2.f * g.l.WIDTH, g.l.HEIGHT * 2.f, { 0.f,0.f,0.f,1.f });
 }
 
-
-static void draw_fire_bar(Game& g, float filled)
+// filled is from 0.f to 1.f
+static void draw_fire_bar(Game& g, Player& p, float timer)
 {
-	g.d.draw_image(TEX::fire_bar, 0.f, 0.f, 1.f, 0.5f, 0.f);
+	const float filled = p.powerup_filled();
 
+	static constexpr float size = 0.005f;
+	const float bar_w = g.d.tex_sizes[TEX::fire_bar][0] * size;
+	const float bar_h = g.d.tex_sizes[TEX::fire_bar][1] * size;
+
+	const float bar_right = 0.f + bar_w/2.f;
+	const float bar_top = g.G_HEIGHT;
+
+	{
+		const float frame_speed = (filled >= 0.5f) ? (4.f) : (2.f);
+		TEX::_ fire_tex = (TEX::_)((int)TEX::fire_0 + (((int)(timer * frame_speed)) % 7));
+
+		static constexpr float size2 = 0.005f;
+		const float w = bar_w * filled;
+		const float h = bar_h;
+
+		g.d.draw_image(fire_tex, bar_right - w / 2.f, bar_top - h/2.f, w, h, 0.f, false);
+	}
+
+	{
+		g.d.draw_image(TEX::fire_bar, bar_right - bar_w / 2.f, bar_top - bar_h / 2.f, bar_w, bar_h, 0.f, false);
+	}
+	
 }
 
 template <typename ObstacleHandler, bool DEATH_STORM_ACTIVE>
@@ -484,11 +588,9 @@ public:
 	// which y coordinate the level ends at
 	float _level_end;
 
-	float next_coin_y;
-
 	CloudHandler ch;
 	ObstacleHandler _oh;
-	std::vector<Coin> coins;
+	
 
 	float _time_when_playing_ended;
 	std::array<Button, 3> _buttons;
@@ -518,8 +620,6 @@ public:
 		gs._level = level;
 		gs._level_end = level_end;
 
-		gs.next_coin_y = -1.5f;
-
 		gs.death_y = 3.f;
 		gs.timer = 0.f;
 		gs.p.init();
@@ -535,7 +635,7 @@ public:
 	static void draw_coins_counter(GameState& gs, Game& g)
 	{
 		char buf[10];
-		snprintf(buf, 10, "Coins: %d", gs.p.coins);
+		snprintf(buf, 10, "Coins: %d", gs.p._coins);
 		g.d.draw_text(buf, { 1.f,1.f,0.f,1.f }, Game::G_WIDTH - 0.2f, Layer::HEIGHT - 0.2f, 0.001f);
 	}
 
@@ -552,7 +652,7 @@ public:
 
 		{
 			// Win
-			if (gs.p.r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT)
+			if (gs.p._r.y + 2.f * gs.p.HEIGHT < gs.c.y - g.l.HEIGHT)
 			{
 				gs.game_state = GameState::State::Win;
 				g._save_state.level_info[gs._level].state = LevelState::Done;
@@ -563,10 +663,9 @@ public:
 				}
 
 				// init things
-
 			}
 			// Lose
-			else  if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset / 2.f < gs.p.r.y) {
+			else  if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset / 2.f < gs.p._r.y) {
 				gs.game_state = GameState::State::Lose;
 			}
 
@@ -581,7 +680,7 @@ public:
 
 			if constexpr (DEATH_STORM_ACTIVE) {
 				// increase the more far away the player is from the barrier
-				gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
+				gs.death_y -= 1.4f * g.l.dt * std::max(std::log(gs.timer / 100.f), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p._r.y, 2.f)));
 			}
 
 			//gs.death_y -= 1.4f * g.l.dt * std::max(std::min(1.8f, std::log(gs.timer / 10.f)), std::max(1.f, 0.05f * std::pow(gs.death_y - gs.p.r.y, 2.f)));
@@ -594,29 +693,10 @@ public:
 			// set CAMERA position
 			gs.c.set_in_game(gs.p, gs._level_end);
 
-			const float remove_bound = gs.c.y + 2.f * g.l.HEIGHT;
-
-			// delete coins that have gone too high
-			for (int i = (int)gs.coins.size() - 1; i >= 0; --i) {
-				if (gs.coins[i].r.y > remove_bound) { // should be removed
-					gs.coins.erase(gs.coins.begin() + i);
-				}
-			}
+			
 			//printf("Camera y: %f", gs.c.y);
-			gs._oh.logic(gs.p, gs.c, gs._level_end, gs.timer, g.l.dt);
+			gs._oh.logic(g, gs.p, gs.c, gs._level_end, gs.timer, g.l.dt);
 
-			handle_collisions_player_coins(gs.coins, gs.p);
-
-			// where it is appropriate to spawn things of screen
-			float spawn_bound = gs.c.y - g.l.HEIGHT * 2.f;
-			if (spawn_bound < gs._level_end - g.l.HEIGHT * 2.f) { spawn_bound = 1000000000.f; }
-
-			// spawn coin
-			while (spawn_bound <= gs.next_coin_y)
-			{
-				gs.coins.emplace_back(g, gs.next_coin_y);
-				gs.next_coin_y -= (2.f * g.l.HEIGHT * (0.5f + 0.5f * rand_01()));
-			}
 		}
 		gs.ch.game_logic(gs.ch, g, gs.c);
 
@@ -626,7 +706,7 @@ public:
 		g.d.draw_sky(g, gs.c.y);
 
 		g.d.draw_clouds(gs.ch);
-		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
+		
 
 		gs.p.draw(g, gs.c);
 		gs._oh.draw(g, gs.c, gs.timer);
@@ -636,7 +716,7 @@ public:
 
 		draw_death_storm(gs.death_y, g);
 
-		draw_fire_bar(g, 0.f);
+		draw_fire_bar(g, gs.p, gs.timer);
 
 		draw_coins_counter(gs, g);
 	}
@@ -693,7 +773,6 @@ public:
 		g.d.draw_sky(g, gs.c.y);
 
 		g.d.draw_clouds(gs.ch);
-		for (auto& e : gs.coins) { e.draw(g, gs.c, gs); }
 
 		gs.p.draw(g, gs.c);
 		gs._oh.draw(g, gs.c, gs.timer);

@@ -2150,7 +2150,7 @@ GLAPI PFNGLBLENDFUNCIPROC glad_glBlendFunci;
 typedef void (APIENTRYP PFNGLBLENDFUNCSEPARATEIPROC)(GLuint buf, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);
 GLAPI PFNGLBLENDFUNCSEPARATEIPROC glad_glBlendFuncSeparatei;
 #define glBlendFuncSeparatei glad_glBlendFuncSeparatei
-typedef void (APIENTRYP PFNGLCOLORMASKIPROC)(GLuint index, GLboolean r, GLboolean g, GLboolean b, GLboolean a);
+typedef void (APIENTRYP PFNGLCOLORMASKIPROC)(GLuint index, GLboolean _r, GLboolean g, GLboolean b, GLboolean a);
 GLAPI PFNGLCOLORMASKIPROC glad_glColorMaski;
 #define glColorMaski glad_glColorMaski
 typedef GLboolean (APIENTRYP PFNGLISENABLEDIPROC)(GLenum target, GLuint index);

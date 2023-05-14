@@ -30,7 +30,7 @@ public:
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
 	// draws middle of image at x,y. Offset by camera 
-	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation);
+	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation, bool offset_by_cam=1.f);
 
 	void draw_sky(Game& g, float camera_y);
 
@@ -40,7 +40,7 @@ public:
 
 	void draw_coin_particle(CoinParticle&);
 
-	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float time_since_coin);
+	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float _time_since_coin);
 
 	// updates relevant global shader values
 	void before_draw(Game& g, float death_y, float cam_y, float timer, Color col);
@@ -96,7 +96,7 @@ private:
 
 	unsigned int image_program = 0;
 	unsigned int image_VAO, image_VBO;
-	int m_image_u_offset, m_image_u_rotation;
+	int m_image_u_offset_and_to_cam, m_image_u_rotation;
 
 	unsigned int sky_program = 0;
 	unsigned int sky_VAO, sky_VBO;
@@ -148,6 +148,7 @@ public:
 	
 
 	std::array<unsigned int, TEX::TOTAL> texs;
+	// For all TEX::... gives [int w, int h]
 	std::array<std::array<int, 2>, TEX::TOTAL> tex_sizes;
 };
 

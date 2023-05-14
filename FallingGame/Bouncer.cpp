@@ -12,6 +12,7 @@ void Bouncer::init(float spawn_width, float y, Type type, float init_time)
 	_type = type;
 	_init_time = init_time;
 	_x_vel = 0.f;
+	_destroyed = false;
 }
 
 

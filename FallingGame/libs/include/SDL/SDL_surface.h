@@ -504,7 +504,7 @@ extern DECLSPEC int SDLCALL SDL_GetColorKey(SDL_Surface * surface,
  * \sa SDL_SetSurfaceAlphaMod
  */
 extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface * surface,
-                                                   Uint8 r, Uint8 g, Uint8 b);
+                                                   Uint8 _r, Uint8 g, Uint8 b);
 
 
 /**
@@ -523,7 +523,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface * surface,
  * \sa SDL_SetSurfaceColorMod
  */
 extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface * surface,
-                                                   Uint8 * r, Uint8 * g,
+                                                   Uint8 * _r, Uint8 * g,
                                                    Uint8 * b);
 
 /**
