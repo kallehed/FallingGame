@@ -555,11 +555,10 @@ static void draw_fire_bar(Game& g, Player& p, float timer)
 		const float frame_speed = (filled >= 0.5f) ? (4.f) : (2.f);
 		TEX::_ fire_tex = (TEX::_)((int)TEX::fire_0 + (((int)(timer * frame_speed)) % 7));
 
-		static constexpr float size2 = 0.005f;
 		const float w = bar_w * filled;
 		const float h = bar_h;
 
-		g.d.draw_image(fire_tex, bar_right - w / 2.f, bar_top - h/2.f, w, h, 0.f, false);
+		g.d.draw_firebar(fire_tex, bar_right - w / 2.f, bar_top - h/2.f, w, h, filled);
 	}
 
 	{
@@ -707,8 +706,11 @@ public:
 
 		g.d.draw_clouds(gs.ch);
 		
+		const bool draw_player_in_front = gs.p.draw_in_front();
 
-		gs.p.draw(g, gs.c);
+		if (!draw_player_in_front)
+			gs.p.draw(g, gs.c);
+
 		gs._oh.draw(g, gs.c, gs.timer);
 
 		// side background
@@ -719,6 +721,9 @@ public:
 		draw_fire_bar(g, gs.p, gs.timer);
 
 		draw_coins_counter(gs, g);
+
+		if (draw_player_in_front)
+			gs.p.draw(g, gs.c);
 	}
 
 	template <State STATE>

@@ -30,7 +30,7 @@ public:
 	void draw_rectangle(float x, float y, float w, float h, const Color& color);
 
 	// draws middle of image at x,y. Offset by camera 
-	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation, bool offset_by_cam=1.f);
+	void draw_image(TEX::_ tex, float x, float y, float w, float h, float rotation, bool offset_by_cam=true);
 
 	void draw_sky(Game& g, float camera_y);
 
@@ -40,7 +40,8 @@ public:
 
 	void draw_coin_particle(CoinParticle&);
 
-	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float _time_since_coin);
+	void draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float rotation, float width, float height, float _time_since_coin, float powerup);
+	void draw_firebar(TEX::_ fire_tex, float x, float y, float width, float height, float shiny);
 
 	// updates relevant global shader values
 	void before_draw(Game& g, float death_y, float cam_y, float timer, Color col);
@@ -119,7 +120,11 @@ private:
 
 	unsigned int bird_program = 0;
 	unsigned int bird_VAO;
-	int m_bird_u_offset, m_bird_u_rotation_width_height, m_bird_u_time_since_coin;
+	int m_bird_u_offset, m_bird_u_rotation_width_height, m_bird_u_time_since_coin_and_powerup;
+
+	unsigned int _firebar_program = 0;
+	unsigned int _firebar_VAO;
+	int _firebar_u_offset_width_height, _firebar_u_shiny;
 
 	/*
 	* float g_death_y; // y where you die

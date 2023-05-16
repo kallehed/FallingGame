@@ -20,6 +20,7 @@ void Player::init()
 	_max_feathers = 4;
 
 	_powerup_active = false;
+	_powerup_timer = 0.f;
 }
 
 void Player::logic(GameEvents ge, float dt)
@@ -49,10 +50,15 @@ void Player::logic(GameEvents ge, float dt)
 
 	// y movement
 	{
-		float y_dec = dt * ((_y_vel < 0.f) ? (1.f / (1.f + std::pow(std::abs(_y_vel), 3.f))) : 1.f);
-		y_dec = std::fmaxf(y_dec, 0.001f); // limit too low increase of y vel
-		float new_y_vel = _y_vel - y_dec;
-		_y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL); // probably never reached
+		if (!_powerup_active){
+			float y_dec = dt * ((_y_vel < 0.f) ? (1.f / (1.f + std::pow(std::abs(_y_vel), 3.f))) : 1.f);
+			y_dec = std::fmaxf(y_dec, 0.001f); // limit too low increase of y vel
+			float new_y_vel = _y_vel - y_dec;
+			_y_vel = std::clamp(new_y_vel, -MAX_Y_VEL, MAX_Y_VEL); // probably never reached
+		}
+		else {
+			_y_vel = -3.f;
+		}
 		_prev_y = _r.y;
 		_r.y += _y_vel * dt;
 	}
@@ -85,9 +91,19 @@ void Player::logic(GameEvents ge, float dt)
 			if (ge.player_activate_special) {
 				if (_feathers >= _feathers_needed_for_powerup) {
 					_powerup_active = true;
+					_powerup_timer = 0.f;
 					_feathers -= _feathers_needed_for_powerup;
 				}
 			}
+		}
+		else {
+			// slowly remove powerup
+			_powerup_timer += dt;
+
+			_feathers = _max_feathers - (int)(_powerup_timer);
+
+			if (_feathers == 0) _powerup_active = false;
+
 		}
 	}
 }
@@ -104,15 +120,28 @@ void Player::draw(Game& g, Camera& c)
 	}
 	//g.d.draw_image(g.c, texture, r.x + 0.045f, r.y + 0.135f, w, WIDTH * 1.16386555f, rotation);
 	_r.draw(g.d, { 1.f, 0.f, 0.1f, 0.4f });
-	g.d.draw_bird(c, texture, _r.x + 0.045f, _r.y + 0.135f, _rotation, w, HEIGHT, _time_since_coin);
+	g.d.draw_bird(c, texture, _r.x + 0.045f, _r.y + 0.135f, _rotation, w, HEIGHT, _time_since_coin, (float)_powerup_active);
 }
 
 void Player::get_feather(int feathers_received)
 {
-	_feathers += feathers_received;
-	_feathers = std::min(_feathers, _max_feathers);
+	if (!_powerup_active) {
+		_feathers += feathers_received;
+		_feathers = std::min(_feathers, _max_feathers);
+	}
 }
 
 float Player::powerup_filled() {
 	return _feathers / (float)_max_feathers;
 }
+
+bool Player::draw_in_front() {
+	return _powerup_active;
+
+}
+
+
+
+
+
+

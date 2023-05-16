@@ -16,6 +16,9 @@ public:
 	// returns from 0.f to 1.f how powerup is filled
 	float powerup_filled();
 
+	// whether to draw the player in front or not
+	bool draw_in_front();
+
 	Rect _r; // for hitbox
 	float _prev_y;
 	float _y_vel;
@@ -30,6 +33,7 @@ public:
 
 	// PUBLIC to read. Says whether the powerup is active or not.
 	bool _powerup_active;
+	float _powerup_timer;
 
 	static constexpr float WIDTH = 0.23f;
 	static constexpr float HEIGHT = WIDTH * 1.16386555f;

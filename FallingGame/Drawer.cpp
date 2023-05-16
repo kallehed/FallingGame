@@ -409,7 +409,18 @@ void Drawer::init(Game& g)
 
 		m_bird_u_offset = glGetUniformLocation(bird_program, "u_offset");
 		m_bird_u_rotation_width_height = glGetUniformLocation(bird_program, "u_rotation_width_height");
-		m_bird_u_time_since_coin = glGetUniformLocation(bird_program, "u_time_since_coin");
+		m_bird_u_time_since_coin_and_powerup = glGetUniformLocation(bird_program, "u_time_since_coin_and_powerup");
+	}
+
+	// firebar program
+	{
+		glGenVertexArrays(1, &_firebar_VAO);
+		glBindVertexArray(_firebar_VAO);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		_firebar_u_offset_width_height = glGetUniformLocation(_firebar_program, "u_offset_width_height");
+		_firebar_u_shiny = glGetUniformLocation(_firebar_program, "u_shiny");
 	}
 
 	// uniform buffer object: Globals
@@ -609,9 +620,9 @@ void Drawer::draw_clouds(CloudHandler& ch)
 
 	// cloud_VBO_pos and cloud_VBO_tex_z initialization
 	{
-		float positions[ch.NR_CLOUDS * FLOATS_PER_CLOUD_POS];
+		float positions[CloudHandler::NR_CLOUDS * FLOATS_PER_CLOUD_POS];
 		
-		float tex_z_values[ch.NR_CLOUDS * TEX_AND_Z_FLOATS];
+		float tex_z_values[CloudHandler::NR_CLOUDS * TEX_AND_Z_FLOATS];
 		int i_t_z = 0, i_pos = 0;
 		for (auto& e : ch.clouds) {
 			float w = e.w, h = e.h;
@@ -649,7 +660,7 @@ void Drawer::draw_coin_particle(CoinParticle& c)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float _rotation, float width, float height, float _time_since_coin)
+void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float _rotation, float width, float height, float _time_since_coin, float powerup)
 {
 	glUseProgram(bird_program);
 	glBindVertexArray(bird_VAO);
@@ -658,14 +669,24 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float _rota
 
 	glUniform2f(m_bird_u_offset, x, y);
 	glUniform3f(m_bird_u_rotation_width_height, _rotation, width, height);
-	glUniform1f(m_bird_u_time_since_coin, _time_since_coin);
-
-	{
-		glUniform2f(m_bird_u_offset, x,  y);
-	}
+	glUniform2f(m_bird_u_time_since_coin_and_powerup, _time_since_coin, powerup);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
+
+void Drawer::draw_firebar(TEX::_ fire_tex, float x, float y, float width, float height, float shiny) 
+{
+	glUseProgram(_firebar_program);
+	glBindVertexArray(_firebar_VAO);
+
+	glBindTexture(GL_TEXTURE_2D, texs[fire_tex]);
+
+	glUniform4f(_firebar_u_offset_width_height, x, y, width, height);
+	glUniform1f(_firebar_u_shiny, shiny);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
 
 void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color col)
 {
@@ -724,5 +745,8 @@ void Drawer::load_all_programs()
 
 	glDeleteProgram(bird_program);
 	bird_program = Layer::compile_shader_program("f/shaders/bird.vert", "f/shaders/bird.frag", "bird shader");
+
+	glDeleteProgram(_firebar_program);
+	_firebar_program = Layer::compile_shader_program("f/shaders/firebar.vert", "f/shaders/firebar.frag", "firebar shader");
 }
 
