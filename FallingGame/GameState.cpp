@@ -272,7 +272,7 @@ static void handle_feather_collisions(std::array<Feather, N>& feathers, Player& 
 
 struct TutorialBouncerHandler
 {
-	static constexpr int _MAX_BOUNCERS = 16;
+	static constexpr int _MAX_BOUNCERS = 22;
 	std::array<Bouncer, _MAX_BOUNCERS> _bouncers;
 
 	static constexpr int _MAX_FEATHERS = 5;
@@ -299,6 +299,12 @@ struct TutorialBouncerHandler
 			_bouncers[bi].h.w = Game::G_WIDTH * 2.f;
 			_bouncers[bi].h.x = -Game::G_WIDTH;
 			++bi;
+
+			for (int i = 0; i < 6; ++i) {
+				_bouncers[bi].init(0.15f, -20.f - (float)(2*i), Bouncer::Type::Normal, 0.f);
+				_bouncers[bi].h.x = ((i % 2) == 0 ) ? -0.3f : 0.3f; 
+				++bi;
+			}
 		}
 
 		{
@@ -828,7 +834,7 @@ public:
 	switch (level) {
 	case LEVEL::Tutorial:
 	{
-		auto gs = new GameState<TutorialBouncerHandler, false>{ g, level, -20.f };
+		auto gs = new GameState<TutorialBouncerHandler, false>{ g, level, -30.f };
 		gs->death_y = 10.f;
 		return gs;
 	}
