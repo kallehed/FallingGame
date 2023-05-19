@@ -13,7 +13,6 @@ void main()
 	float time_since_coin = u_time_since_coin_and_powerup.x;
 	float powerup = u_time_since_coin_and_powerup.y;
 
-
     FragColor = texture(bird_texture, f_texCoord);
 
     // boost effect when picking up coins
@@ -31,5 +30,8 @@ void main()
 	// powerup effect when having powerup 
 	if (powerup >= 0.99)
 	{	
-		FragColor *= 1.2;
+		float time = 2.5*g_timer - 2.5 * (1.0 - f_texCoord.y);
+		float change = sin(time);
+		change *= change;
+		FragColor += vec4(0.0, change, change, 0.0);
 	}

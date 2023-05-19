@@ -32,7 +32,7 @@ void main()
     rot[0] = vec2(cos(v),-sin(v));
     rot[1] = vec2(sin(v),cos(v));
 
-    vec2 pos = poses[gl_VertexID] * vec2(width, height) * ((powerup >= 0.99)? 1.5 : 1.0);
+    vec2 pos = poses[gl_VertexID] * vec2(width, height) * ((powerup >= 0.99)? 1.15 : 1.0);
     pos = rot * pos;
     pos = pos + u_offset - vec2(0.f, g_cam_y);
     gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
