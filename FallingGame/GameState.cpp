@@ -651,10 +651,17 @@ public:
 
     int _level;
 
-    float death_y; // y coordinate of the death barrier
-
     // which y coordinate the level ends at
     float _level_end;
+
+    // what the timer was when you won
+    float _win_time;
+
+    float _time_for_3_star;
+    float _time_for_2_star;
+    float _time_for_1_star;
+
+    float death_y; // y coordinate of the death barrier
 
     CloudHandler ch;
     ObstacleHandler _oh;
@@ -679,12 +686,16 @@ public:
         }
     }
 
-    GameState(Game& g, int level, float level_end)
+    GameState(Game& g, int level, float level_end, float level_star_time_multiplier = 1.f)
     {
         GameState& gs = *this;
 
         gs._level = level;
         gs._level_end = level_end;
+
+        gs._time_for_3_star = std::max(1.f, std::abs(level_end)) * 2.f * level_star_time_multiplier;
+        gs._time_for_2_star = 2.f * gs._time_for_3_star;
+        gs._time_for_1_star = 2.f * gs._time_for_2_star;
 
         gs.death_y = 3.f;
         gs.timer = 0.f;
@@ -728,6 +739,7 @@ public:
                     }
                 }
 
+                gs._win_time = gs.timer;
                 // init things
             }
             // Lose
@@ -878,6 +890,12 @@ public:
 
         g.d.draw_text<true>(title_text, { 0.93f, 1.f, 0.f, 1.f }, menu_x_offset,
             0.4f, 0.002f);
+
+        if constexpr (STATE == GameState::State::Win) {
+            char buf[100];
+            snprintf(buf, sizeof(buf), "Time: %.1f, 3 star: %.1f, 2 star: %.1f, 1 star: %.1f", gs._win_time, gs._time_for_3_star, gs._time_for_2_star, gs._time_for_1_star);
+            g.d.draw_text<true>(buf, { 0.f, 0.f, 0.f, 1.f }, menu_x_offset, 0.3f, 0.001f);
+        }
     }
 };
 

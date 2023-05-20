@@ -27,9 +27,9 @@ public:
 	float _rotation;
 	float _time_since_coin;
 	int _coins;
-	int _feathers;
-	int _feathers_needed_for_powerup;
-	int _max_feathers;
+	float _feathers;
+	float _feathers_needed_for_powerup;
+	float _max_feathers;
 
 	// PUBLIC to read. Says whether the powerup is active or not.
 	bool _powerup_active;
