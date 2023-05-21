@@ -35,8 +35,7 @@ static void load_game(Game& g)
 {
     // will initialize everything as if never played game before
     auto no_save_file = [&g]() {
-
-		g._save_state.breaking_change_version = CURRENT_BREAKING_CHANGE_VERSION;
+        g._save_state.breaking_change_version = CURRENT_BREAKING_CHANGE_VERSION;
 
         int i = 0;
         for (auto& e : g._save_state.level_info) {
@@ -65,11 +64,11 @@ static void load_game(Game& g)
         try {
             json data = json::parse(buffer);
 
-			auto breaking_version = data["breaking_change_version"].get<int>();
-			g._save_state.breaking_change_version = breaking_version;
-			if (breaking_version != CURRENT_BREAKING_CHANGE_VERSION) {
-				throw std::invalid_argument("wrong version");
-			}
+            auto breaking_version = data["breaking_change_version"].get<int>();
+            g._save_state.breaking_change_version = breaking_version;
+            if (breaking_version != CURRENT_BREAKING_CHANGE_VERSION) {
+                throw std::invalid_argument("wrong version");
+            }
 
             auto levels = data["level_info"].get<std::vector<SaveState::LevelInfo>>();
             int i = 0;
@@ -165,11 +164,13 @@ bool Game::to_be_looped()
     }
 
     // increases timer, gets events, possibly exits
-    if (start_func(*gs, *this))
+    if (start_func(*gs, *this)) {
+        delete this->gs; // no memory leaks valgrind!
         return false;
+    }
 
     // this does NOT loop
-    gs->entry_point(*this);
+    this->gs->entry_point(*this);
 
     // delays, swaps frame buffers
     end_func(*this);
@@ -180,14 +181,13 @@ void Game::start()
 {
     if (init())
         return;
-    ;
 
-    // this loop calls a virtual function EACH frame. This is the only loop
+        // this loop calls a virtual function EACH frame. This is the only loop
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(emscripten_main_loop_callback, (void*)this, 0, true);
 #else
-    while (to_be_looped())
-        ;
+    while (to_be_looped()) { }
+
 #endif
 
     save_game(_save_state);

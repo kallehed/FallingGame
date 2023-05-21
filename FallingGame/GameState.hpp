@@ -89,7 +89,7 @@ public:
 	virtual void entry_point(Game& g) override;
 };
 
-BaseState* create_new_session(Game& g, SessionToChangeTo asd, int level);
+[[nodiscard]] BaseState* create_new_session(Game& g, SessionToChangeTo asd, int level);
 
 
 namespace LEVEL {
