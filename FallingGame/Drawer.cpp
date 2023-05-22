@@ -4,12 +4,12 @@
 
 #include "CoinParticle.hpp"
 
+#include <cmath>
 #include <iostream>
 #include <tuple>
-#include <cmath>
 
 #include <ft2build.h>
-#include FT_FREETYPE_H  
+#include FT_FREETYPE_H
 
 void Drawer::init(Game& g)
 {
@@ -44,11 +44,12 @@ void Drawer::init(Game& g)
 		unsigned char* font_buffer = NULL;
 
 		{
-		// Load font by first loading it into memory
+			// Load font by first loading it into memory
 
 			SDL_RWops* io = SDL_RWFromFile("f/fonts/arial.ttf", "rb");
 			CHKSDL(!io);
-			if (!io) goto GOTO_AFTER_FONT_LOAD;
+			if (!io)
+				goto GOTO_AFTER_FONT_LOAD;
 			auto file_length = io->size(io);
 			font_buffer = new unsigned char[file_length];
 
@@ -59,38 +60,38 @@ void Drawer::init(Game& g)
 				SDL_Log("ERROR::FREETYPE: Font failed to load arial");
 			}
 		}
-		GOTO_AFTER_FONT_LOAD:
-		
+	GOTO_AFTER_FONT_LOAD:
+
 		// set width to 0 to dynamically calculate it
 		FT_Set_Pixel_Sizes(face, 0, 48);
 
 		/*
-		* How to render text efficiently
-		* The easy method is having a seperate texture for each character, 
-		* and then issuing a draw call for each one of them,
-		* where you specify the texture in question and it's rectangular information
-		* precisely. Which is very costly.
-		* Couldn't you just store all the characters in one big image?
-		* Then in an array indexed by the character, you should store where all the
-		* characters are exactly in 2D space, and how big they are.
-		* Let's say you want to render the character A. You pass the shader a uniform
-		* containing the starting position. In the vertex parameters you give it the character.
-		* It indexes into the array buffer stored into the GPU containing the correct offsets
-		* for characters. There it gets the x, y, w and h of the image, which it uses to
-		* successfully query the texture in question and render a part of it. Let's now say we
-		* want to do this for a larger amount of characters at a time; We shall then use instanced
-		* rendering and give each instance it's own letter, but we also have to give it it's
-		* offset compared to the previous characters. They can't all be drawn onto the same
-		* place. So the CPU should first examine the text in question, query all the advancements
-		* of each character and compute where they all should be offset to. Load all that into
-		* an array containing all offsets. Then instancing will take care of moving through that
-		* array one time per instance. Thus, all the vertices in a single instance can use it's
-		* GL_VertexID to compute it's offset as well from the starting position of the character
-		* because they all share the offset, width and height. The instanced array should also
-		* contain the character in question, because there will be static memory storing the 
-		* texture offsets for all the characters in an SSBO, which the fragment shader will index 
-		* into, recieving the correct 4 coordintes in some way. 
-		*/
+		 * How to render text efficiently
+		 * The easy method is having a seperate texture for each character,
+		 * and then issuing a draw call for each one of them,
+		 * where you specify the texture in question and it's rectangular information
+		 * precisely. Which is very costly.
+		 * Couldn't you just store all the characters in one big image?
+		 * Then in an array indexed by the character, you should store where all the
+		 * characters are exactly in 2D space, and how big they are.
+		 * Let's say you want to render the character A. You pass the shader a uniform
+		 * containing the starting position. In the vertex parameters you give it the character.
+		 * It indexes into the array buffer stored into the GPU containing the correct offsets
+		 * for characters. There it gets the x, y, w and h of the image, which it uses to
+		 * successfully query the texture in question and render a part of it. Let's now say we
+		 * want to do this for a larger amount of characters at a time; We shall then use instanced
+		 * rendering and give each instance it's own letter, but we also have to give it it's
+		 * offset compared to the previous characters. They can't all be drawn onto the same
+		 * place. So the CPU should first examine the text in question, query all the advancements
+		 * of each character and compute where they all should be offset to. Load all that into
+		 * an array containing all offsets. Then instancing will take care of moving through that
+		 * array one time per instance. Thus, all the vertices in a single instance can use it's
+		 * GL_VertexID to compute it's offset as well from the starting position of the character
+		 * because they all share the offset, width and height. The instanced array should also
+		 * contain the character in question, because there will be static memory storing the
+		 * texture offsets for all the characters in an SSBO, which the fragment shader will index
+		 * into, recieving the correct 4 coordintes in some way.
+		 */
 
 		static constexpr int PIX_OFFSET = 1;
 		// load glyphs twice and make a texture with all of them
@@ -98,13 +99,10 @@ void Drawer::init(Game& g)
 			unsigned int width = 0, height = 0;
 
 			// the offset between characters in the texture
-			
 
-			for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++)
-			{
-				// load character glyph   
-				if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-				{
+			for (unsigned char c = CHARACTERS_START_AT; c < CHARACTERS; c++) {
+				// load character glyph
+				if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 					std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
 					continue;
 				}
@@ -135,11 +133,9 @@ void Drawer::init(Game& g)
 			int x = PIX_OFFSET;
 
 			// exclude loading space by starting at 33.
-			for (unsigned char c = CHARACTERS_START_AT + 1; c < CHARACTERS; c++)
-			{
-				// load character glyph 
-				if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-				{
+			for (unsigned char c = CHARACTERS_START_AT + 1; c < CHARACTERS; c++) {
+				// load character glyph
+				if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
 					std::cout << "ERROR::FREETYTPE: Failed to load Glyph:" << c << std::endl;
 					continue;
 				}
@@ -149,7 +145,6 @@ void Drawer::init(Game& g)
 					face->glyph->bitmap.width, face->glyph->bitmap.rows,
 					GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
 				x += face->glyph->bitmap.width + PIX_OFFSET;
-
 			}
 
 			FT_Done_Face(face);
@@ -178,7 +173,6 @@ void Drawer::init(Game& g)
 		glVertexAttribPointer(0, TEXT_ATTRIBUTES, GL_FLOAT, GL_FALSE, TEXT_BYTES_PER, (void*)0);
 
 		glVertexAttribDivisor(0, 1); // one per instance
-
 
 		m_text_u_offset_scale = glGetUniformLocation(m_text_program, "u_offset_scale");
 
@@ -236,17 +230,16 @@ void Drawer::init(Game& g)
 		m_rectangle_u_color = glGetUniformLocation(rectangle_program, "u_color");
 	}
 
-
 	// image shader
 	{
-		
+
 		float vertices[] = { // changed later
 			// position   texture coordinates
 			-0.5f, -0.5f, 0.f, 0.f,
-			-0.5f, 0.5f,  0.f, 1.f,
-			0.5f, 0.5f,   1.f, 1.f,
-			0.5f, -0.5f,  1.f, 0.f
-		}; 
+			-0.5f, 0.5f, 0.f, 1.f,
+			0.5f, 0.5f, 1.f, 1.f,
+			0.5f, -0.5f, 1.f, 0.f
+		};
 
 		glUseProgram(image_program);
 		glGenVertexArrays(1, &image_VAO);
@@ -277,13 +270,13 @@ void Drawer::init(Game& g)
 		const float left = -Game::G_WIDTH * 2.f;
 		const float bottom = -g.G_HEIGHT - sky_height_per_sky;
 		const float y_top = g.G_HEIGHT;
-		
+
 		const float vertices[] = {
 			// position   texture coordinates
 			left, bottom, 0.f, 0.f,
-			left, y_top,  0.f, y_imgs + 1,
-			-left, y_top,   x_imgs, y_imgs + 1,
-			-left, bottom,  x_imgs, 0.f
+			left, y_top, 0.f, y_imgs + 1,
+			-left, y_top, x_imgs, y_imgs + 1,
+			-left, bottom, x_imgs, 0.f
 		};
 
 		glUseProgram(sky_program);
@@ -303,7 +296,7 @@ void Drawer::init(Game& g)
 	}
 
 	// sides shader
-	{	
+	{
 		glGenVertexArrays(1, &sides_VAO);
 		glBindVertexArray(sides_VAO);
 
@@ -314,7 +307,7 @@ void Drawer::init(Game& g)
 
 		constexpr float top = Layer::HEIGHT;
 		constexpr float bottom = -Layer::HEIGHT - img_height;
-		
+
 		constexpr float left = -Layer::WIDTH;
 		constexpr float right = -Game::G_WIDTH;
 
@@ -322,16 +315,16 @@ void Drawer::init(Game& g)
 			// position    texture coordinates
 
 			// left side of screen
-			left, bottom,   0.f, 0.f,
-			left, top,      0.f, y_imgs + 1.f,
-			right, top,     x_imgs, y_imgs + 1.f,
-			right, bottom,  x_imgs, 0.f,
-			
+			left, bottom, 0.f, 0.f,
+			left, top, 0.f, y_imgs + 1.f,
+			right, top, x_imgs, y_imgs + 1.f,
+			right, bottom, x_imgs, 0.f,
+
 			// right side of screen
 			-right, bottom, x_imgs, 0.f,
-			-right, top,    x_imgs, y_imgs + 1.f,
-			-left, top,     0.f, y_imgs + 1.f,
-			-left, bottom,  0.f, 0.f
+			-right, top, x_imgs, y_imgs + 1.f,
+			-left, top, 0.f, y_imgs + 1.f,
+			-left, bottom, 0.f, 0.f
 		};
 
 		glGenBuffers(1, &sides_VBO);
@@ -347,7 +340,7 @@ void Drawer::init(Game& g)
 	}
 
 	// cloud program
-	{	
+	{
 		glGenVertexArrays(1, &cloud_VAO);
 		glBindVertexArray(cloud_VAO);
 
@@ -362,7 +355,7 @@ void Drawer::init(Game& g)
 		glEnableVertexAttribArray(1);
 		glGenBuffers(1, &cloud_VBO_tex_z);
 		glBindBuffer(GL_ARRAY_BUFFER, cloud_VBO_tex_z);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float)* TEX_AND_Z_FLOATS* CloudHandler::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * TEX_AND_Z_FLOATS * CloudHandler::NR_CLOUDS, NULL, GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glVertexAttribDivisor(1, 1);
 
@@ -372,23 +365,23 @@ void Drawer::init(Game& g)
 		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[1]"), 1);
 		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[2]"), 2);
 		glUniform1i(glGetUniformLocation(cloud_program, "cloudTexs[3]"), 3);
-	
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
 	}
 
 	// coin particle program
 	{
-		
+
 		glGenVertexArrays(1, &coin_particle_VAO);
 		glBindVertexArray(coin_particle_VAO);
 
 		float vertices[] = // rectangle for screen
-		{
-			-1.f, -1.f,
-			-1, 1.f,
-			1.f, 1.f,
-			1.f, -1.f
-		};
+			{
+				-1.f, -1.f,
+				-1, 1.f,
+				1.f, 1.f,
+				1.f, -1.f
+			};
 
 		glGenBuffers(1, &coin_particle_VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, coin_particle_VBO);
@@ -423,6 +416,17 @@ void Drawer::init(Game& g)
 		_firebar_u_shiny = glGetUniformLocation(_firebar_program, "u_shiny");
 	}
 
+	// star program
+	{
+		glGenVertexArrays(1, &_star_VAO);
+		glBindVertexArray(_star_VAO);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, standard_rect_EBO);
+
+		_star_u_offset_width_height = glGetUniformLocation(_star_program, "u_offset_width_height");
+        _star_u_filled = glGetUniformLocation(_star_program, "u_filled");
+	}
+
 	// uniform buffer object: Globals
 	{
 		glGenBuffers(1, &ubo_globals);
@@ -434,37 +438,37 @@ void Drawer::init(Game& g)
 
 	// load textures
 	{
-		static constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data =
-		{ {
-			{"f/images/bird.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/bird_closed.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/mushroom_cap.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/mushroom_stem.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/side_background.png", GL_CLAMP_TO_EDGE, GL_REPEAT },
-			{"f/images/vines.png", GL_REPEAT, GL_REPEAT },
-			{"f/images/sky.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/sky2.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/sky3.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/sky_space1.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/sky_space2.png", GL_REPEAT, GL_REPEAT},
-			{"f/images/storm.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/cloud_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/cloud_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/cloud_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/cloud_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/coin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/feather.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_bar.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_0.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_5.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/fire_6.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
-			{"f/images/title_screen.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE},
+		static constexpr std::array<std::tuple<const char*, int, int>, TEX::TOTAL> data = { {
+			{ "f/images/bird.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/bird_closed.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/mushroom_cap.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/mushroom_stem.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/side_background.png", GL_CLAMP_TO_EDGE, GL_REPEAT },
+			{ "f/images/vines.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky_blurred.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky2.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky3.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky_space1.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/sky_space2.png", GL_REPEAT, GL_REPEAT },
+			{ "f/images/storm.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/cloud_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/cloud_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/cloud_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/cloud_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/coin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/coin_blurred.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/feather.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_bar.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_0.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_1.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_2.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_3.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_4.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_5.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/fire_6.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/title_screen.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+			{ "f/images/star.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {
@@ -472,23 +476,23 @@ void Drawer::init(Game& g)
 			tex_sizes[i] = Layer::load_texture(std::get<0>(d), &texs[i], std::get<1>(d), std::get<2>(d));
 		}
 	}
-	
+
 	// mess with a texture2D
 	/* {
-		unsigned char data[100][100][4];
-		for (int i = 0; i < 100; ++i) {
-			for (int j = 0; j < 100; ++j) {
-				data[i][j][0] = 255*sin(i/20.0);
-				data[i][j][1] = 0;
-				data[i][j][2] = 0;
-				data[i][j][3] = 255;
+			unsigned char data[100][100][4];
+			for (int i = 0; i < 100; ++i) {
+					for (int j = 0; j < 100; ++j) {
+							data[i][j][0] = 255*sin(i/20.0);
+							data[i][j][1] = 0;
+							data[i][j][2] = 0;
+							data[i][j][3] = 255;
+					}
 			}
-		}
 
-		for (int i = 0; i < 3; ++i) {
-			glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
-			glTexSubImage2D(GL_TEXTURE_2D, i, 100, 100, 100, 100, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		}
+			for (int i = 0; i < 3; ++i) {
+					glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
+					glTexSubImage2D(GL_TEXTURE_2D, i, 100, 100, 100, 100, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			}
 	}*/
 }
 
@@ -511,8 +515,8 @@ void Drawer::draw_text(const char* text, Color color, float x, float y, float sc
 		data[i][0] = (float)c;
 		data[i][1] = char_x_offset;
 
-		//advance is number of 1/64 pixels for some reason
-		char_x_offset += (m_characters[c].advance >> 6) * scale; //bitshift by 6 == * 2^6
+		// advance is number of 1/64 pixels for some reason
+		char_x_offset += (m_characters[c].advance >> 6) * scale; // bitshift by 6 == * 2^6
 	}
 	const int nr_of_chars = i;
 
@@ -539,9 +543,9 @@ void Drawer::draw_rectangle(float x, float y, float w, float h, const Color& col
 	glUseProgram(rectangle_program);
 	glBindVertexArray(rectangle_VAO);
 	float vertices[] = {
-		x, y, 
-		x, y + h, 
-		x + w, y + h, 
+		x, y,
+		x, y + h,
+		x + w, y + h,
 		x + w, y
 	};
 	glBindBuffer(GL_ARRAY_BUFFER, rectangle_VBO);
@@ -561,18 +565,19 @@ void Drawer::draw_image(TEX::_ tex, float x, float y, float w, float h, float _r
 	float y_l = -h / 2.f;
 
 	float vertices[] = {
-		x_l, y_l,     0.f, 1.f,
-		x_l, -y_l,     0.f, 0.f,
-		-x_l, -y_l,  1.f, 0.f,
-		-x_l, y_l,     1.f, 1.f
+		x_l, y_l, 0.f, 1.f,
+		x_l, -y_l, 0.f, 0.f,
+		-x_l, -y_l, 1.f, 0.f,
+		-x_l, y_l, 1.f, 1.f
 	};
 	glBindBuffer(GL_ARRAY_BUFFER, image_VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
-	{		glUniform3f(m_image_u_offset_and_to_cam, x, y, (float)offset_by_cam);
+	{
+		glUniform3f(m_image_u_offset_and_to_cam, x, y, (float)offset_by_cam);
 	}
 	glUniform1f(m_image_u_rotation, _rotation);
-	//glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
+	// glUniform1f(m_image_u_rotation, SDL_GetTicks()/100.f);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -583,9 +588,9 @@ void Drawer::draw_sky(Game& g, float camera_y)
 	glBindVertexArray(sky_VAO);
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::sky2]);
 
-	float y = -camera_y/5.f;
-	y -= (sky_height_per_sky) * std::floor(y / sky_height_per_sky);
-	
+	float y = -camera_y / 5.f;
+	y -= (sky_height_per_sky)*std::floor(y / sky_height_per_sky);
+
 	glUniform2f(sky_u_offset, 0.f, y);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -596,7 +601,7 @@ void Drawer::draw_sides(Player& p)
 	glBindVertexArray(sides_VAO);
 
 	glBindTexture(GL_TEXTURE_2D, texs[TEX::side_background]);
-	//glBindTexture(GL_TEXTURE_2D, texs[TEX::vines]);
+	// glBindTexture(GL_TEXTURE_2D, texs[TEX::vines]);
 
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 }
@@ -621,7 +626,7 @@ void Drawer::draw_clouds(CloudHandler& ch)
 	// cloud_VBO_pos and cloud_VBO_tex_z initialization
 	{
 		float positions[CloudHandler::NR_CLOUDS * FLOATS_PER_CLOUD_POS];
-		
+
 		float tex_z_values[CloudHandler::NR_CLOUDS * TEX_AND_Z_FLOATS];
 		int i_t_z = 0, i_pos = 0;
 		for (auto& e : ch.clouds) {
@@ -649,9 +654,8 @@ void Drawer::draw_coin_particle(CoinParticle& c)
 {
 	glUseProgram(coin_particle_program);
 	glBindVertexArray(coin_particle_VAO);
-	
-	float u_pos_and_vel_and_time[COIN_PARTICLE_FLOATS_IN_ARRAY] =
-	{
+
+	float u_pos_and_vel_and_time[COIN_PARTICLE_FLOATS_IN_ARRAY] = {
 		c.start_x, c.start_y, c._x_vel, c._y_vel, c.start_time
 	};
 
@@ -674,7 +678,7 @@ void Drawer::draw_bird(Camera& c, TEX::_ bird_tex, float x, float y, float _rota
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void Drawer::draw_firebar(TEX::_ fire_tex, float x, float y, float width, float height, float shiny) 
+void Drawer::draw_firebar(TEX::_ fire_tex, float x, float y, float width, float height, float shiny)
 {
 	glUseProgram(_firebar_program);
 	glBindVertexArray(_firebar_VAO);
@@ -687,43 +691,54 @@ void Drawer::draw_firebar(TEX::_ fire_tex, float x, float y, float width, float 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void Drawer::draw_star(float x, float y, float scale, float filled)
+{
+    glUseProgram(_star_program);
+    glBindVertexArray(_star_VAO);
+
+	glBindTexture(GL_TEXTURE_2D, texs[TEX::star]);
+
+	glUniform4f(_star_u_offset_width_height, x, y, scale * tex_sizes[TEX::star][0], scale * tex_sizes[TEX::star][1]);
+    glUniform1f(_star_u_filled, filled);
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
 
 void Drawer::before_draw(Game& g, float death_y, float cam_y, float timer, Color col)
 {
 	// bind unfiform buffer object: Globals
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_globals);
-		float data[UBO_GLOBAL_FLOATS] = { death_y, cam_y, timer, Layer::WIDTH, Layer::HEIGHT};
+		float data[UBO_GLOBAL_FLOATS] = { death_y, cam_y, timer, Layer::WIDTH, Layer::HEIGHT };
 		glBufferSubData(GL_UNIFORM_BUFFER, 0, UBO_GLOBAL_SIZE, &data);
-	}	
+	}
 
-	 // hot reloading of shaders
-	if constexpr (DEV_TOOLS) { 
+	// hot reloading of shaders
+	if constexpr (DEV_TOOLS) {
 		if (g.l.key_just_down(SDL_SCANCODE_R)) {
 			load_all_programs();
 		}
 	}
 	glClearColor(col._r, col.g, col.b, col.a);
-	// THE COLOR BUFFER WILL **ALWAYS** BE CLEARED ON ANDROID PHONES; 
+	// THE COLOR BUFFER WILL **ALWAYS** BE CLEARED ON ANDROID PHONES;
 	// THERFORE, DO NOT REMOVE THIS LINE. (preserves cross-compatibility)
-	glClear(GL_COLOR_BUFFER_BIT/* | GL_DEPTH_BUFFER_BIT */);
+	glClear(GL_COLOR_BUFFER_BIT /* | GL_DEPTH_BUFFER_BIT */);
 }
 
 void Drawer::draw_fps(float dt)
 {
 	static constexpr int SIZE = 10;
 	char fps_string[SIZE];
-	snprintf(fps_string, SIZE, "%f", 1.f/dt);
+	snprintf(fps_string, SIZE, "%f", 1.f / dt);
 
-	draw_text(fps_string, Color{ 0,0,1,1 }, -Game::G_WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
+	draw_text(fps_string, Color { 0, 0, 1, 1 }, -Game::G_WIDTH + 0.1f, Layer::HEIGHT - 0.1f, 0.001f);
 }
-
 
 void Drawer::load_all_programs()
 {
 	// the uniforms for the text shader are only set once, and they are removed when reloading shader...
-	//glDeleteProgram(m_text_program);
-	//m_text_program = l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
+	// glDeleteProgram(m_text_program);
+	// m_text_program = l.compile_shader_program("f/shaders/text.vert", "f/shaders/text.frag", "text shader");
 
 	glDeleteProgram(rectangle_program);
 	rectangle_program = Layer::compile_shader_program("f/shaders/rectangle.vert", "f/shaders/rectangle.frag", "rectangle shader");
@@ -748,5 +763,7 @@ void Drawer::load_all_programs()
 
 	glDeleteProgram(_firebar_program);
 	_firebar_program = Layer::compile_shader_program("f/shaders/firebar.vert", "f/shaders/firebar.frag", "firebar shader");
-}
 
+	glDeleteProgram(_star_program);
+    _star_program = Layer::compile_shader_program("f/shaders/star.vert", "f/shaders/star.frag", "star shader");
+}

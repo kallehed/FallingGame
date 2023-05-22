@@ -892,9 +892,36 @@ public:
             0.4f, 0.002f);
 
         if constexpr (STATE == GameState::State::Win) {
-            char buf[100];
-            snprintf(buf, sizeof(buf), "Time: %.1f, 3 star: %.1f, 2 star: %.1f, 1 star: %.1f", gs._win_time, gs._time_for_3_star, gs._time_for_2_star, gs._time_for_1_star);
-            g.d.draw_text<true>(buf, { 0.f, 0.f, 0.f, 1.f }, menu_x_offset, 0.3f, 0.001f);
+            //char buf[100];
+            //snprintf(buf, sizeof(buf), "Time: %.1f, 3 star: %.1f, 2 star: %.1f, 1 star: %.1f", gs._win_time, gs._time_for_3_star, gs._time_for_2_star, gs._time_for_1_star);
+            //g.d.draw_text<true>(buf, { 0.f, 0.f, 0.f, 1.f }, menu_x_offset, 0.3f, 0.001f);
+
+            float passed = gs.timer - gs._win_time;
+
+            passed /= 2.f;
+
+            float percentage = 1.f + (passed - 2.f) * passed;
+            if (passed > 1.f)
+                percentage = 0.f;
+            percentage = 1.f - percentage;
+
+            float base_time = gs._time_for_1_star * 1.5f;
+
+            float time = base_time - (base_time - gs._win_time) * percentage;
+
+            float f1 = 0.f, f2 = 0.f, f3 = 0.f;
+
+            f1 = gs._time_for_1_star / time;
+            if (f1 >= 1.f) {
+                f2 = (gs._time_for_1_star - time) / gs._time_for_2_star;
+                if (f2 >= 1.f) {
+                    f3 = (gs._time_for_2_star - time) / gs._time_for_3_star;
+                }
+            }
+            static constexpr float STAR_SCALE = 0.004f;
+            g.d.draw_star(menu_x_offset - 0.3f, 0.25f, STAR_SCALE, f1);
+            g.d.draw_star(menu_x_offset + 0.0f, 0.25f, STAR_SCALE, f2);
+            g.d.draw_star(menu_x_offset + 0.3f, 0.25f, STAR_SCALE, f3);
         }
     }
 };
@@ -903,6 +930,7 @@ public:
 {
     float level_end = -6.f * level * level;
     float percent_move = 0.f;
+    float star_time_mult = 1.f; // changes the time needed for different stars
 
     SDL_Log("Starting level: %d", level);
 
@@ -914,6 +942,7 @@ public:
     } break;
     case LEVEL::W1_0:
         level_end = 0.f;
+        star_time_mult = 1.4f;
         break;
     case LEVEL::W1_1:
         level_end = -5.f;
@@ -943,7 +972,7 @@ public:
         break;
     }
 
-    auto gs = new GameState<BouncerHandler, true> { g, level, level_end };
+    auto gs = new GameState<BouncerHandler, true> { g, level, level_end, star_time_mult };
     gs->_oh.init(percent_move);
 
     return gs;
