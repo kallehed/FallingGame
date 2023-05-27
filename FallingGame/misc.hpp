@@ -161,6 +161,8 @@ enum _ : char {
 
     title_screen,
 
+    star,
+
     TOTAL
 };
 

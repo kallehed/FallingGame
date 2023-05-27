@@ -153,5 +153,17 @@
     <None Include="f\shaders\text.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="f\shaders\firebar.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\firebar.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\star.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="f\shaders\star.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

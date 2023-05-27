@@ -182,6 +182,8 @@
     <None Include="f\shaders\cloud.vert" />
     <None Include="f\shaders\coin_particle.frag" />
     <None Include="f\shaders\coin_particle.vert" />
+    <None Include="f\shaders\firebar.frag" />
+    <None Include="f\shaders\firebar.vert" />
     <None Include="f\shaders\image.frag" />
     <None Include="f\shaders\image.vert" />
     <None Include="f\shaders\rectangle.frag" />
@@ -190,6 +192,8 @@
     <None Include="f\shaders\sides.vert" />
     <None Include="f\shaders\sky.frag" />
     <None Include="f\shaders\sky.vert" />
+    <None Include="f\shaders\star.frag" />
+    <None Include="f\shaders\star.vert" />
     <None Include="f\shaders\text.frag" />
     <None Include="f\shaders\text.vert" />
   </ItemGroup>
