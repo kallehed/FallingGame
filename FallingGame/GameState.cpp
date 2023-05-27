@@ -379,11 +379,12 @@ struct TutorialBouncerHandler {
             e.draw(g, c, timer);
         }
 
-        g.d.draw_text<true>("<--|-->", { 0.f, 0.f, 0.f, 1.f }, 0.f, -4.6f - c.y,
-            0.012f);
+		static constexpr const char* left_right = "<- Left | Right ->";
+		static constexpr float tsize = 0.0045f;
+        g.d.draw_text<true>(left_right, { 0.f, 0.f, 0.f, 1.f }, 0.f, -4.6f - c.y, tsize);
+        g.d.draw_text<true>(left_right, { 0.f, 0.f, 0.f, 1.f }, 0.f, -9.6f - c.y, tsize);
 
-        g.d.draw_text<true>("<--|-->", { 0.f, 0.f, 0.f, 1.f }, 0.f, -9.6f - c.y,
-            0.012f);
+        g.d.draw_text<true>("Drag up! ^.^", { 0.f, 0.f, 0.f, 1.f }, 0.f, -18.5f - c.y, 0.006f);
     };
 };
 
@@ -595,6 +596,9 @@ static void set_movement_events(Game& g)
     }
 
     g.ge.player_activate_special = g.l.key_down(SDL_SCANCODE_L);
+    if (g.l._finger_scroll.y < -0.08f) {
+        g.ge.player_activate_special = true;
+    }
 }
 
 // draw death storm at death_y
