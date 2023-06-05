@@ -13,7 +13,6 @@
 #include "GameState.hpp"
 
 
-
 class Game
 {
 private:

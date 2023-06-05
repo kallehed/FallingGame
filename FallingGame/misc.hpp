@@ -48,7 +48,7 @@ enum class LevelState : signed char {
     Done = 2,
 };
 
-// incremenet when you want to erase user data
+// increment when you want to erase user data
 constexpr int CURRENT_BREAKING_CHANGE_VERSION = 1;
 
 // The state that is relevant between game sessions; stuff like levels done
@@ -59,6 +59,7 @@ struct SaveState {
 
     struct LevelInfo {
         LevelState state;
+        int stars; // how many stars you have on the level
     };
     static constexpr int TOTAL_LEVELS = 9;
     std::array<LevelInfo, TOTAL_LEVELS> level_info;
@@ -160,8 +161,8 @@ enum _ : char {
     fire_6,
 
     title_screen,
-
     star,
+    level_bulletin,
 
     TOTAL
 };

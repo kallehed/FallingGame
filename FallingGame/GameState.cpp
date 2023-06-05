@@ -440,10 +440,10 @@ void Button::draw_start(Drawer& d, float cam_y)
         _r.y + _r.h / 2.f - cam_y, _text_size);
 }
 
-void Button::draw_level(Drawer& d, float cam_y, LevelState ls)
+void Button::draw_level(Drawer& d, float cam_y, SaveState::LevelInfo ls)
 {
     Color c;
-    switch (ls) {
+    switch (ls.state) {
     case LevelState::Locked:
         c = Color { 0.5f, 0.5f, 0.f, 0.5f };
         break;
@@ -456,9 +456,27 @@ void Button::draw_level(Drawer& d, float cam_y, LevelState ls)
                             : (Color { 0.35f, 0.95f, 0.1f, 1.f });
         break;
     }
-    d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
-    d.draw_text<true>(_text, { 0.f, 0.f, 0.f, 1.f }, _r.x + _r.w / 2.f,
-        _r.y + _r.h / 2.f - cam_y, _text_size);
+    //d.draw_rectangle(_r.x, _r.y, _r.w, _r.h, c);
+    const float mid_x = _r.x + _r.w / 2.f;
+    const float mid_y = _r.y + _r.h / 2.f;
+    d.draw_image(TEX::level_bulletin, mid_x, mid_y, _r.w, _r.h, 0.f, true);
+    d.draw_text<true>(_text, { 0.f, 0.f, 0.f, 1.f }, mid_x,
+        mid_y - cam_y, _text_size);
+
+    {
+
+        const float f1 = ls.stars >= 1 ? 1.f : 0.f;
+        const float f2 = ls.stars >= 2 ? 1.f : 0.f;
+        const float f3 = ls.stars >= 3 ? 1.f : 0.f;
+        
+        const float star_y = mid_y - cam_y - 0.15f;
+
+
+        static constexpr float STAR_SCALE = 0.0035f;
+        d.draw_star(mid_x - 0.3f, star_y, STAR_SCALE, f1);
+        d.draw_star(mid_x + 0.0f, star_y, STAR_SCALE, f2);
+        d.draw_star(mid_x + 0.3f, star_y, STAR_SCALE, f3);
+    }
 }
 
 bool Button::just_pressed() { return _just_pressed; }
@@ -520,8 +538,6 @@ void MenuState::entry_point(Game& g)
 
 LevelSelectorState::LevelSelectorState(Game& g)
 {
-    int i = 0;
-
     static constexpr std::array<const char*, SaveState::TOTAL_LEVELS> names = {
         "Level 1",
         "Level 2",
@@ -534,11 +550,16 @@ LevelSelectorState::LevelSelectorState(Game& g)
         "Level 7",
     };
 
+    static constexpr float y_dec = 0.6f;
+    int i = 0;
+
     for (auto& e : _btn_levels) {
-        e.init(names[i], 0.00175f, 0.4f * sinf(float(i) / 1.75f), -i * 0.3f,
-            0.5f, 0.2f);
+        e.init(names[i], 0.00175f, 0.4f * sinf(float(i) / 1.75f), -i * y_dec,
+            0.8f, 0.4f);
         ++i;
     }
+    _max_scroll = - (i - 2) * y_dec;
+
     timer = 0.f;
     _scroll_y = 0.f;
 }
@@ -555,7 +576,7 @@ void LevelSelectorState::entry_point(Game& g)
     /*if (g.l.m_finger_down)*/ {
         _scroll_y += g.l._finger_scroll.y;
         _scroll_y = fmin(0.f, _scroll_y);
-        _scroll_y = fmax(-3.f, _scroll_y);
+        _scroll_y = fmax(_max_scroll, _scroll_y);
     }
     const float cam_y = _scroll_y;
 
@@ -578,7 +599,7 @@ void LevelSelectorState::entry_point(Game& g)
     g.d.draw_sky(g, gs.timer);
     int i = 0;
     for (auto& e : _btn_levels) {
-        e.draw_level(g.d, cam_y, g._save_state.level_info[i].state);
+        e.draw_level(g.d, cam_y, g._save_state.level_info[i]);
         ++i;
     }
 
@@ -629,7 +650,7 @@ static void draw_fire_bar(Game& g, Player& p, float timer)
         const float w = bar_w * filled;
         const float h = bar_h;
 
-        g.d.draw_firebar(fire_tex, bar_right - w / 2.f, bar_top - h / 2.f, w, h,
+        g.d.draw_firebar(fire_tex, bar_right - w / 2.f - 0.01f, bar_top - h / 2.f + 0.008f, w, h - 0.0045f,
             (p._powerup_active) ? 1.f : filled);
     }
 
@@ -744,7 +765,19 @@ public:
                 }
 
                 gs._win_time = gs.timer;
-                // init things
+                
+                // set stars for level
+                {
+                    if (gs._win_time <= gs._time_for_3_star) {
+                        g._save_state.level_info[gs._level].stars = 3;
+                    }
+                    else if (gs._win_time <= gs._time_for_2_star) {
+                        g._save_state.level_info[gs._level].stars = 2;
+                    }
+                    else if (gs._win_time <= gs._time_for_1_star) {
+                        g._save_state.level_info[gs._level].stars = 1;
+                    }
+                }
             }
             // Lose
             else if (gs.death_y + 2.f * Layer::HEIGHT + gs.c.player_screen_top_offset / 2.f < gs.p._r.y) {
@@ -879,9 +912,9 @@ public:
         gs._buttons[0].draw_start(g.d, gs.c.y);
         gs._buttons[2].draw_start(g.d, gs.c.y);
         if constexpr (STATE == GameState::State::Win) {
-            gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Unlocked);
+            gs._buttons[1].draw_start(g.d, gs.c.y);
         } else if constexpr (STATE == GameState::State::Lose) {
-            gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Locked);
+            //gs._buttons[1].draw_level(g.d, gs.c.y, LevelState::Locked);
         }
 
         const char* title_text;

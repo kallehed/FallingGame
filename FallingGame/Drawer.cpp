@@ -469,6 +469,7 @@ void Drawer::init(Game& g)
 			{ "f/images/fire_6.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
 			{ "f/images/title_screen.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
 			{ "f/images/star.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
+            { "f/images/level_bulletin.png", GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE },
 		} };
 
 		for (int i = 0; i < TEX::TOTAL; ++i) {

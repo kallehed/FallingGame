@@ -49,7 +49,7 @@ public:
 	void draw_start(Drawer& d, float cam_y);
 
 	// for level buttons
-	void draw_level(Drawer& d, float cam_y, LevelState ls);
+	void draw_level(Drawer& d, float cam_y, SaveState::LevelInfo ls);
 	 
 	// was the button just pressed?
 	bool just_pressed();
@@ -83,6 +83,8 @@ private:
 
 	std::array<Button, SaveState::TOTAL_LEVELS> _btn_levels;
 	float _scroll_y;
+	// how far you can scroll
+	float _max_scroll;
 
 public:
 	LevelSelectorState(Game& g);

@@ -2,30 +2,39 @@
   "breaking_change_version": 1,
   "level_info": [
     {
+      "stars": 3,
       "state": 2
     },
     {
+      "stars": 2,
       "state": 2
     },
     {
+      "stars": 3,
       "state": 2
     },
     {
-      "state": 2
-    },
-    {
-      "state": 2
-    },
-    {
-      "state": 2
-    },
-    {
-      "state": 2
-    },
-    {
+      "stars": 0,
       "state": 1
     },
     {
+      "stars": 0,
+      "state": 0
+    },
+    {
+      "stars": 0,
+      "state": 0
+    },
+    {
+      "stars": 0,
+      "state": 0
+    },
+    {
+      "stars": 0,
+      "state": 0
+    },
+    {
+      "stars": 0,
       "state": 0
     }
   ]

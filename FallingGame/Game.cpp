@@ -14,7 +14,7 @@ using json = nlohmann::json;
 #include <emscripten.h>
 #endif
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SaveState::LevelInfo, state)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SaveState::LevelInfo, state, stars)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SaveState, breaking_change_version, level_info)
 
 static void save_game(SaveState& s)
@@ -44,6 +44,7 @@ static void load_game(Game& g)
             } else {
                 e.state = LevelState::Locked;
             }
+            e.stars = 0;
             ++i;
         }
     };

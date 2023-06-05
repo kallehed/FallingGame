@@ -18,6 +18,10 @@ void main()
 		FragColor.g *= 1.0 + 0.1 * abs(sin(px_timer*0.8 - 0.483));
 	}
 
+    if (abs(f_screenCoord.y - 0.937) + 0.45*((f_screenCoord.x - 0.55)) > 0.05) {
+        FragColor = vec4(0.0,0.0,0.0,0.0);
+    }
+
     // boost effect when picking up coins
 /*    {
         float time = u_time_since_coin * 7.0 - 2.5*(1.0-f_texCoord.y);
