@@ -546,8 +546,8 @@ LevelSelectorState::LevelSelectorState(Game& g)
         "Level 5",
         "Level 6",
         "Level 7",
-        "Level 6",
-        "Level 7",
+        "Level 8",
+        "Level 9",
     };
 
     static constexpr float y_dec = 0.6f;
@@ -1000,10 +1000,13 @@ public:
         percent_move = 0.75f;
         break;
     case LEVEL::W1_6:
+        percent_move = 0.40f;
         break;
     case LEVEL::W1_7:
+        percent_move = 0.60f;
         break;
     case LEVEL::W1_8:
+        percent_move = 0.90f;
         break;
     default:
         break;
